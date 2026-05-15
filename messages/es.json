@@ -6,5 +6,20 @@
   "home": {
     "kicker": "Equipo de tecnología — Sede en Ciudad de México",
     "comingSoon": "El sitio completo está en construcción — scaffold desplegado correctamente."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Iniciar sesión en Nexo AI",
+      "subtitle": "Continúa con tu cuenta de Google para acceder a la plataforma.",
+      "googleButton": "Continuar con Google",
+      "errorGeneric": "Ocurrió un error al iniciar sesión. Inténtalo de nuevo.",
+      "errorMissingCode": "Flujo de inicio de sesión incompleto. Inténtalo de nuevo.",
+      "fine": "Al continuar aceptas los Términos y la Política de Privacidad."
+    },
+    "account": {
+      "title": "Cuenta",
+      "signedInAs": "Sesión iniciada como",
+      "signOut": "Cerrar sesión"
+    }
   }
 }

@@ -6,5 +6,20 @@
   "home": {
     "kicker": "Technology team — HQ Mexico City",
     "comingSoon": "The full site is being built — scaffold deployed successfully."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in to Nexo AI",
+      "subtitle": "Continue with your Google account to access the platform.",
+      "googleButton": "Continue with Google",
+      "errorGeneric": "Something went wrong signing you in. Try again.",
+      "errorMissingCode": "Sign-in flow incomplete. Try again.",
+      "fine": "By continuing you agree to the Terms and Privacy Policy."
+    },
+    "account": {
+      "title": "Account",
+      "signedInAs": "Signed in as",
+      "signOut": "Sign out"
+    }
   }
 }
