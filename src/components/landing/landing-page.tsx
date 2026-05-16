@@ -19,6 +19,9 @@ import { EarnWorld } from './earn-world';
 import { ContactSection } from './contact-section';
 import { CtaSection } from './cta-section';
 import { LandingFooter } from './footer';
+import { OperatingSection } from './operating-section';
+import { BuildingSection } from './building-section';
+import { FounderSection } from './founder-section';
 
 function PathOrderedSections() {
   const { sectionOrder } = usePath();
@@ -56,6 +59,9 @@ function LandingInner({ isAuthenticated }: { isAuthenticated: boolean }) {
       <ModeBanner />
       <Marquee />
       <PathOrderedSections />
+      <OperatingSection />
+      <BuildingSection />
+      <FounderSection />
       <ContactSection />
       <CtaSection />
       <LandingFooter />

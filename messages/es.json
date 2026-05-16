@@ -68,6 +68,10 @@
     "stat2": "Gobernanza DSS a escala empresarial",
     "stat3": "Sistemas en producción entregados",
     "stat4": "Equipo, partnerships, plataforma",
+    "stat5": "Objetivos de uptime",
+    "stat6": "Sistemas en producción monitoreados",
+    "stat7": "Operaciones LATAM + Norteamérica",
+    "stat8": "Infraestructura como código · despliegues multi-entorno",
     "line": "Sistemas en producción sobre AWS · Apps y plataformas desplegadas · Arquitectura lista para escalar · Bots y agentes de IA en operación · Base de clientes internacional",
     "units": {
       "verticals": "verticales"
@@ -134,17 +138,23 @@
     "1": {
       "tag": "Cliente · Tecnología para eventos",
       "title": "Sistema interactivo de activación",
-      "body": "Experiencia interactiva con detección de personas y sensores para la activación de una marca de consumo — diseñada para eventos de alta afluencia, desplegada y soportada en sitio."
+      "body": "Experiencia interactiva con detección de personas y sensores para la activación de una marca de consumo — diseñada para eventos de alta afluencia, desplegada y soportada en sitio.",
+      "scale": "Eventos de alta afluencia · operación on-site multi-día",
+      "timeline": "Construido y desplegado en semanas"
     },
     "2": {
       "tag": "Cliente · Salud",
       "title": "Plataforma web farmacéutica",
-      "body": "Plataforma multiusuario para salud con RBAC, 2FA y arquitectura alineada con requisitos de privacidad y escalabilidad — construida de extremo a extremo, con traspaso estructurado al equipo del cliente."
+      "body": "Plataforma multiusuario para salud con RBAC, 2FA y arquitectura alineada con requisitos de privacidad y escalabilidad — construida de extremo a extremo, con traspaso estructurado al equipo del cliente.",
+      "scale": "RBAC multiusuario · 2FA · línea base alineada a privacidad",
+      "timeline": "Build de extremo a extremo · traspaso estructurado"
     },
     "3": {
       "tag": "Empresarial · Cloud",
       "title": "Infraestructura nivel pagos",
-      "body": "Arquitectura cloud para un procesador de pagos global de primer nivel — organización AWS multi-cuenta bajo gobernanza PCI DSS 4.0, con respuesta a incidentes en sistemas críticos en producción."
+      "body": "Arquitectura cloud para un procesador de pagos global de primer nivel — organización AWS multi-cuenta bajo gobernanza PCI DSS 4.0, con respuesta a incidentes en sistemas críticos en producción.",
+      "scale": "AWS multi-cuenta · gobernanza PCI DSS 4.0",
+      "timeline": "Engagement multi-año · respuesta a incidentes en producción"
     }
   },
   "partner": {
@@ -418,5 +428,52 @@
     "contactH3": "Elige cómo <em>trabajar con nosotros.</em>",
     "contactP": "Elige cómo quieres trabajar con Nexo AI y empecemos la conversación correcta desde el inicio.",
     "ctaSub": "Contrata al equipo, asóciate en una idea, u opera la plataforma — empieza donde tenga sentido."
+  },
+  "position": {
+    "line": "Construimos sistemas reales que deben operar, escalar y mantenerse en producción."
+  },
+  "operate": {
+    "num": "Cómo operamos",
+    "title": "Entregamos como operadores, <em>no como freelancers.</em>",
+    "desc": "Todo proyecto corre con las mismas prácticas operativas que usamos en nuestros propios sistemas de producción. Esto separa a partners técnicos serios de las agencias.",
+    "items": {
+      "1": { "title": "Pipelines CI/CD", "body": "Cada deploy automatizado, probado, reproducible. Nada de FTP manual." },
+      "2": { "title": "Infraestructura como código", "body": "AWS gestionado con Terraform. Nada de clickops en producción." },
+      "3": { "title": "Monitoreo en producción", "body": "Dashboards, alertas, historial de ejecución. Las mismas herramientas que construimos para clientes." },
+      "4": { "title": "Despliegues multi-entorno", "body": "Aislamiento dev, staging, prod. Reglas de promoción. Sin sorpresas." },
+      "5": { "title": "Estrategia de rollback", "body": "Blue/green o canary por defecto. Un deploy malo nunca tira producción." },
+      "6": { "title": "Revisiones de seguridad", "body": "RBAC, 2FA, rotación de secretos, IAM con menor privilegio. Integrado, no añadido." },
+      "7": { "title": "Documentación y traspaso", "body": "Runbooks, diagramas de arquitectura, decision logs. Tu equipo puede tomarlo limpiamente." },
+      "8": { "title": "Demos semanales", "body": "Software funcional cada sprint. Siempre probable, nunca teórico." },
+      "9": { "title": "Monitoreo de costos cloud", "body": "Presupuestos AWS, detección de anomalías, recursos etiquetados. No quemamos tu dinero." }
+    },
+    "why": {
+      "title": "No somos una agencia tradicional.",
+      "items": {
+        "1": "Operamos sistemas reales en producción",
+        "2": "Experiencia en arquitectura cloud a escala empresarial",
+        "3": "Equipo técnico directo — sin capas comerciales",
+        "4": "Menos reuniones, más ejecución",
+        "5": "Construido como infraestructura, lanzado como producto",
+        "6": "Trayectoria en fintech y producción"
+      }
+    }
+  },
+  "building": {
+    "num": "Construyendo ahora",
+    "title": "Trabajo en curso, <em>en vivo.</em>",
+    "desc": "Sistemas que estamos operando o lanzando ahora mismo. Construcciones públicas, producción real.",
+    "items": {
+      "1": { "tag": "Trading", "title": "Quantor Polybot", "body": "Sistema async de trading sobre Polymarket — señales Ollama, dashboard FastAPI, log de ejecución SQLite, producción en vivo." },
+      "2": { "tag": "Plataforma", "title": "Dashboard operador Nexo AI", "body": "La plataforma multi-tenant que estás viendo ahora. Operadores despliegan bots y agentes IA desde una librería compartida." },
+      "3": { "tag": "Automatización de contenido", "title": "Infraestructura AI clipping", "body": "Clipping de stream en tiempo real con scoring IA, distribución multi-plataforma, dashboards para creadores." },
+      "4": { "tag": "Sistemas de sensores", "title": "Analítica de sensores en tiempo real", "body": "Pipelines de visión y presencia para activaciones — analítica de sensor a dashboard en menos de un segundo." },
+      "5": { "tag": "Telegram + SaaS", "title": "Plataforma NexoPicks", "body": "Plataforma de picks deportivos + bot Telegram en monorepo Node/TS, Postgres, Redis, reasoner Ollama." }
+    }
+  },
+  "founder": {
+    "num": "Construido por operadores",
+    "title": "No una marca. <em>Un equipo.</em>",
+    "body": "Liderado por su fundador, con experiencia en arquitectura cloud en un procesador de pagos global de primer nivel, producción bajo PCI DSS 4.0 en organizaciones AWS multi-cuenta, y trayectoria entregando SaaS multi-tenant, sistemas de sensores e infraestructura de trading. Trabajamos como construimos — directo, técnico, on-call."
   }
 }

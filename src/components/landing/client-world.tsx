@@ -79,6 +79,12 @@ export function ClientWorld() {
             <div className="pc-tag">{tCpc(`${i}.tag`)}</div>
             <h4>{tCpc(`${i}.title`)}</h4>
             <p>{tCpc(`${i}.body`)}</p>
+            <dl className="pc-meta">
+              <dt>Scale</dt>
+              <dd>{tCpc(`${i}.scale`)}</dd>
+              <dt>Timeline</dt>
+              <dd>{tCpc(`${i}.timeline`)}</dd>
+            </dl>
             <div className="pc-stack">
               {CPC_STACKS[i - 1]?.map((s) => <span key={s}>{s}</span>)}
             </div>

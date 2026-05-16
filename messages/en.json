@@ -68,6 +68,10 @@
     "stat2": "DSS governance at enterprise scale",
     "stat3": "Production systems shipped",
     "stat4": "Studio, partnerships, platform",
+    "stat5": "Uptime targets",
+    "stat6": "Monitored production systems",
+    "stat7": "LATAM + North America operations",
+    "stat8": "Infrastructure as code · multi-env deploys",
     "line": "Production systems on AWS · Apps &amp; platforms shipped · Architecture built to scale · Bots &amp; AI agents in operation · International client base",
     "units": {
       "verticals": "verticals"
@@ -134,17 +138,23 @@
     "1": {
       "tag": "Client · Event tech",
       "title": "Interactive activation system",
-      "body": "On-site human-detection and interactive sensor experience for a consumer-brand activation — engineered for high-traffic events, deployed and supported on-location."
+      "body": "On-site human-detection and interactive sensor experience for a consumer-brand activation — engineered for high-traffic events, deployed and supported on-location.",
+      "scale": "High-traffic events · multi-day on-site operation",
+      "timeline": "Built + deployed in weeks"
     },
     "2": {
       "tag": "Client · Healthcare",
       "title": "Pharmaceutical web platform",
-      "body": "Multi-user healthcare platform with RBAC, 2FA and architecture aligned to privacy and scale requirements — built end-to-end with structured handover to the client's team."
+      "body": "Multi-user healthcare platform with RBAC, 2FA and architecture aligned to privacy and scale requirements — built end-to-end with structured handover to the client's team.",
+      "scale": "Multi-user RBAC · 2FA · privacy-aligned baseline",
+      "timeline": "End-to-end build · structured client handoff"
     },
     "3": {
       "tag": "Enterprise · Cloud",
       "title": "Payments-grade infrastructure",
-      "body": "Cloud architecture for a major global payments processor — multi-account AWS organization under PCI DSS 4.0 governance, with production incident response on critical systems."
+      "body": "Cloud architecture for a major global payments processor — multi-account AWS organization under PCI DSS 4.0 governance, with production incident response on critical systems.",
+      "scale": "Multi-account AWS · PCI DSS 4.0 governance",
+      "timeline": "Multi-year engagement · production incident response"
     }
   },
   "partner": {
@@ -418,5 +428,52 @@
     "contactH3": "Choose how you want to <em>work with us.</em>",
     "contactP": "Pick the path that fits — and we start the right conversation from the first message.",
     "ctaSub": "Hire the team, partner on an idea, or operate the platform — start where it fits."
+  },
+  "position": {
+    "line": "We build real systems that have to operate, scale, and stay live in production."
+  },
+  "operate": {
+    "num": "How we operate",
+    "title": "We ship like operators, <em>not freelancers.</em>",
+    "desc": "Every project runs with the same operational practices we use on our own production systems. This is what separates serious technical partners from agencies.",
+    "items": {
+      "1": { "title": "CI/CD pipelines", "body": "Every deploy automated, tested, reproducible. No manual ftp." },
+      "2": { "title": "Infrastructure as code", "body": "Terraform-managed AWS. No clickops in production." },
+      "3": { "title": "Production monitoring", "body": "Dashboards, alerts, execution history. Same tools we build for clients." },
+      "4": { "title": "Multi-environment deploys", "body": "Dev, staging, prod isolation. Promotion gates. No surprises." },
+      "5": { "title": "Rollback strategy", "body": "Blue/green or canary by default. A bad deploy never takes prod down." },
+      "6": { "title": "Security reviews", "body": "RBAC, 2FA, secret rotation, least-privilege IAM. Built in, not bolted on." },
+      "7": { "title": "Documentation handoff", "body": "Runbooks, architecture diagrams, decision logs. Your team can take it over cleanly." },
+      "8": { "title": "Weekly demos", "body": "Working software every sprint. Always testable, never theoretical." },
+      "9": { "title": "Cloud cost monitoring", "body": "AWS budgets, anomaly detection, tagged resources. We don't burn your money." }
+    },
+    "why": {
+      "title": "Not a traditional agency.",
+      "items": {
+        "1": "We operate real systems in production",
+        "2": "Cloud architecture experience at enterprise scale",
+        "3": "Direct technical team — no commercial layers",
+        "4": "Fewer meetings, more execution",
+        "5": "Built like infrastructure, shipped like product",
+        "6": "Fintech and production-grade backgrounds"
+      }
+    }
+  },
+  "building": {
+    "num": "Currently building",
+    "title": "Live work in <em>progress.</em>",
+    "desc": "Systems we're operating or shipping right now. Public builds, real production.",
+    "items": {
+      "1": { "tag": "Trading", "title": "Quantor Polybot", "body": "Async Polymarket trading system — Ollama-driven signals, FastAPI dashboard, SQLite execution log, live production." },
+      "2": { "tag": "Platform", "title": "Nexo AI operator dashboard", "body": "The multi-tenant platform you're looking at now. Operators deploy bots and AI agents from a shared library." },
+      "3": { "tag": "Content automation", "title": "AI clipping infrastructure", "body": "Real-time stream clipping with AI scoring, multi-platform distribution, creator-facing dashboards." },
+      "4": { "tag": "Sensor systems", "title": "Real-time sensor analytics", "body": "Human-presence and vision pipelines for activations — sub-second analytics from sensor to dashboard." },
+      "5": { "tag": "Telegram + SaaS", "title": "NexoPicks sports platform", "body": "Local sports picks + Telegram bot platform on Node/TS monorepo, Postgres, Redis, Ollama reasoner." }
+    }
+  },
+  "founder": {
+    "num": "Built by operators",
+    "title": "Not a brand. <em>A team.</em>",
+    "body": "Founder-led, with cloud architecture leadership at a major global payments processor, PCI DSS 4.0 production experience across multi-account AWS organizations, and a track record of shipping multi-tenant SaaS, sensor systems, and trading infrastructure. We work the way we build — direct, technical, on-call."
   }
 }
