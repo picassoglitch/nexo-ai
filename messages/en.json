@@ -3,10 +3,6 @@
     "title": "Nexo AI — A technology team and AI automation platform",
     "description": "We build products for clients, partner with founders, and operate intelligent systems."
   },
-  "home": {
-    "kicker": "Technology team — HQ Mexico City",
-    "comingSoon": "The full site is being built — scaffold deployed successfully."
-  },
   "auth": {
     "signIn": {
       "title": "Sign in to Nexo AI",
@@ -21,5 +17,403 @@
       "signedInAs": "Signed in as",
       "signOut": "Sign out"
     }
+  },
+  "nav": {
+    "proof": "Work",
+    "client": "Studio",
+    "partner": "Partnerships",
+    "earn": "Platform",
+    "cta": "Get started"
+  },
+  "hero": {
+    "kicker": "Technology team — HQ Mexico City",
+    "scroll": "Or scroll — there's more below",
+    "cta": {
+      "primary": "Start a project",
+      "secondary": "See the work"
+    }
+  },
+  "trust": {
+    "label": "Tech stack"
+  },
+  "door": {
+    "client": {
+      "num": "/01 — Studio",
+      "title": "Build my product",
+      "body": "You have a business and something to ship. We design, develop and deploy apps, platforms and technology systems for you.",
+      "go": "Start a project"
+    },
+    "partner": {
+      "num": "/02 — Partnerships",
+      "title": "Technical partnership",
+      "body": "You have a real idea but no tech team. We become your technical partner with equity arrangements defined by scope and each side's participation.",
+      "go": "Apply for partnership"
+    },
+    "earn": {
+      "num": "/03 — Platform",
+      "title": "Operate the systems",
+      "body": "Run bots and AI agents from the Nexo AI library — trading, content, scraping, ops automation — with live monitoring and a community of operators alongside you. Free to start.",
+      "go": "Open the platform"
+    }
+  },
+  "banner": {
+    "viewing": "Viewing as",
+    "switch": "switch view"
+  },
+  "proof": {
+    "num": "The foundation",
+    "title": "One team. <em>Three ways</em> to work with us.",
+    "desc": "Nexo AI is a technology team and an AI automation platform. Founder-led, team-built. The numbers below are what we operate today.",
+    "stat1": "AWS accounts under architecture",
+    "stat2": "DSS governance at enterprise scale",
+    "stat3": "Production systems shipped",
+    "stat4": "Studio, partnerships, platform",
+    "line": "Production systems on AWS · Apps &amp; platforms shipped · Architecture built to scale · Bots &amp; AI agents in operation · International client base"
+  },
+  "client": {
+    "tag": "For clients",
+    "num": "Build it for me",
+    "title": "You bring the brief. <em>We ship the build.</em>",
+    "desc": "For businesses with a defined need and a budget. The Nexo AI team designs, develops and deploys platforms, apps and AI-driven systems — ready to operate and scale."
+  },
+  "process": {
+    "1": {
+      "num": "01",
+      "title": "Validation",
+      "body": "We pressure-test the brief — scope, audience, constraints — before any code."
+    },
+    "2": {
+      "num": "02",
+      "title": "Architecture",
+      "body": "Stack, infrastructure, data model and security baseline locked at the start."
+    },
+    "3": {
+      "num": "03",
+      "title": "MVP",
+      "body": "A real working build in weeks — not months. Shipped to a real environment."
+    },
+    "4": {
+      "num": "04",
+      "title": "Iteration",
+      "body": "Feedback loops, real users, measured improvements. We ship continuously."
+    },
+    "5": {
+      "num": "05",
+      "title": "Scale &amp; handover",
+      "body": "Production-ready architecture, documented, with a clean handover or ongoing support."
+    },
+    "num": "How we work",
+    "title": "From idea to production — a clear path."
+  },
+  "svc": {
+    "1": {
+      "name": "Web &amp; mobile platforms",
+      "meta": "From functional spec to production deploy and handover"
+    },
+    "2": {
+      "name": "Sensor &amp; detection systems",
+      "meta": "Human-presence and vision tech for activation and marketing events"
+    },
+    "3": {
+      "name": "Multi-tenant SaaS",
+      "meta": "Architecture, auth, billing, tenancy — built to scale"
+    },
+    "4": {
+      "name": "Bots &amp; AI agents",
+      "meta": "Trading, content, scraping, ops automation — engineered, deployed, monitored"
+    },
+    "5": {
+      "name": "Cloud architecture",
+      "meta": "Multi-account AWS, governance, security baselines"
+    }
+  },
+  "cpc": {
+    "1": {
+      "tag": "Client · Event tech",
+      "title": "Interactive activation system",
+      "body": "On-site human-detection and interactive sensor experience for a consumer-brand activation — engineered for high-traffic events, deployed and supported on-location."
+    },
+    "2": {
+      "tag": "Client · Healthcare",
+      "title": "Pharmaceutical web platform",
+      "body": "Multi-user healthcare platform with RBAC, 2FA and architecture aligned to privacy and scale requirements — built end-to-end with structured handover to the client's team."
+    },
+    "3": {
+      "tag": "Enterprise · Cloud",
+      "title": "Payments-grade infrastructure",
+      "body": "Cloud architecture for a major global payments processor — multi-account AWS organization under PCI DSS 4.0 governance, with production incident response on critical systems."
+    }
+  },
+  "partner": {
+    "tag": "For partners",
+    "num": "Partner up with me",
+    "title": "Got the idea, <em>not the tech?</em>",
+    "desc": "There are a lot of smart people with good ideas and no way to build them. The Nexo AI partnership hub closes that gap — you bring the vision, the brand brings the team and the engineering.",
+    "hero": {
+      "title": "You don't need a budget. <em>You need a builder.</em>",
+      "p1": "This isn't a client engagement — it's a partnership. If you have a real idea and the drive to push it, but limited resources to hire a dev team, this is the door. We evaluate it together, and if it's a fit, we build it together.",
+      "p2": "Nexo AI becomes your technical partner for the project — design, architecture, build, deploy — and we share in what it becomes."
+    }
+  },
+  "pv": {
+    "1": {
+      "title": "You bring",
+      "body": "The idea, the market insight, the drive, the domain knowledge."
+    },
+    "2": {
+      "title": "We bring",
+      "body": "Architecture, full-stack build, cloud infrastructure, deployment, iteration."
+    },
+    "3": {
+      "title": "We share",
+      "body": "Equity aligned to the level of work, risk and participation on each side."
+    }
+  },
+  "how": {
+    "1": {
+      "num": "STEP 01",
+      "title": "Pitch the idea",
+      "body": "A real conversation first. Then we decide together whether it's worth moving forward formally."
+    },
+    "2": {
+      "num": "STEP 02",
+      "title": "Scope & fit",
+      "body": "We assess the build, the workload, and whether it's a partnership that makes sense for both sides."
+    },
+    "3": {
+      "num": "STEP 03",
+      "title": "Structure the deal",
+      "body": "Equity split agreed up front — based on the work involved and each person's input. Clear, fair, written down."
+    },
+    "4": {
+      "num": "STEP 04",
+      "title": "Build & launch",
+      "body": "We engineer it, ship it, and iterate — as partners in the outcome, not a vendor on a clock."
+    }
+  },
+  "equity": {
+    "note": "<b>On equity:</b> arrangements are aligned to the level of work, risk and participation on each side. No two deals are identical — bring the idea and we structure what's fair, together, before anything starts."
+  },
+  "earn": {
+    "tag": "For earners",
+    "num": "Use the bots",
+    "title": "Sign in. Deploy a system. <em>Scale on demand.</em>",
+    "desc": "Automate operations, content and workflows through AI-driven agents. The Nexo AI platform hosts a growing library of bots and intelligent systems, with a community of operators running them alongside you.",
+    "cta": "Create your account"
+  },
+  "bots": {
+    "title": "A library of intelligent systems. <em>One platform.</em>",
+    "p": "Create a free account with Google and access the full library — trading, content, scraping, ops automation, AI agents. Test any system in simulation before going live. New tools ship continuously.",
+    "feat1": {
+      "b": "Free to start.",
+      "t": "Connect with Google and run any system in simulation mode."
+    },
+    "feat2": {
+      "b": "Live monitoring.",
+      "t": "Dashboards, metrics and execution history — the same tools we build for ourselves."
+    },
+    "feat3": {
+      "b": "Pay for what you use.",
+      "t": "Unlock one system or full access through a secure gateway."
+    },
+    "feat4": {
+      "b": "Always shipping.",
+      "t": "New systems and capabilities land as we deploy them."
+    }
+  },
+  "dash": {
+    "pnl": "Shadow P&L",
+    "trades": "Trades",
+    "winrate": "Win rate",
+    "bot1": "Polybot — Scalping lane",
+    "bot2": "Pattern Scout — EMA 35/50",
+    "bot3": "Longshot lane",
+    "running": "● running",
+    "locked": "○ locked · upgrade"
+  },
+  "pricing": {
+    "num": "Access",
+    "title": "Start free. <em>Scale when it pays.</em>",
+    "desc": "No contracts, no sales calls. Pick a tier, connect with Google, running in under a minute."
+  },
+  "price": {
+    "free": {
+      "name": "Free",
+      "amt": "$0",
+      "per": " /forever",
+      "tag": "Create an account and explore the whole platform.",
+      "f1": "Google sign-in & full account",
+      "f2": "Run any system in simulation mode",
+      "f3": "Live dashboard, read-only",
+      "f4": "Limited usage & history",
+      "f5": "No live execution",
+      "btn": "Get started"
+    },
+    "pro": {
+      "name": "Pro",
+      "amt": "$39",
+      "per": " /month",
+      "badge": "Most chosen",
+      "tag": "Full live access to one system of your choice.",
+      "f1": "Everything in Free",
+      "f2": "One system, fully unlocked & live",
+      "f3": "Real execution & standard limits",
+      "f4": "Full history & analytics",
+      "f5": "Email support",
+      "btn": "Go Pro"
+    },
+    "vip": {
+      "name": "All-Access",
+      "amt": "$129",
+      "per": " /month",
+      "tag": "Every system, every capability, highest limits.",
+      "f1": "Everything in Pro",
+      "f2": "All systems unlocked, live",
+      "f3": "Highest usage limits",
+      "f4": "Early access to new tools",
+      "f5": "Priority support",
+      "btn": "Get All-Access"
+    },
+    "addon": "Not ready for All-Access? <b>Unlock any single system à la carte</b> — per-tool pricing at checkout."
+  },
+  "academy": {
+    "title": "The operator network — <em>Nexo Academy</em>",
+    "p": "The platform isn't just tools — it's an operator network. Nexo Academy is the community where builders and operators learn the systems, share what works, and run alongside each other. Free, Premium and All-Access tiers, hosted on Skool. Deeper integration into this platform is on the roadmap.",
+    "btn": "Visit Nexo Academy →"
+  },
+  "contact": {
+    "num": "Get started",
+    "tab": {
+      "client": "Hire us",
+      "partner": "Partner up",
+      "earn": "Use the bots"
+    }
+  },
+  "form": {
+    "name": {
+      "label": "Name",
+      "ph": "Your name"
+    },
+    "company": {
+      "label": "Company",
+      "ph": "Company name"
+    },
+    "email": "Email",
+    "need": {
+      "label": "What do you need built?",
+      "ph": "A platform, an app, a sensor system..."
+    },
+    "budget": "Budget range",
+    "idea": {
+      "label": "Your idea — what do you want to build?",
+      "ph": "Describe the idea and the opportunity you see..."
+    },
+    "bring": {
+      "label": "What do you bring to the partnership?",
+      "ph": "Domain knowledge, market access, drive, time..."
+    },
+    "password": "Password",
+    "google": "Continue with Google",
+    "or": "OR",
+    "client": {
+      "submit": "Send project brief",
+      "fine": "Prototype — form is not yet wired. Goes live in the build phase."
+    },
+    "partner": {
+      "submit": "Pitch the partnership",
+      "fine": "No NDA needed to start a conversation. Equity terms are worked out together, up front."
+    },
+    "earn": {
+      "submit": "Create free account",
+      "fine": "Free account, no card required. Prototype — auth wires up in the build phase."
+    }
+  },
+  "budget": {
+    "0": "Select a range",
+    "1": "Under $10k",
+    "2": "$10k – $30k",
+    "3": "$30k – $75k",
+    "4": "$75k+",
+    "5": "Not sure yet"
+  },
+  "cta": {
+    "btn": "Get started",
+    "big": "Build it <em>real.</em>"
+  },
+  "footer": {
+    "brand": "A technology team and AI automation platform. HQ in Mexico City. We build products for clients, partner with founders, and operate intelligent systems with a community of operators.",
+    "build": "Build",
+    "earn": "Platform",
+    "connect": "Connect",
+    "track": "Track record",
+    "contact": "Contact",
+    "bots": "AI tools",
+    "pricing": "Pricing",
+    "signin": "Sign in",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "status": "Status"
+  },
+  "marquee": [
+    "The team",
+    "Partnerships",
+    "The platform",
+    "Operator network",
+    "AI agents",
+    "Automation at scale",
+    "Production systems",
+    "Intelligent infrastructure"
+  ],
+  "path": {
+    "client": {
+      "name": "Client",
+      "kicker": "For businesses that need a build team",
+      "h1": [
+        "You have a project.",
+        "We have the",
+        "<em>team that ships.</em>"
+      ],
+      "lead": "You need real technology built for your business — platforms, apps, intelligent systems. Designed, deployed, ready to operate.",
+      "contactH3": "Tell us what you <em>need built.</em>",
+      "contactP": "A defined brief, a real budget, a team that delivers. Send the project details and we come back with a way forward.",
+      "ctaSub": "A defined project and a team that ships it. That's the client path."
+    },
+    "partner": {
+      "name": "Partner",
+      "kicker": "For founders with an idea and no tech team",
+      "h1": [
+        "You have an idea.",
+        "We become your",
+        "<em>technical partner.</em>"
+      ],
+      "lead": "Smart idea, real drive, limited resources. You don't need a budget — you need a builder. Bring it here and we build it together, as partners in the upside.",
+      "contactH3": "Pitch us the <em>partnership.</em>",
+      "contactP": "Bring the idea and what you put on the table. If it's a fit, we structure the equity together — up front, fair, written down.",
+      "ctaSub": "Your idea, our engineering, shared upside. That's the partner path."
+    },
+    "earn": {
+      "name": "Operator",
+      "kicker": "For operators running intelligent systems",
+      "h1": [
+        "Intelligent systems,",
+        "running for you.",
+        "<em>Live.</em>"
+      ],
+      "lead": "Sign in, browse the library, deploy a system — trading, content, scraping, ops automation. Simulation mode is free. The operator community runs alongside.",
+      "contactH3": "Create your <em>free account.</em>",
+      "contactP": "Connect with Google and you're in — every system available in simulation mode, unlock live execution whenever you're ready.",
+      "ctaSub": "Run the systems, join the operators, scale on demand. That's the platform path."
+    }
+  },
+  "neutral": {
+    "h1": [
+      "Apps, platforms,",
+      "AI systems —",
+      "<em>built for real businesses.</em>"
+    ],
+    "lead": "Nexo AI is a technology team and an AI-driven automation platform. We build products for clients, partner with founders who have ideas but no tech team, and operate a growing library of bots and intelligent agents.",
+    "contactH3": "Choose how you want to <em>work with us.</em>",
+    "contactP": "Pick the path that fits — and we start the right conversation from the first message.",
+    "ctaSub": "Hire the team, partner on an idea, or operate the platform — start where it fits."
   }
 }

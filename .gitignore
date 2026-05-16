@@ -45,3 +45,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.nexo-reference/
+
+# Build-package step prompts + reference drops (kept locally, not shipped)
+/0?-*.md
+/reference-*.json
+/reference-*.html

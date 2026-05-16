@@ -3,10 +3,6 @@
     "title": "Nexo AI — Equipo de tecnología y plataforma de automatización con IA",
     "description": "Construimos productos para clientes, nos asociamos con founders, y operamos sistemas inteligentes."
   },
-  "home": {
-    "kicker": "Equipo de tecnología — Sede en Ciudad de México",
-    "comingSoon": "El sitio completo está en construcción — scaffold desplegado correctamente."
-  },
   "auth": {
     "signIn": {
       "title": "Iniciar sesión en Nexo AI",
@@ -21,5 +17,403 @@
       "signedInAs": "Sesión iniciada como",
       "signOut": "Cerrar sesión"
     }
+  },
+  "nav": {
+    "proof": "Trayectoria",
+    "client": "Equipo",
+    "partner": "Partnerships",
+    "earn": "Plataforma IA",
+    "cta": "Empezar"
+  },
+  "hero": {
+    "kicker": "Equipo de tecnología — Sede en Ciudad de México",
+    "scroll": "O desplázate — hay más abajo",
+    "cta": {
+      "primary": "Iniciar proyecto",
+      "secondary": "Ver trayectoria"
+    }
+  },
+  "trust": {
+    "label": "Stack tecnológico"
+  },
+  "door": {
+    "client": {
+      "num": "/01 — Equipo",
+      "title": "Construyamos tu producto",
+      "body": "Tienes un negocio y algo que lanzar. Diseñamos, desarrollamos y desplegamos plataformas, apps y sistemas impulsados por IA — listos para operar y escalar.",
+      "go": "Iniciar proyecto"
+    },
+    "partner": {
+      "num": "/02 — Partnerships",
+      "title": "Partnership técnico",
+      "body": "Tienes una idea real pero no equipo técnico. Nos volvemos tu socio técnico, con acuerdos basados en equity definidos según el alcance y la participación de cada lado.",
+      "go": "Aplicar a partnership"
+    },
+    "earn": {
+      "num": "/03 — Plataforma IA",
+      "title": "Opera sistemas autónomos",
+      "body": "Automatiza operaciones, contenido y flujos de trabajo mediante agentes impulsados por IA. Accede a herramientas con monitoreo en vivo y una comunidad de operadores ejecutando junto a ti.",
+      "go": "Abrir la plataforma"
+    }
+  },
+  "banner": {
+    "viewing": "Viendo como",
+    "switch": "cambiar vista"
+  },
+  "proof": {
+    "num": "La base",
+    "title": "Un equipo. <em>Tres formas</em> de trabajar con nosotros.",
+    "desc": "Nexo AI es un equipo de tecnología y una plataforma de automatización con IA. Dirigida por su fundador, construida por un equipo. Los números abajo son lo que operamos hoy.",
+    "stat1": "Cuentas AWS bajo arquitectura",
+    "stat2": "Gobernanza DSS a escala empresarial",
+    "stat3": "Sistemas en producción entregados",
+    "stat4": "Equipo, partnerships, plataforma",
+    "line": "Sistemas en producción sobre AWS · Apps y plataformas desplegadas · Arquitectura lista para escalar · Bots y agentes de IA en operación · Base de clientes internacional"
+  },
+  "client": {
+    "tag": "Para clientes",
+    "num": "Constrúyelo por mí",
+    "title": "Tú traes el brief. <em>Nosotros entregamos.</em>",
+    "desc": "Para negocios con una necesidad definida y presupuesto. El equipo Nexo AI diseña, desarrolla y despliega plataformas, apps y sistemas impulsados por IA — listos para operar y escalar."
+  },
+  "process": {
+    "1": {
+      "num": "01",
+      "title": "Validación",
+      "body": "Presionamos el brief — alcance, audiencia, restricciones — antes de escribir código."
+    },
+    "2": {
+      "num": "02",
+      "title": "Arquitectura",
+      "body": "Stack, infraestructura, modelo de datos y línea base de seguridad definidos desde el inicio."
+    },
+    "3": {
+      "num": "03",
+      "title": "MVP",
+      "body": "Un build real funcionando en semanas — no meses. Desplegado en un entorno real."
+    },
+    "4": {
+      "num": "04",
+      "title": "Iteración",
+      "body": "Ciclos de feedback, usuarios reales, mejoras medibles. Lanzamos continuamente."
+    },
+    "5": {
+      "num": "05",
+      "title": "Escalamiento y traspaso",
+      "body": "Arquitectura lista para producción, documentada, con traspaso limpio o soporte continuo."
+    },
+    "num": "Cómo trabajamos",
+    "title": "De la idea a producción — un camino claro."
+  },
+  "svc": {
+    "1": {
+      "name": "Plataformas web y móviles",
+      "meta": "Del spec funcional al despliegue en producción y traspaso"
+    },
+    "2": {
+      "name": "Sistemas de sensores y detección",
+      "meta": "Tecnología de presencia y visión para activaciones y eventos de marketing"
+    },
+    "3": {
+      "name": "SaaS multi-tenant",
+      "meta": "Arquitectura, autenticación, cobros, tenancy — listo para escalar"
+    },
+    "4": {
+      "name": "Bots y agentes de IA",
+      "meta": "Trading, contenido, scraping, automatización de operaciones — diseñados, desplegados, monitoreados"
+    },
+    "5": {
+      "name": "Arquitectura cloud",
+      "meta": "AWS multi-cuenta, gobernanza, líneas base de seguridad"
+    }
+  },
+  "cpc": {
+    "1": {
+      "tag": "Cliente · Tecnología para eventos",
+      "title": "Sistema interactivo de activación",
+      "body": "Experiencia interactiva con detección de personas y sensores para la activación de una marca de consumo — diseñada para eventos de alta afluencia, desplegada y soportada en sitio."
+    },
+    "2": {
+      "tag": "Cliente · Salud",
+      "title": "Plataforma web farmacéutica",
+      "body": "Plataforma multiusuario para salud con RBAC, 2FA y arquitectura alineada con requisitos de privacidad y escalabilidad — construida de extremo a extremo, con traspaso estructurado al equipo del cliente."
+    },
+    "3": {
+      "tag": "Empresarial · Cloud",
+      "title": "Infraestructura nivel pagos",
+      "body": "Arquitectura cloud para un procesador de pagos global de primer nivel — organización AWS multi-cuenta bajo gobernanza PCI DSS 4.0, con respuesta a incidentes en sistemas críticos en producción."
+    }
+  },
+  "partner": {
+    "tag": "Para socios",
+    "num": "Asóciate conmigo",
+    "title": "¿Tienes la idea <em>y no la tecnología?</em>",
+    "desc": "Hay mucha gente inteligente con buenas ideas y sin forma de construirlas. Nexo AI cierra esa brecha — tú traes la visión, el equipo trae la ingeniería.",
+    "hero": {
+      "title": "No necesitas presupuesto. <em>Necesitas a quien lo construya.</em>",
+      "p1": "Esto no es un contrato de cliente — es una sociedad. Si tienes una idea real y el empuje para impulsarla, pero recursos limitados para contratar un equipo, esta es la puerta. La evaluamos juntos, y si encaja, la construimos juntos.",
+      "p2": "Nexo AI se convierte en tu socio técnico para el proyecto — diseño, arquitectura, construcción, despliegue — y compartimos en lo que llegue a ser."
+    }
+  },
+  "pv": {
+    "1": {
+      "title": "Tú aportas",
+      "body": "La idea, la visión de mercado, el empuje, el conocimiento del dominio."
+    },
+    "2": {
+      "title": "Nosotros aportamos",
+      "body": "Arquitectura, desarrollo full-stack, infraestructura cloud, despliegue, iteración."
+    },
+    "3": {
+      "title": "Compartimos",
+      "body": "Equity alineado al nivel de trabajo, riesgo y participación de cada lado."
+    }
+  },
+  "how": {
+    "1": {
+      "num": "PASO 01",
+      "title": "Presenta la idea",
+      "body": "Primero una conversación real. Luego decidimos juntos si vale la pena avanzar formalmente."
+    },
+    "2": {
+      "num": "PASO 02",
+      "title": "Alcance y encaje",
+      "body": "Evaluamos la construcción, la carga de trabajo y si es una sociedad que tiene sentido para ambos."
+    },
+    "3": {
+      "num": "PASO 03",
+      "title": "Estructurar el trato",
+      "body": "Reparto de equity acordado por adelantado — según el trabajo y el aporte de cada persona. Claro, justo, por escrito."
+    },
+    "4": {
+      "num": "PASO 04",
+      "title": "Construir y lanzar",
+      "body": "Lo diseñamos, lo lanzamos e iteramos — como socios en el resultado, no como proveedor a sueldo."
+    }
+  },
+  "equity": {
+    "note": "<b>Sobre el equity:</b> los acuerdos se alinean al nivel de trabajo, riesgo y participación de cada lado. No hay dos tratos iguales — trae la idea y estructuramos juntos qué es justo, antes de empezar."
+  },
+  "earn": {
+    "tag": "Para quienes buscan ganar",
+    "num": "Usa los bots",
+    "title": "Inicia sesión. Despliega un sistema. <em>Escala según lo necesites.</em>",
+    "desc": "Automatiza operaciones, contenido y flujos de trabajo mediante agentes impulsados por IA. La plataforma Nexo AI hospeda una librería creciente de bots y sistemas inteligentes, con una comunidad de operadores ejecutando junto a ti.",
+    "cta": "Crea tu cuenta"
+  },
+  "bots": {
+    "title": "Una librería de sistemas inteligentes. <em>Una plataforma.</em>",
+    "p": "Crea una cuenta gratis con Google y accede a toda la librería — trading, contenido, scraping, automatización de operaciones, agentes de IA. Prueba cualquier sistema en modo simulación antes de activarlo en vivo. Nuevas herramientas se publican continuamente.",
+    "feat1": {
+      "b": "Gratis para empezar.",
+      "t": "Conéctate con Google y opera cualquier sistema en modo simulación."
+    },
+    "feat2": {
+      "b": "Monitoreo en vivo.",
+      "t": "Dashboards, métricas e historial de ejecución — las mismas herramientas que construimos para nosotros."
+    },
+    "feat3": {
+      "b": "Paga solo por uso.",
+      "t": "Desbloquea un sistema o acceso completo mediante una pasarela segura."
+    },
+    "feat4": {
+      "b": "Siempre lanzando.",
+      "t": "Nuevos sistemas y capacidades llegan conforme los desplegamos."
+    }
+  },
+  "dash": {
+    "pnl": "P&L sombra",
+    "trades": "Operaciones",
+    "winrate": "Tasa de acierto",
+    "bot1": "Polybot — Línea scalping",
+    "bot2": "Pattern Scout — EMA 35/50",
+    "bot3": "Línea longshot",
+    "running": "● activo",
+    "locked": "○ bloqueado · mejora"
+  },
+  "pricing": {
+    "num": "Acceso",
+    "title": "Empieza gratis. <em>Escala cuando rinda.</em>",
+    "desc": "Sin contratos, sin llamadas de ventas. Elige un plan, conéctate con Google, operando en menos de un minuto."
+  },
+  "price": {
+    "free": {
+      "name": "Gratis",
+      "amt": "$0",
+      "per": " /siempre",
+      "tag": "Crea una cuenta y explora toda la plataforma.",
+      "f1": "Inicio con Google y cuenta completa",
+      "f2": "Opera cualquier sistema en modo simulación",
+      "f3": "Dashboard en vivo, solo lectura",
+      "f4": "Uso e historial limitados",
+      "f5": "Sin ejecución en vivo",
+      "btn": "Empezar"
+    },
+    "pro": {
+      "name": "Pro",
+      "amt": "$39",
+      "per": " /mes",
+      "badge": "El más elegido",
+      "tag": "Acceso completo en vivo a un sistema de tu elección.",
+      "f1": "Todo lo de Gratis",
+      "f2": "Un sistema, totalmente desbloqueado y en vivo",
+      "f3": "Ejecución real y límites estándar",
+      "f4": "Historial y analíticas completas",
+      "f5": "Soporte por correo",
+      "btn": "Pasar a Pro"
+    },
+    "vip": {
+      "name": "Acceso completo",
+      "amt": "$129",
+      "per": " /mes",
+      "tag": "Todos los sistemas, todas las capacidades, los límites más altos.",
+      "f1": "Todo lo de Pro",
+      "f2": "Todos los sistemas desbloqueados, en vivo",
+      "f3": "Los límites de uso más altos",
+      "f4": "Acceso anticipado a nuevas herramientas",
+      "f5": "Soporte prioritario",
+      "btn": "Obtener Acceso completo"
+    },
+    "addon": "¿Aún no para Acceso completo? <b>Desbloquea cualquier sistema por separado</b> — precio por herramienta en el checkout."
+  },
+  "academy": {
+    "title": "La red de operadores — <em>Nexo Academy</em>",
+    "p": "La plataforma no son solo herramientas — es una red de operadores. Nexo Academy es la comunidad donde builders y operadores aprenden los sistemas, comparten lo que funciona, y ejecutan junto a otros. Niveles Gratis, Premium y Acceso completo, en Skool. La integración más profunda en esta plataforma está en el roadmap.",
+    "btn": "Visitar Nexo Academy →"
+  },
+  "contact": {
+    "num": "Empezar",
+    "tab": {
+      "client": "Contrátanos",
+      "partner": "Asóciate",
+      "earn": "Usa los bots"
+    }
+  },
+  "form": {
+    "name": {
+      "label": "Nombre",
+      "ph": "Tu nombre"
+    },
+    "company": {
+      "label": "Empresa",
+      "ph": "Nombre de la empresa"
+    },
+    "email": "Correo",
+    "need": {
+      "label": "¿Qué necesitas construir?",
+      "ph": "Una plataforma, una app, un sistema de sensores..."
+    },
+    "budget": "Rango de presupuesto",
+    "idea": {
+      "label": "Tu idea — ¿qué quieres construir?",
+      "ph": "Describe la idea y la oportunidad que ves..."
+    },
+    "bring": {
+      "label": "¿Qué aportas a la sociedad?",
+      "ph": "Conocimiento del dominio, acceso a mercado, empuje, tiempo..."
+    },
+    "password": "Contraseña",
+    "google": "Continuar con Google",
+    "or": "O",
+    "client": {
+      "submit": "Enviar brief del proyecto",
+      "fine": "Prototipo — el formulario aún no está conectado. Se activa en la fase de desarrollo."
+    },
+    "partner": {
+      "submit": "Presentar la sociedad",
+      "fine": "No se necesita NDA para iniciar una conversación. Los términos de equity se definen juntos, por adelantado."
+    },
+    "earn": {
+      "submit": "Crear cuenta gratis",
+      "fine": "Cuenta gratis, sin tarjeta. Prototipo — la autenticación se conecta en la fase de desarrollo."
+    }
+  },
+  "budget": {
+    "0": "Elige un rango",
+    "1": "Menos de $10k",
+    "2": "$10k – $30k",
+    "3": "$30k – $75k",
+    "4": "$75k+",
+    "5": "Aún no estoy seguro"
+  },
+  "cta": {
+    "btn": "Empezar",
+    "big": "Constrúyelo <em>real.</em>"
+  },
+  "footer": {
+    "brand": "Un equipo de tecnología y plataforma de automatización con IA. Sede en Ciudad de México. Construimos productos para clientes, nos asociamos con founders, y operamos sistemas inteligentes con una comunidad de operadores.",
+    "build": "Construir",
+    "earn": "Plataforma IA",
+    "connect": "Conectar",
+    "track": "Trayectoria",
+    "contact": "Contacto",
+    "bots": "Herramientas IA",
+    "pricing": "Precios",
+    "signin": "Iniciar sesión",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "status": "Estado"
+  },
+  "marquee": [
+    "El equipo",
+    "Partnerships",
+    "La plataforma",
+    "Red de operadores",
+    "Agentes de IA",
+    "Automatización a escala",
+    "Sistemas en producción",
+    "Infraestructura inteligente"
+  ],
+  "path": {
+    "client": {
+      "name": "Cliente",
+      "kicker": "Para negocios que necesitan un equipo de desarrollo",
+      "h1": [
+        "Tienes un proyecto.",
+        "Tenemos el",
+        "<em>equipo que entrega.</em>"
+      ],
+      "lead": "Necesitas tecnología real construida para tu negocio — plataformas, apps, sistemas inteligentes. Diseñada, desplegada, lista para operar.",
+      "contactH3": "Cuéntanos qué <em>necesitas construir.</em>",
+      "contactP": "Un brief definido, un presupuesto real, un equipo que entrega. Envía los detalles del proyecto y regresamos con un camino a seguir.",
+      "ctaSub": "Un proyecto definido y un equipo que lo entrega. Ese es el camino del cliente."
+    },
+    "partner": {
+      "name": "Socio",
+      "kicker": "Para founders con una idea y sin equipo técnico",
+      "h1": [
+        "Tienes una idea.",
+        "Nos volvemos tu",
+        "<em>socio técnico.</em>"
+      ],
+      "lead": "Idea inteligente, empuje real, recursos limitados. No necesitas presupuesto — necesitas a quien lo construya. Tráela aquí y la construimos juntos, como socios en el resultado.",
+      "contactH3": "Preséntanos la <em>sociedad.</em>",
+      "contactP": "Trae la idea y lo que pones sobre la mesa. Si encaja, estructuramos el equity juntos — por adelantado, justo, por escrito.",
+      "ctaSub": "Tu idea, nuestra ingeniería, resultado compartido. Ese es el camino del socio."
+    },
+    "earn": {
+      "name": "Operador",
+      "kicker": "Para operadores de sistemas inteligentes",
+      "h1": [
+        "Sistemas inteligentes,",
+        "ejecutando para ti.",
+        "<em>En vivo.</em>"
+      ],
+      "lead": "Inicia sesión, explora la librería, despliega un sistema — trading, contenido, scraping, automatización de operaciones. El modo simulación es gratis. La comunidad de operadores ejecuta junto a ti.",
+      "contactH3": "Crea tu <em>cuenta gratis.</em>",
+      "contactP": "Conéctate con Google y estás dentro — cada sistema disponible en modo simulación, desbloquea la ejecución en vivo cuando estés listo.",
+      "ctaSub": "Opera los sistemas, únete a los operadores, escala según lo necesites. Ese es el camino de la plataforma."
+    }
+  },
+  "neutral": {
+    "h1": [
+      "Apps, plataformas",
+      "y sistemas de IA",
+      "<em>para empresas reales.</em>"
+    ],
+    "lead": "Nexo AI es un equipo de tecnología y una plataforma de automatización impulsada por IA. Construimos productos para clientes, nos asociamos con founders sin equipo técnico y operamos una librería de bots y agentes inteligentes.",
+    "contactH3": "Elige cómo <em>trabajar con nosotros.</em>",
+    "contactP": "Elige cómo quieres trabajar con Nexo AI y empecemos la conversación correcta desde el inicio.",
+    "ctaSub": "Contrata al equipo, asóciate en una idea, u opera la plataforma — empieza donde tenga sentido."
   }
 }
