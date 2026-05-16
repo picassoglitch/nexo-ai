@@ -2,17 +2,18 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
+import { EmailAuthForm } from '@/components/auth/email-auth-form';
 
 export default async function SignInPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; mode?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { error, next } = await searchParams;
+  const { error, next, mode } = await searchParams;
   const t = await getTranslations('auth.signIn');
 
   const supabase = await createClient();
@@ -21,8 +22,9 @@ export default async function SignInPage({
   } = await supabase.auth.getUser();
   if (user) redirect('/account');
 
-  const errorMessage =
+  const upstreamError =
     error === 'missing_code' ? t('errorMissingCode') : error ? t('errorGeneric') : null;
+  const initialMode = mode === 'signup' ? 'signup' : 'signin';
 
   return (
     <main className="auth-shell">
@@ -32,38 +34,30 @@ export default async function SignInPage({
       </div>
 
       <div className="auth-card">
-        <div className="auth-section auth-section-primary">
-          <div className="auth-kicker">{t('newTitle')}</div>
-          <h1 className="auth-headline">{t('newSubtitle')}</h1>
+        <EmailAuthForm initialMode={initialMode} next={next} showModeTabs />
 
-          {errorMessage && <div className="auth-error">{errorMessage}</div>}
-
-          <GoogleSignInButton next={next} variant="premium" />
-
-          <ul className="auth-benefits">
-            <li>
-              <span className="ab-tick">✓</span>
-              {t('benefits.1')}
-            </li>
-            <li>
-              <span className="ab-tick">✓</span>
-              {t('benefits.2')}
-            </li>
-            <li>
-              <span className="ab-tick">✓</span>
-              {t('benefits.3')}
-            </li>
-          </ul>
-        </div>
+        {upstreamError && <div className="auth-error auth-error-upstream">{upstreamError}</div>}
 
         <div className="auth-divider">
-          <span>{t('returningTitle')}</span>
+          <span>{t('orDivider')}</span>
         </div>
 
-        <div className="auth-section auth-section-returning">
-          <p className="auth-returning-copy">{t('returningSubtitle')}</p>
-          <GoogleSignInButton next={next} variant="compact" />
-        </div>
+        <GoogleSignInButton next={next} variant="compact" />
+
+        <ul className="auth-benefits">
+          <li>
+            <span className="ab-tick">✓</span>
+            {t('benefits.1')}
+          </li>
+          <li>
+            <span className="ab-tick">✓</span>
+            {t('benefits.2')}
+          </li>
+          <li>
+            <span className="ab-tick">✓</span>
+            {t('benefits.3')}
+          </li>
+        </ul>
 
         <p className="auth-social-proof">{t('socialProof')}</p>
       </div>

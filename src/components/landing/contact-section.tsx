@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
+import { EmailAuthForm } from '@/components/auth/email-auth-form';
 import { usePath, type Path } from './use-path';
 
 type Pane = 'client' | 'partner' | 'earn';
@@ -127,7 +128,15 @@ function EarnPane() {
         {t('liveStatus')}
       </div>
       <p className="cc-earn-headline">{t('newSubtitle')}</p>
-      <GoogleSignInButton variant="premium" />
+
+      <EmailAuthForm initialMode="signup" showModeTabs={false} />
+
+      <div className="auth-divider auth-divider-compact">
+        <span>{t('orDivider')}</span>
+      </div>
+
+      <GoogleSignInButton variant="compact" />
+
       <ul className="auth-benefits auth-benefits-compact">
         <li>
           <span className="ab-tick">✓</span>
