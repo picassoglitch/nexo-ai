@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'OPERATOR' | 'EDITOR' | 'VIEWER' | 'CLIENT';
+export type SubscriptionTier = 'FREE' | 'PRO' | 'ALL_ACCESS';
 
 const ROLE_TIER: Record<UserRole, number> = {
   SUPER_ADMIN: 100,
@@ -26,6 +27,7 @@ export function isSuperAdminEmail(email: string | null | undefined): boolean {
 export interface SessionUser {
   user: User;
   role: UserRole;
+  tier: SubscriptionTier;
   orgId: string | null;
 }
 
@@ -38,9 +40,10 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 /**
- * Reads the authenticated user + their stored role + org from `profiles`.
+ * Reads the authenticated user + their stored role/tier/org from `profiles`.
  * SUPER_ADMIN_EMAILS allowlist forces role to SUPER_ADMIN regardless of stored value
- * — this is the durable backstop documented in the build spec.
+ * — this is the durable backstop documented in the build spec. Tier is read raw
+ * (no env override) since tier is billing state, not a security boundary.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
   const user = await getCurrentUser();
@@ -48,14 +51,16 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, org_id')
+    .select('role, tier, org_id')
     .eq('id', user.id)
     .maybeSingle();
   const storedRole = (profile?.role as UserRole | undefined) ?? 'VIEWER';
   const role: UserRole = isSuperAdminEmail(user.email) ? 'SUPER_ADMIN' : storedRole;
+  const tier = (profile?.tier as SubscriptionTier | undefined) ?? 'FREE';
   return {
     user,
     role,
+    tier,
     orgId: (profile?.org_id as string | null) ?? null,
   };
 }
@@ -80,18 +85,12 @@ export async function requireRole(min: UserRole, currentPath?: string): Promise<
     redirect(`/sign-in${next}`);
   }
   if (ROLE_TIER[session.role] < ROLE_TIER[min]) {
-    // Insufficient role — bounce to /account (or /sign-in if guard semantic mismatch).
     redirect('/account?error=insufficient_role');
   }
   return session;
 }
 
-/**
- * Single-helper RBAC check. v1 uses role tiers; per-action policies come later.
- * Mark TODO in DEVIATIONS so this is replaced before any privileged op (restart worker etc.) ships.
- */
 export function can(role: UserRole, action: string): boolean {
-  // v1 mapping — coarse role tiers. Replace with per-action policy in step 06+.
   const tier = ROLE_TIER[role] ?? 0;
   switch (action) {
     case 'view':

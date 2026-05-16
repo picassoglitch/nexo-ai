@@ -2,14 +2,16 @@ import { setRequestLocale } from 'next-intl/server';
 import { getSessionUser, isSuperAdminEmail } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { TeamRoleSelect } from '@/components/dashboard/team-role-select';
+import { TeamTierSelect } from '@/components/dashboard/team-tier-select';
 import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
-import type { UserRole } from '@/lib/auth/session';
+import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
 interface ProfileRow {
   id: string;
   email: string | null;
   full_name: string | null;
   role: UserRole;
+  tier: SubscriptionTier;
   created_at: string;
 }
 
@@ -26,11 +28,12 @@ export default async function TeamPage({
 
   const { data: profilesRaw } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, created_at')
+    .select('id, email, full_name, role, tier, created_at')
     .order('created_at');
   const profiles = (profilesRaw ?? []) as ProfileRow[];
 
   const canEdit = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
+  const paidCount = profiles.filter((p) => p.tier !== 'FREE').length;
 
   return (
     <div className="cc-scroll">
@@ -43,6 +46,14 @@ export default async function TeamPage({
           </div>
         </div>
         <div className="cc-mod-stat">
+          <div className="cc-mod-stat-l">Suscripciones pagas</div>
+          <div className="cc-mod-stat-v gr">{paidCount}</div>
+          <div className="cc-mod-stat-sub">
+            {profiles.filter((p) => p.tier === 'PRO').length} Pro ·{' '}
+            {profiles.filter((p) => p.tier === 'ALL_ACCESS').length} All-Access
+          </div>
+        </div>
+        <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Invitaciones pendientes</div>
           <div className="cc-mod-stat-v">0</div>
           <div className="cc-mod-stat-sub">Nadie pendiente</div>
@@ -50,7 +61,9 @@ export default async function TeamPage({
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Roles definidos</div>
           <div className="cc-mod-stat-v">6</div>
-          <div className="cc-mod-stat-sub">Super Admin · Admin · Operator · Editor · Viewer · Client</div>
+          <div className="cc-mod-stat-sub">
+            SA · Admin · Operator · Editor · Viewer · Client
+          </div>
         </div>
       </div>
 
@@ -78,12 +91,27 @@ export default async function TeamPage({
                 </div>
                 <div
                   className="cc-mod-right"
-                  style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}
+                  style={{
+                    flexDirection: 'row',
+                    gap: 8,
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
                 >
                   {canEdit ? (
-                    <TeamRoleSelect userId={p.id} current={p.role} envLocked={isEnvLocked} />
+                    <>
+                      <TeamTierSelect userId={p.id} current={p.tier} />
+                      <TeamRoleSelect
+                        userId={p.id}
+                        current={p.role}
+                        envLocked={isEnvLocked}
+                      />
+                    </>
                   ) : (
-                    <span className="cc-mod-badge">{p.role.replace('_', ' ')}</span>
+                    <>
+                      <span className="cc-mod-badge gr">{p.tier.replace('_', '-')}</span>
+                      <span className="cc-mod-badge">{p.role.replace('_', ' ')}</span>
+                    </>
                   )}
                 </div>
               </div>

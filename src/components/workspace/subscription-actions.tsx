@@ -1,53 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useWorkspace } from '@/lib/workspace/store';
+import { changeUserTier } from '@/lib/auth/tier-actions';
+import type { SubscriptionTier } from '@/lib/auth/session';
 
-type Tier = 'free' | 'pro' | 'vip';
-
-interface Props {
-  initialTier: Tier;
-}
-
-const TIER_LABELS: Record<Tier, string> = {
-  free: 'Free',
-  pro: 'Pro',
-  vip: 'All-Access',
+const TIER_LABELS: Record<SubscriptionTier, string> = {
+  FREE: 'Free',
+  PRO: 'Pro',
+  ALL_ACCESS: 'All-Access',
 };
 
-export function SubscriptionActions({ initialTier }: Props) {
-  const [tier, setTier] = useState<Tier>(initialTier);
-  const [pending, setPending] = useState<Tier | null>(null);
+interface Props {
+  initialTier: SubscriptionTier;
+  userId: string;
+  isAdmin: boolean;
+}
+
+export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
+  const [tier, setTier] = useState<SubscriptionTier>(initialTier);
+  const [pendingTier, setPendingTier] = useState<SubscriptionTier | null>(null);
+  const [isPending, startTransition] = useTransition();
   const showToast = useWorkspace((s) => s.showToast);
 
-  async function changeTier(next: Tier) {
-    if (next === tier) return;
-    setPending(next);
-    // TODO step 05-PAYMENTS: replace with real Mercado Pago checkout flow.
-    // For now this only updates local state + flashes a confirmation.
-    await new Promise((r) => setTimeout(r, 700));
-    setTier(next);
-    setPending(null);
-    showToast(
-      next === 'free'
-        ? `Suscripción cambiada a <b>${TIER_LABELS[next]}</b>.`
-        : `Plan <b>${TIER_LABELS[next]}</b> activado — pasaremos al checkout en step 05.`,
-    );
+  async function changeTier(next: SubscriptionTier) {
+    if (next === tier || isPending) return;
+    setPendingTier(next);
+    startTransition(async () => {
+      const prev = tier;
+      // Optimistic
+      setTier(next);
+      const res = await changeUserTier(userId, next);
+      setPendingTier(null);
+      if (!res.ok) {
+        setTier(prev);
+        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo cambiar el plan'}`);
+        return;
+      }
+      if (res.paymentRequired) {
+        showToast(
+          `Plan <b>${TIER_LABELS[next]}</b> activado en modo demo. El checkout real (Mercado Pago) se conecta en step 05.`,
+        );
+      } else if (next === 'FREE') {
+        showToast(`Suscripción cambiada a <b>${TIER_LABELS[next]}</b>.`);
+      } else {
+        showToast(`Plan <b>${TIER_LABELS[next]}</b> activado.`);
+      }
+    });
   }
 
   function cancelSubscription() {
-    if (tier === 'free') {
+    if (tier === 'FREE') {
       showToast('Ya estás en el plan Free.');
       return;
     }
-    if (!confirm('¿Cancelar tu suscripción? Mantendrás el plan hasta el final del período actual.')) {
+    if (
+      !confirm(
+        '¿Cancelar tu suscripción? Mantendrás el plan hasta el final del período actual.',
+      )
+    ) {
       return;
     }
-    void changeTier('free');
+    void changeTier('FREE');
   }
 
   const cards: Array<{
-    id: Tier;
+    id: SubscriptionTier;
     name: string;
     price: string;
     per: string;
@@ -56,7 +74,7 @@ export function SubscriptionActions({ initialTier }: Props) {
     featured?: boolean;
   }> = [
     {
-      id: 'free',
+      id: 'FREE',
       name: 'Free',
       price: '$0',
       per: '/siempre',
@@ -69,7 +87,7 @@ export function SubscriptionActions({ initialTier }: Props) {
       ],
     },
     {
-      id: 'pro',
+      id: 'PRO',
       name: 'Pro',
       price: 'USD $39',
       per: '/mes',
@@ -84,7 +102,7 @@ export function SubscriptionActions({ initialTier }: Props) {
       ],
     },
     {
-      id: 'vip',
+      id: 'ALL_ACCESS',
       name: 'All-Access',
       price: 'USD $129',
       per: '/mes',
@@ -101,35 +119,87 @@ export function SubscriptionActions({ initialTier }: Props) {
 
   return (
     <>
-      <div className="cc-mod-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+      {isAdmin && (
+        <div
+          style={{
+            padding: '10px 14px',
+            border: '1px solid var(--cc-purple)',
+            background: 'var(--cc-purple-g)',
+            borderRadius: 9,
+            fontSize: 12,
+            color: 'var(--cc-txt-2)',
+            marginBottom: 16,
+          }}
+        >
+          ▸ <b>Modo admin</b> — los cambios de plan se aplican inmediatamente sin pasar por el
+          checkout.
+        </div>
+      )}
+
+      <div
+        className="cc-mod-grid"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}
+      >
         {cards.map((c) => {
           const isCurrent = c.id === tier;
-          const isPending = pending === c.id;
+          const isPendingHere = pendingTier === c.id;
           return (
             <div
               key={c.id}
               className="cc-mod-card"
               style={{
-                borderColor: isCurrent ? 'var(--cc-green)' : c.featured ? 'rgba(158,234,58,.3)' : undefined,
+                borderColor: isCurrent
+                  ? 'var(--cc-green)'
+                  : c.featured
+                    ? 'rgba(158,234,58,.3)'
+                    : undefined,
                 background: c.featured && !isCurrent ? 'rgba(158,234,58,.04)' : undefined,
                 position: 'relative',
               }}
             >
               <div className="cc-mod-card-head">
-                <span className="cc-mod-tag" style={{ fontSize: 13, color: 'var(--cc-txt)', fontWeight: 600 }}>
+                <span
+                  className="cc-mod-tag"
+                  style={{ fontSize: 13, color: 'var(--cc-txt)', fontWeight: 600 }}
+                >
                   {c.name}
                 </span>
                 {isCurrent && <span className="cc-mod-badge gr">Tu plan</span>}
                 {!isCurrent && c.featured && <span className="cc-mod-badge gr">El más elegido</span>}
               </div>
-              <div style={{ fontFamily: 'var(--cc-disp), sans-serif', fontSize: 30, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--cc-disp), sans-serif',
+                  fontSize: 30,
+                  fontWeight: 700,
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1,
+                }}
+              >
                 {c.price}
-                <span style={{ fontSize: 13, color: 'var(--cc-txt-3)', fontWeight: 500, marginLeft: 4 }}>
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: 'var(--cc-txt-3)',
+                    fontWeight: 500,
+                    marginLeft: 4,
+                  }}
+                >
                   {c.per}
                 </span>
               </div>
-              <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', minHeight: 36 }}>{c.tagline}</p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }}>
+              <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', minHeight: 36 }}>
+                {c.tagline}
+              </p>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  padding: 0,
+                }}
+              >
                 {c.features.map((f) => (
                   <li
                     key={f}
@@ -141,7 +211,13 @@ export function SubscriptionActions({ initialTier }: Props) {
                       lineHeight: 1.45,
                     }}
                   >
-                    <span style={{ color: 'var(--cc-green)', fontFamily: 'var(--cc-mono), monospace', flexShrink: 0 }}>
+                    <span
+                      style={{
+                        color: 'var(--cc-green)',
+                        fontFamily: 'var(--cc-mono), monospace',
+                        flexShrink: 0,
+                      }}
+                    >
                       ✓
                     </span>
                     <span>{f}</span>
@@ -151,7 +227,7 @@ export function SubscriptionActions({ initialTier }: Props) {
               <button
                 type="button"
                 onClick={() => changeTier(c.id)}
-                disabled={isCurrent || pending !== null}
+                disabled={isCurrent || isPending}
                 style={{
                   marginTop: 'auto',
                   padding: '11px 14px',
@@ -165,16 +241,16 @@ export function SubscriptionActions({ initialTier }: Props) {
                   color: isCurrent ? 'var(--cc-txt-3)' : c.featured ? '#070809' : 'var(--cc-txt)',
                   fontWeight: 600,
                   fontSize: 13,
-                  cursor: isCurrent || pending !== null ? 'default' : 'pointer',
+                  cursor: isCurrent || isPending ? 'default' : 'pointer',
                   fontFamily: 'inherit',
-                  opacity: pending !== null && !isPending ? 0.5 : 1,
+                  opacity: isPending && !isPendingHere ? 0.5 : 1,
                 }}
               >
-                {isPending
+                {isPendingHere
                   ? 'Procesando…'
                   : isCurrent
                     ? 'Plan actual'
-                    : c.id === 'free'
+                    : c.id === 'FREE'
                       ? 'Bajar a Free'
                       : `Cambiar a ${c.name}`}
               </button>
@@ -183,7 +259,7 @@ export function SubscriptionActions({ initialTier }: Props) {
         })}
       </div>
 
-      {tier !== 'free' && (
+      {tier !== 'FREE' && (
         <div className="cc-mod-section">
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">

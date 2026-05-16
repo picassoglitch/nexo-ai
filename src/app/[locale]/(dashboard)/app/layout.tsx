@@ -33,9 +33,11 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     email.split('@')[0] ||
     'Operator';
   const initial = fullName.charAt(0).toUpperCase();
-  // For v1, tier label is derived from a placeholder. Wires to Supabase column or
-  // Mercado Pago subscription state in step 05.
-  const tierLabel = 'FREE';
+  // Real tier read from profiles.tier (0004 migration). The sidebar pill flips
+  // automatically when the admin changes someone's tier from /dashboard/team
+  // or the user upgrades their own plan from /app/subscription.
+  const tier = session?.tier ?? 'FREE';
+  const tierLabel = tier === 'ALL_ACCESS' ? 'ALL-ACCESS' : tier;
   const isAdmin = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
 
   return (

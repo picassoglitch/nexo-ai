@@ -1,5 +1,13 @@
 import { setRequestLocale } from 'next-intl/server';
+import { redirect } from 'next/navigation';
+import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
 import { SubscriptionActions } from '@/components/workspace/subscription-actions';
+
+const TIER_DISPLAY: Record<SubscriptionTier, { label: string; price: string; per: string }> = {
+  FREE: { label: 'Free', price: '$0', per: 'siempre' },
+  PRO: { label: 'Pro', price: 'USD $39', per: 'mes' },
+  ALL_ACCESS: { label: 'All-Access', price: 'USD $129', per: 'mes' },
+};
 
 export default async function SubscriptionPage({
   params,
@@ -9,10 +17,11 @@ export default async function SubscriptionPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // Current tier source (v1): hard-coded 'free' until step 05 wires Mercado Pago.
-  // The SubscriptionActions component owns the change flow client-side and will
-  // call the real /api/billing/portal once the integration lands.
-  const tier = 'free' as const;
+  const session = await getSessionUser();
+  if (!session) redirect('/sign-in?next=/app/subscription');
+  const tier = session.tier;
+  const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ADMIN';
+  const display = TIER_DISPLAY[tier];
 
   return (
     <div className="cc-scroll">
@@ -20,18 +29,24 @@ export default async function SubscriptionPage({
         <div className="cc-mod-statgrid">
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Plan actual</div>
-            <div className="cc-mod-stat-v gr">Free</div>
-            <div className="cc-mod-stat-sub">Sin cargo · sin tarjeta</div>
+            <div className="cc-mod-stat-v gr">{display.label}</div>
+            <div className="cc-mod-stat-sub">
+              {tier === 'FREE' ? 'Sin cargo · sin tarjeta' : `${display.price} / ${display.per}`}
+            </div>
           </div>
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Renovación</div>
-            <div className="cc-mod-stat-v">—</div>
-            <div className="cc-mod-stat-sub">Free no caduca</div>
+            <div className="cc-mod-stat-v">{tier === 'FREE' ? '—' : '01 jun'}</div>
+            <div className="cc-mod-stat-sub">
+              {tier === 'FREE' ? 'Free no caduca' : 'cargo automático'}
+            </div>
           </div>
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Método de pago</div>
-            <div className="cc-mod-stat-v">—</div>
-            <div className="cc-mod-stat-sub">No requerido en Free</div>
+            <div className="cc-mod-stat-v">{tier === 'FREE' ? '—' : 'Mercado Pago'}</div>
+            <div className="cc-mod-stat-sub">
+              {tier === 'FREE' ? 'No requerido en Free' : 'wires en step 05'}
+            </div>
           </div>
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Activo desde</div>
@@ -43,17 +58,21 @@ export default async function SubscriptionPage({
 
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Cambia tu plan</div>
-        <SubscriptionActions initialTier={tier} />
+        <SubscriptionActions
+          initialTier={tier}
+          userId={session.user.id}
+          isAdmin={isAdmin}
+        />
       </div>
 
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Uso este período</div>
         <div className="cc-mod-list">
           {[
-            { label: 'Trabajos IA', used: 0, cap: 100, unit: 'trabajos' },
-            { label: 'Tokens IA', used: 0, cap: 50_000, unit: 'tokens' },
-            { label: 'Almacenamiento', used: 0, cap: 500, unit: 'MB' },
-            { label: 'Sistemas activos', used: 0, cap: 1, unit: 'sistema (sim)' },
+            { label: 'Trabajos IA', used: 0, cap: tier === 'FREE' ? 100 : tier === 'PRO' ? 2000 : 20000, unit: 'trabajos' },
+            { label: 'Tokens IA', used: 0, cap: tier === 'FREE' ? 50_000 : tier === 'PRO' ? 2_000_000 : 20_000_000, unit: 'tokens' },
+            { label: 'Almacenamiento', used: 0, cap: tier === 'FREE' ? 500 : tier === 'PRO' ? 5000 : 50000, unit: 'MB' },
+            { label: 'Sistemas activos', used: 0, cap: tier === 'FREE' ? 1 : tier === 'PRO' ? 1 : 16, unit: tier === 'FREE' ? 'sistema (sim)' : 'sistemas en vivo' },
           ].map((row) => {
             const pct = Math.min(100, (row.used / row.cap) * 100);
             const fill = pct > 85 ? 'r' : pct > 60 ? 'am' : 'gr';
