@@ -57,7 +57,7 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
           </a>
         </div>
         {isAuthenticated ? (
-          <Link href={'/dashboard' as never} className="nav-cta">
+          <Link href="/account" className="nav-cta">
             {tAccount('title')}
           </Link>
         ) : (
