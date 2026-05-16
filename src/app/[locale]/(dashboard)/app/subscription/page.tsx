@@ -1,13 +1,8 @@
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
+import { getSessionUser } from '@/lib/auth/session';
 import { SubscriptionActions } from '@/components/workspace/subscription-actions';
-
-const TIER_DISPLAY: Record<SubscriptionTier, { label: string; price: string; per: string }> = {
-  FREE: { label: 'Free', price: '$0', per: 'siempre' },
-  PRO: { label: 'Pro', price: 'USD $39', per: 'mes' },
-  ALL_ACCESS: { label: 'All-Access', price: 'USD $129', per: 'mes' },
-};
+import { TIER_CAPS, buildQuotaRows } from '@/lib/billing/tiers';
 
 export default async function SubscriptionPage({
   params,
@@ -21,7 +16,8 @@ export default async function SubscriptionPage({
   if (!session) redirect('/sign-in?next=/app/subscription');
   const tier = session.tier;
   const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ADMIN';
-  const display = TIER_DISPLAY[tier];
+  const caps = TIER_CAPS[tier];
+  const quotaRows = buildQuotaRows(tier);
 
   return (
     <div className="cc-scroll">
@@ -29,9 +25,9 @@ export default async function SubscriptionPage({
         <div className="cc-mod-statgrid">
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Plan actual</div>
-            <div className="cc-mod-stat-v gr">{display.label}</div>
+            <div className="cc-mod-stat-v gr">{caps.label}</div>
             <div className="cc-mod-stat-sub">
-              {tier === 'FREE' ? 'Sin cargo · sin tarjeta' : `${display.price} / ${display.per}`}
+              {tier === 'FREE' ? 'Sin cargo · sin tarjeta' : `${caps.price} / ${caps.per}`}
             </div>
           </div>
           <div className="cc-mod-stat">
@@ -49,32 +45,31 @@ export default async function SubscriptionPage({
             </div>
           </div>
           <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Activo desde</div>
-            <div className="cc-mod-stat-v">Hoy</div>
-            <div className="cc-mod-stat-sub">primera sesión</div>
+            <div className="cc-mod-stat-l">Sistemas en vivo</div>
+            <div className="cc-mod-stat-v gr">
+              {caps.liveBotsCount === Infinity ? '∞' : caps.liveBotsCount}
+            </div>
+            <div className="cc-mod-stat-sub">
+              {tier === 'FREE'
+                ? 'solo simulación'
+                : tier === 'PRO'
+                  ? 'tú eliges cuál'
+                  : 'todos los sistemas'}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Cambia tu plan</div>
-        <SubscriptionActions
-          initialTier={tier}
-          userId={session.user.id}
-          isAdmin={isAdmin}
-        />
+        <SubscriptionActions initialTier={tier} userId={session.user.id} isAdmin={isAdmin} />
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Uso este período</div>
+        <div className="cc-mod-sl">Uso este período · {caps.label}</div>
         <div className="cc-mod-list">
-          {[
-            { label: 'Trabajos IA', used: 0, cap: tier === 'FREE' ? 100 : tier === 'PRO' ? 2000 : 20000, unit: 'trabajos' },
-            { label: 'Tokens IA', used: 0, cap: tier === 'FREE' ? 50_000 : tier === 'PRO' ? 2_000_000 : 20_000_000, unit: 'tokens' },
-            { label: 'Almacenamiento', used: 0, cap: tier === 'FREE' ? 500 : tier === 'PRO' ? 5000 : 50000, unit: 'MB' },
-            { label: 'Sistemas activos', used: 0, cap: tier === 'FREE' ? 1 : tier === 'PRO' ? 1 : 16, unit: tier === 'FREE' ? 'sistema (sim)' : 'sistemas en vivo' },
-          ].map((row) => {
-            const pct = Math.min(100, (row.used / row.cap) * 100);
+          {quotaRows.map((row) => {
+            const pct = row.cap > 0 ? Math.min(100, (row.used / row.cap) * 100) : 0;
             const fill = pct > 85 ? 'r' : pct > 60 ? 'am' : 'gr';
             return (
               <div key={row.label} className="cc-mod-row">

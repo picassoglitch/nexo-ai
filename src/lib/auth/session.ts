@@ -29,6 +29,7 @@ export interface SessionUser {
   role: UserRole;
   tier: SubscriptionTier;
   orgId: string | null;
+  selectedBotId: string | null;
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -40,10 +41,9 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 /**
- * Reads the authenticated user + their stored role/tier/org from `profiles`.
+ * Reads the authenticated user + their stored role/tier/org/selected-bot from `profiles`.
  * SUPER_ADMIN_EMAILS allowlist forces role to SUPER_ADMIN regardless of stored value
- * — this is the durable backstop documented in the build spec. Tier is read raw
- * (no env override) since tier is billing state, not a security boundary.
+ * — this is the durable backstop documented in the build spec.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
   const user = await getCurrentUser();
@@ -51,7 +51,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, tier, org_id')
+    .select('role, tier, org_id, selected_bot_id')
     .eq('id', user.id)
     .maybeSingle();
   const storedRole = (profile?.role as UserRole | undefined) ?? 'VIEWER';
@@ -62,6 +62,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     role,
     tier,
     orgId: (profile?.org_id as string | null) ?? null,
+    selectedBotId: (profile?.selected_bot_id as string | null) ?? null,
   };
 }
 
@@ -74,10 +75,6 @@ export async function requireUser(currentPath?: string): Promise<User> {
   return user;
 }
 
-/**
- * Server-side role guard. Use in route handlers and server components reading org data.
- * Returns the session user if their role meets the minimum tier, otherwise 401/403.
- */
 export async function requireRole(min: UserRole, currentPath?: string): Promise<SessionUser> {
   const session = await getSessionUser();
   if (!session) {
