@@ -64,6 +64,36 @@ export const NAV: NavGroup[] = [
   },
 ];
 
+// ============================================================
+// Subscriber workspace navigation — Free / Pro / All-Access tier UI.
+// Mounted at /app/*. Distinct from the admin /dashboard sidebar.
+// ============================================================
+export const SUBSCRIBER_NAV: NavGroup[] = [
+  {
+    grp: 'Tu cuenta',
+    items: [
+      { id: 'home', href: '/app', ic: '◉', label: 'Inicio' },
+      { id: 'subscription', href: '/app/subscription', ic: '◈', label: 'Suscripción' },
+      { id: 'usage', href: '/app/usage', ic: '◑', label: 'Uso' },
+      { id: 'billing', href: '/app/billing', ic: '▦', label: 'Facturación' },
+    ],
+  },
+  {
+    grp: 'Plataforma',
+    items: [
+      { id: 'mybots', href: '/app/bots', ic: '🤖', label: 'Mis bots' },
+      { id: 'history', href: '/app/history', ic: '≡', label: 'Historial' },
+    ],
+  },
+  {
+    grp: 'Ajustes',
+    items: [
+      { id: 'profile', href: '/app/settings', ic: '⚙', label: 'Perfil & seguridad' },
+      { id: 'help', href: '/app/help', ic: '?', label: 'Ayuda' },
+    ],
+  },
+];
+
 export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard': {
     title: 'Operaciones',
@@ -140,5 +170,37 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard/settings': {
     title: 'Settings',
     sub: 'Cuenta, organización, notificaciones y seguridad.',
+  },
+  '/app': {
+    title: 'Tu espacio',
+    sub: 'Resumen de tu suscripción, uso y bots activos.',
+  },
+  '/app/subscription': {
+    title: 'Suscripción',
+    sub: 'Tu plan actual, cambios de tier y método de pago.',
+  },
+  '/app/usage': {
+    title: 'Uso',
+    sub: 'Tu actividad en el período de facturación actual.',
+  },
+  '/app/billing': {
+    title: 'Facturación',
+    sub: 'Historial de facturas y método de pago.',
+  },
+  '/app/bots': {
+    title: 'Mis bots',
+    sub: 'Sistemas disponibles en tu tier actual.',
+  },
+  '/app/history': {
+    title: 'Historial',
+    sub: 'Tus ejecuciones recientes y trabajos completados.',
+  },
+  '/app/settings': {
+    title: 'Perfil & seguridad',
+    sub: 'Tu cuenta personal, contraseña y 2FA.',
+  },
+  '/app/help': {
+    title: 'Ayuda',
+    sub: 'Docs, contacto y estado del sistema.',
   },
 };

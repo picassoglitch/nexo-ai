@@ -1,7 +1,17 @@
 import { setRequestLocale } from 'next-intl/server';
-import { getSessionUser } from '@/lib/auth/session';
+import { getSessionUser, isSuperAdminEmail } from '@/lib/auth/session';
+import { createClient } from '@/lib/supabase/server';
+import { TeamRoleSelect } from '@/components/dashboard/team-role-select';
+import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
+import type { UserRole } from '@/lib/auth/session';
 
-const STATIC_MEMBERS: Array<{ id: string; name: string; email: string; role: string; badge: 'gr' | 'cy' | 'pu' | 'am'; status: string }> = [];
+interface ProfileRow {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  role: UserRole;
+  created_at: string;
+}
 
 export default async function TeamPage({
   params,
@@ -10,30 +20,27 @@ export default async function TeamPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const session = await getSessionUser();
-  const meta = session?.user.user_metadata ?? {};
-  const me = {
-    id: session?.user.id ?? 'me',
-    name:
-      (typeof meta.full_name === 'string' && meta.full_name) ||
-      (typeof meta.name === 'string' && meta.name) ||
-      session?.user.email?.split('@')[0] ||
-      'Operator',
-    email: session?.user.email ?? 'operator@nexo.ai',
-    role: session?.role ?? 'VIEWER',
-    badge: (session?.role === 'SUPER_ADMIN' ? 'pu' : 'gr') as 'pu' | 'gr',
-    status: 'Activo · sesión actual',
-  };
 
-  const members = [me, ...STATIC_MEMBERS];
+  const session = await getSessionUser();
+  const supabase = await createClient();
+
+  const { data: profilesRaw } = await supabase
+    .from('profiles')
+    .select('id, email, full_name, role, created_at')
+    .order('created_at');
+  const profiles = (profilesRaw ?? []) as ProfileRow[];
+
+  const canEdit = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
 
   return (
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Miembros activos</div>
-          <div className="cc-mod-stat-v gr">{members.length}</div>
-          <div className="cc-mod-stat-sub">{members.filter((m) => m.role === 'SUPER_ADMIN').length} super admin</div>
+          <div className="cc-mod-stat-v gr">{profiles.length}</div>
+          <div className="cc-mod-stat-sub">
+            {profiles.filter((p) => p.role === 'SUPER_ADMIN').length} super admin
+          </div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Invitaciones pendientes</div>
@@ -50,57 +57,44 @@ export default async function TeamPage({
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Miembros</div>
         <div className="cc-mod-list">
-          {members.map((m) => (
-            <div key={m.id} className="cc-mod-row">
-              <div className="cc-mod-ic">{m.name.charAt(0).toUpperCase()}</div>
-              <div className="cc-mod-body">
-                <div className="cc-mod-name">
-                  {m.name}{' '}
-                  <span className={`cc-mod-badge ${m.badge}`}>{m.role.replace('_', ' ')}</span>
+          {profiles.map((p) => {
+            const isSelf = p.id === session?.user.id;
+            const isEnvLocked = isSuperAdminEmail(p.email);
+            const displayName = p.full_name || p.email?.split('@')[0] || 'Sin nombre';
+            return (
+              <div key={p.id} className="cc-mod-row">
+                <div className="cc-mod-ic">{displayName.charAt(0).toUpperCase()}</div>
+                <div className="cc-mod-body">
+                  <div className="cc-mod-name">
+                    {displayName}{' '}
+                    {isSelf && <span className="cc-mod-badge gr">tú</span>}{' '}
+                    {isEnvLocked && (
+                      <span className="cc-mod-badge pu" title="SUPER_ADMIN_EMAILS env var">
+                        env-locked
+                      </span>
+                    )}
+                  </div>
+                  <div className="cc-mod-sub">{p.email}</div>
                 </div>
-                <div className="cc-mod-sub">{m.email}</div>
+                <div
+                  className="cc-mod-right"
+                  style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}
+                >
+                  {canEdit ? (
+                    <TeamRoleSelect userId={p.id} current={p.role} envLocked={isEnvLocked} />
+                  ) : (
+                    <span className="cc-mod-badge">{p.role.replace('_', ' ')}</span>
+                  )}
+                </div>
               </div>
-              <div className="cc-mod-right">
-                <b>{m.status}</b>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Invitar miembro</div>
-        <div className="cc-mod-form">
-          <div className="cc-mod-field">
-            <label>Correo</label>
-            <input type="email" placeholder="nombre@dominio.com" disabled />
-          </div>
-          <div className="cc-mod-field">
-            <label>Rol</label>
-            <select disabled>
-              <option>Viewer</option>
-              <option>Editor</option>
-              <option>Operator</option>
-              <option>Admin</option>
-            </select>
-          </div>
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">Notificar por correo</span>
-              <span className="s">Te respondemos en un día hábil.</span>
-            </div>
-            <div className="cc-mod-switch on" />
-          </div>
-          <p
-            style={{
-              fontFamily: 'var(--cc-mono), monospace',
-              fontSize: 11,
-              color: 'var(--cc-txt-4)',
-            }}
-          >
-            ▸ Invitaciones se cablean al flujo Resend en step 07.
-          </p>
-        </div>
+        <TeamInviteForm />
       </div>
     </div>
   );
