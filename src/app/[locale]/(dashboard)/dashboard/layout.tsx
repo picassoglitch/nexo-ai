@@ -1,5 +1,7 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
-import { requireUser } from '@/lib/auth/session';
+import { getSessionUser, requireUser } from '@/lib/auth/session';
+import { listBots } from '@/lib/data/bots';
+import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import './dashboard.css';
 
 const inter = Inter({
@@ -21,11 +23,49 @@ const mono = JetBrains_Mono({
   display: 'swap',
 });
 
+function roleLabel(role: string) {
+  switch (role) {
+    case 'SUPER_ADMIN':
+      return 'Super Admin · Org root';
+    case 'ADMIN':
+      return 'Admin';
+    case 'OPERATOR':
+      return 'Operator';
+    case 'EDITOR':
+      return 'Editor';
+    case 'CLIENT':
+      return 'Client';
+    default:
+      return 'Viewer';
+  }
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  // Gate: any unauthenticated visit to /dashboard bounces to /sign-in?next=/dashboard
   await requireUser('/dashboard');
 
+  const session = await getSessionUser();
+  const email = session?.user.email ?? 'operator@nexo.ai';
+  const meta = session?.user.user_metadata ?? {};
+  const fullName =
+    (typeof meta.full_name === 'string' && meta.full_name) ||
+    (typeof meta.name === 'string' && meta.name) ||
+    email.split('@')[0] ||
+    'Operator';
+  const initial = fullName.charAt(0).toUpperCase();
+  const role = session?.role ?? 'VIEWER';
+
+  const bots = await listBots();
+
   return (
-    <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>{children}</div>
+    <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+      <DashboardShell
+        initialBots={bots}
+        userInitial={initial}
+        userName={fullName}
+        userRole={roleLabel(role)}
+      >
+        {children}
+      </DashboardShell>
+    </div>
   );
 }

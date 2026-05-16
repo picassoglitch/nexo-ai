@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from '@/i18n/routing';
 import { useDashboard } from '@/lib/dashboard/store';
 import { Sidebar } from './sidebar';
 import { ActivityRail } from './activity-rail';
 import { MetricStrip } from './metric-strip';
-import { OperatorSurface, Toolbar } from './operator-rows';
 import { CommandPalette } from './command-palette';
 import { DetailDrawer } from './detail-drawer';
 import { Toast } from './toast';
+import { PAGE_META } from './nav-data';
 import type { Bot } from '@/lib/data/types';
 
 interface Props {
@@ -16,21 +17,32 @@ interface Props {
   userInitial: string;
   userName: string;
   userRole: string;
+  children: React.ReactNode;
 }
 
-export function DashboardClient({ initialBots, userInitial, userName, userRole }: Props) {
+export function DashboardShell({
+  initialBots,
+  userInitial,
+  userName,
+  userRole,
+  children,
+}: Props) {
+  const pathname = usePathname();
   const setBots = useDashboard((s) => s.setBots);
   const openPalette = useDashboard((s) => s.openPalette);
   const mobileSidebarOpen = useDashboard((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen = useDashboard((s) => s.setMobileSidebarOpen);
   const showToast = useDashboard((s) => s.showToast);
 
-  // Seed Zustand from server-fetched bots once on mount. Deliberate sync from
-  // server-prop into client store — the rule's "don't setState in effect" guidance
-  // doesn't apply to one-time hydration from props.
+  // Hydrate Zustand from server-fetched bots once.
   useEffect(() => {
     setBots(initialBots);
   }, [initialBots, setBots]);
+
+  const meta = PAGE_META[pathname] ?? {
+    title: 'Módulo',
+    sub: 'Sección en construcción.',
+  };
 
   return (
     <div className="cc-shell">
@@ -58,10 +70,8 @@ export function DashboardClient({ initialBots, userInitial, userName, userRole }
               ☰
             </button>
             <div>
-              <h1 className="cc-pg-title">Operaciones</h1>
-              <div className="cc-pg-sub">
-                Todos los sistemas, agentes y trabajos de IA — estado en vivo.
-              </div>
+              <h1 className="cc-pg-title">{meta.title}</h1>
+              <div className="cc-pg-sub">{meta.sub}</div>
             </div>
           </div>
           <div className="cc-tools">
@@ -90,11 +100,7 @@ export function DashboardClient({ initialBots, userInitial, userName, userRole }
           </div>
         </div>
 
-        <Toolbar />
-
-        <div className="cc-scroll">
-          <OperatorSurface />
-        </div>
+        {children}
       </main>
 
       <ActivityRail />

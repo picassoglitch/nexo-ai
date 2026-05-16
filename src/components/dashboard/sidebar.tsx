@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import type { Route } from 'next';
+import { Link, usePathname } from '@/i18n/routing';
 import { FusionMark } from './fusion-mark';
 import { NAV } from './nav-data';
 import { useDashboard } from '@/lib/dashboard/store';
@@ -13,16 +14,12 @@ interface Props {
 }
 
 export function Sidebar({ userInitial, userName, userRole, mobileOpen }: Props) {
-  const [active, setActive] = useState('ops');
+  const pathname = usePathname();
   const setMobileSidebarOpen = useDashboard((s) => s.setMobileSidebarOpen);
-  const showToast = useDashboard((s) => s.showToast);
 
-  function selectNav(id: string, label: string) {
-    setActive(id);
-    setMobileSidebarOpen(false);
-    if (id !== 'ops' && id !== 'bots') {
-      showToast(`Módulo <b>${label}</b> — cableado en build phase.`);
-    }
+  function isActive(href: string): boolean {
+    if (href === '/dashboard') return pathname === '/dashboard';
+    return pathname === href || pathname.startsWith(href + '/');
   }
 
   return (
@@ -41,17 +38,17 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen }: Props) 
             <div className="cc-gl">{g.grp}</div>
             <div className="cc-nav">
               {g.items.map((it) => (
-                <button
+                <Link
                   key={it.id}
-                  type="button"
-                  className={`cc-nav-item${active === it.id ? ' on' : ''}`}
-                  onClick={() => selectNav(it.id, it.label)}
+                  href={it.href as Route}
+                  className={`cc-nav-item${isActive(it.href) ? ' on' : ''}`}
+                  onClick={() => setMobileSidebarOpen(false)}
                 >
                   <span className="cc-ic">{it.ic}</span>
                   <span>{it.label}</span>
                   {it.live && <span className="cc-dot" />}
                   {it.ct && <span className="cc-ct">{it.ct}</span>}
-                </button>
+                </Link>
               ))}
             </div>
           </div>
