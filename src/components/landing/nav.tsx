@@ -30,11 +30,9 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
             : navKey === 'earn'
               ? 'earn-world'
               : 'contact';
-    // Defer scroll until after React has re-rendered the reordered sections
-    // so we scroll to the section's NEW DOM position, not the stale one.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => scrollToId(target));
-    });
+    // Defer scroll until after React + Next.js has committed the reordered DOM.
+    // rAF alone isn't enough — the URL-driven re-render takes 100-150ms in dev.
+    setTimeout(() => scrollToId(target), 180);
   };
 
   return (
@@ -68,9 +66,7 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
             className="nav-cta"
             onClick={(e) => {
               e.preventDefault();
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => scrollToId('contact'));
-              });
+              scrollToId('contact');
             }}
           >
             {t('cta')}
