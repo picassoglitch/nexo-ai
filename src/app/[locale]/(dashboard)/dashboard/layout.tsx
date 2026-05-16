@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
 import { listBots } from '@/lib/data/bots';
@@ -44,6 +45,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
   await requireUser('/dashboard');
 
   const session = await getSessionUser();
+
+  // Role gate: only SUPER_ADMIN and ADMIN can see the operator command center.
+  // Everyone else (OPERATOR / EDITOR / VIEWER / CLIENT) is silently redirected
+  // to /app — the subscriber workspace they should be using.
+  // This guards every /dashboard/* route below this layout, including any URL
+  // typed directly into the address bar.
+  if (
+    session &&
+    session.role !== 'SUPER_ADMIN' &&
+    session.role !== 'ADMIN'
+  ) {
+    redirect('/app');
+  }
+
   const email = session?.user.email ?? 'operator@nexo.ai';
   const meta = session?.user.user_metadata ?? {};
   const fullName =
