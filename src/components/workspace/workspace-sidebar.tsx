@@ -10,9 +10,10 @@ interface Props {
   userInitial: string;
   userName: string;
   tierLabel: string;
+  isAdmin: boolean;
 }
 
-export function WorkspaceSidebar({ userInitial, userName, tierLabel }: Props) {
+export function WorkspaceSidebar({ userInitial, userName, tierLabel, isAdmin }: Props) {
   const pathname = usePathname();
   const setMobileSidebarOpen = useWorkspace((s) => s.setMobileSidebarOpen);
   const mobileOpen = useWorkspace((s) => s.mobileSidebarOpen);
@@ -53,6 +54,25 @@ export function WorkspaceSidebar({ userInitial, userName, tierLabel }: Props) {
             </div>
           </div>
         ))}
+
+        {/* Cross-nav: only admins can swap into the operator command center */}
+        {isAdmin && (
+          <div className="cc-sb-grp">
+            <div className="cc-gl">Vista</div>
+            <div className="cc-nav">
+              <Link
+                href={'/dashboard' as Route}
+                className="cc-nav-item"
+                onClick={() => setMobileSidebarOpen(false)}
+                title="Volver al command center"
+              >
+                <span className="cc-ic">⬡</span>
+                <span>Vista admin</span>
+                <span className="cc-ct">→</span>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="cc-sb-foot">
@@ -61,9 +81,14 @@ export function WorkspaceSidebar({ userInitial, userName, tierLabel }: Props) {
           <div className="cc-u-n">{userName}</div>
           <div className="cc-u-r">{tierLabel} plan</div>
         </div>
-        <button type="button" className="cc-cog" title="Settings">
+        <Link
+          href={'/app/settings' as Route}
+          className="cc-cog"
+          title="Settings"
+          onClick={() => setMobileSidebarOpen(false)}
+        >
           ⚙
-        </button>
+        </Link>
       </div>
     </aside>
   );

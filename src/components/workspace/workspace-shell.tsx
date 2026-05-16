@@ -9,10 +9,11 @@ interface Props {
   userInitial: string;
   userName: string;
   tierLabel: string;
+  isAdmin: boolean;
   children: React.ReactNode;
 }
 
-export function WorkspaceShell({ userInitial, userName, tierLabel, children }: Props) {
+export function WorkspaceShell({ userInitial, userName, tierLabel, isAdmin, children }: Props) {
   const pathname = usePathname();
   const mobileSidebarOpen = useWorkspace((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen = useWorkspace((s) => s.setMobileSidebarOpen);
@@ -25,7 +26,12 @@ export function WorkspaceShell({ userInitial, userName, tierLabel, children }: P
       {mobileSidebarOpen && (
         <div className="cc-sbscrim show" onClick={() => setMobileSidebarOpen(false)} />
       )}
-      <WorkspaceSidebar userInitial={userInitial} userName={userName} tierLabel={tierLabel} />
+      <WorkspaceSidebar
+        userInitial={userInitial}
+        userName={userName}
+        tierLabel={tierLabel}
+        isAdmin={isAdmin}
+      />
 
       <main className="cc-main">
         <div className="cc-ph" style={{ paddingTop: 24 }}>

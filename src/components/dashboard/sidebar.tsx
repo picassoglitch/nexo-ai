@@ -53,6 +53,23 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen }: Props) 
             </div>
           </div>
         ))}
+
+        {/* Cross-nav: switch to subscriber view */}
+        <div className="cc-sb-grp">
+          <div className="cc-gl">Vista</div>
+          <div className="cc-nav">
+            <Link
+              href={'/app' as Route}
+              className="cc-nav-item"
+              onClick={() => setMobileSidebarOpen(false)}
+              title="Ver lo que ven tus subscribers"
+            >
+              <span className="cc-ic">◐</span>
+              <span>Vista de subscriber</span>
+              <span className="cc-ct">→</span>
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="cc-sb-foot">
@@ -61,9 +78,14 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen }: Props) 
           <div className="cc-u-n">{userName}</div>
           <div className="cc-u-r">{userRole}</div>
         </div>
-        <button type="button" className="cc-cog" title="Settings">
+        <Link
+          href={'/dashboard/settings' as Route}
+          className="cc-cog"
+          title="Settings"
+          onClick={() => setMobileSidebarOpen(false)}
+        >
           ⚙
-        </button>
+        </Link>
       </div>
     </aside>
   );

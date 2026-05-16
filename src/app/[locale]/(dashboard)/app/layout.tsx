@@ -36,10 +36,16 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   // For v1, tier label is derived from a placeholder. Wires to Supabase column or
   // Mercado Pago subscription state in step 05.
   const tierLabel = 'FREE';
+  const isAdmin = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
-      <WorkspaceShell userInitial={initial} userName={fullName} tierLabel={tierLabel}>
+      <WorkspaceShell
+        userInitial={initial}
+        userName={fullName}
+        tierLabel={tierLabel}
+        isAdmin={isAdmin}
+      >
         {children}
       </WorkspaceShell>
     </div>

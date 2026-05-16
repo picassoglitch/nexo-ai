@@ -57,20 +57,13 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
           </a>
         </div>
         {isAuthenticated ? (
-          <Link href="/account" className="nav-cta">
+          <Link href="/dashboard" className="nav-cta">
             {tAccount('title')}
           </Link>
         ) : (
-          <a
-            href="#contact"
-            className="nav-cta"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToId('contact');
-            }}
-          >
+          <Link href="/sign-in" className="nav-cta">
             {t('cta')}
-          </a>
+          </Link>
         )}
       </div>
     </nav>
