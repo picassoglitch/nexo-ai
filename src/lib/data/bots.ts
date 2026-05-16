@@ -93,7 +93,18 @@ export async function listBots(): Promise<Bot[]> {
     .order('name');
 
   if (error) {
-    console.error('[bots.listBots]', error.message);
+    // Friendly hint when the CP2 migration hasn't been run yet — the dashboard
+    // just shows an empty state instead of throwing.
+    const missingTable =
+      error.code === '42P01' ||
+      /could not find the table|relation .* does not exist|schema cache/i.test(error.message);
+    if (missingTable) {
+      console.warn(
+        '[bots.listBots] tables not provisioned yet — run supabase/migrations/0002_command_center.sql in your Supabase SQL editor, then refresh.',
+      );
+    } else {
+      console.error('[bots.listBots]', error.message);
+    }
     return [];
   }
 
