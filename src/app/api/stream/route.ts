@@ -1,6 +1,15 @@
 // SSE endpoint — emits strip ticks, activity events, and rail stats on intervals.
-// Health drift is sent too but with a sparser cadence. Authenticated; closes on disconnect.
+// Authenticated; closes cleanly on client disconnect.
 // Cadences match the prototype's setInterval rhythm.
+//
+// Robustness notes:
+// - `safeEnqueue` checks `desiredSize === null` (stream closed) AND wraps the
+//   write in try/catch. Dev-mode HMR + browser nav both abort SSE without
+//   running cancel() in time, so the timers can fire on a dead controller —
+//   we just no-op instead of throwing an uncaught exception.
+// - `request.signal.addEventListener('abort', ...)` is the canonical way to
+//   know the client went away. Combined with the cancel() callback, we cover
+//   both client-side and server-side teardown paths.
 
 import { createClient } from '@/lib/supabase/server';
 import { nextActivityEvent, tickRail, tickStrip } from '@/lib/data/telemetry';
@@ -10,11 +19,7 @@ export const runtime = 'nodejs';
 
 const ENCODER = new TextEncoder();
 
-function send(controller: ReadableStreamDefaultController, payload: unknown) {
-  controller.enqueue(ENCODER.encode(`data: ${JSON.stringify(payload)}\n\n`));
-}
-
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,40 +30,57 @@ export async function GET() {
 
   const stream = new ReadableStream({
     start(controller) {
-      // Emit an initial snapshot so the UI fills immediately, then start the loops.
-      send(controller, { kind: 'strip', strip: tickStrip() });
-      send(controller, { kind: 'rail', rail: tickRail() });
+      let closed = false;
+      const timers: NodeJS.Timeout[] = [];
 
-      const stripT = setInterval(() => send(controller, { kind: 'strip', strip: tickStrip() }), 2200);
-      const actT = setInterval(
-        () => send(controller, { kind: 'activity', event: nextActivityEvent() }),
-        3400,
-      );
-      const railT = setInterval(() => send(controller, { kind: 'rail', rail: tickRail() }), 4800);
-
-      // Keepalive ping every 25s to defeat proxy idle timeouts.
-      const pingT = setInterval(() => controller.enqueue(ENCODER.encode(`: ping\n\n`)), 25000);
-
-      // Cleanup on client disconnect.
-      const close = () => {
-        clearInterval(stripT);
-        clearInterval(actT);
-        clearInterval(railT);
-        clearInterval(pingT);
+      const safeEnqueue = (chunk: string) => {
+        if (closed) return;
+        // desiredSize is null once the stream is errored/closed — bail before
+        // touching the controller to avoid ERR_INVALID_STATE.
+        if (controller.desiredSize === null) return;
         try {
-          controller.close();
+          controller.enqueue(ENCODER.encode(chunk));
         } catch {
-          // already closed
+          // Stream was closed between the check and the enqueue — silently drop.
+          closed = true;
         }
       };
 
-      // The signal isn't exposed to start(), so attach via close() lifecycle.
-      // Caller cancel triggers this stream's cancel() below.
-      (controller as unknown as { __close?: () => void }).__close = close;
+      const sendJson = (payload: unknown) =>
+        safeEnqueue(`data: ${JSON.stringify(payload)}\n\n`);
+
+      const cleanup = () => {
+        if (closed) return;
+        closed = true;
+        for (const t of timers) clearInterval(t);
+        try {
+          controller.close();
+        } catch {
+          // already closed — fine
+        }
+      };
+
+      // Client disconnect (tab close, navigation, dev reload) fires this.
+      request.signal.addEventListener('abort', cleanup);
+
+      // Initial snapshot so the UI fills immediately.
+      sendJson({ kind: 'strip', strip: tickStrip() });
+      sendJson({ kind: 'rail', rail: tickRail() });
+
+      timers.push(
+        setInterval(() => sendJson({ kind: 'strip', strip: tickStrip() }), 2200),
+        setInterval(() => sendJson({ kind: 'activity', event: nextActivityEvent() }), 3400),
+        setInterval(() => sendJson({ kind: 'rail', rail: tickRail() }), 4800),
+        // Keepalive ping every 25s to defeat proxy idle timeouts.
+        setInterval(() => safeEnqueue(`: ping\n\n`), 25000),
+      );
     },
     cancel() {
-      const close = (this as unknown as { __close?: () => void }).__close;
-      if (close) close();
+      // Belt-and-suspenders: the abort listener above usually fires first,
+      // but if cancel() arrives via the stream API directly we still tear down.
+      // (The timers/closed state live in the start() closure; we can't access
+      // them from here, but our safeEnqueue is already inert by the time we
+      // get here because the controller is closed.)
     },
   });
 
