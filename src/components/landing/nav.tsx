@@ -1,10 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
-import type { Route } from 'next';
-import { useRouter, usePathname } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { FusionLogo } from './fusion-logo';
 import { usePath, type Path } from './use-path';
 
@@ -16,22 +13,13 @@ function scrollToId(id: string) {
 export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
   const t = useTranslations('nav');
   const tAccount = useTranslations('auth.account');
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { setPath } = usePath();
-  const currentLocale = useLocale() as 'en' | 'es';
-
-  const switchLocale = (locale: 'en' | 'es') => {
-    if (locale === currentLocale) return;
-    const qs = searchParams.toString();
-    const target = (qs ? `${pathname}?${qs}` : pathname) as Route;
-    router.push(target, { locale });
-  };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, navKey: string | null) => {
     e.preventDefault();
-    if (navKey && navKey !== 'proof') setPath(navKey as Path, { scroll: false });
+    if (navKey && navKey !== 'proof') {
+      setPath(navKey as Path, { scroll: false });
+    }
     const target =
       navKey === 'proof'
         ? 'proof'
@@ -42,7 +30,11 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
             : navKey === 'earn'
               ? 'earn-world'
               : 'contact';
-    scrollToId(target);
+    // Defer scroll until after React has re-rendered the reordered sections
+    // so we scroll to the section's NEW DOM position, not the stale one.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToId(target));
+    });
   };
 
   return (
@@ -66,22 +58,6 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
             {t('earn')}
           </a>
         </div>
-        <div className="lang-switch">
-          <button
-            type="button"
-            className={currentLocale === 'en' ? 'active' : ''}
-            onClick={() => switchLocale('en')}
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            className={currentLocale === 'es' ? 'active' : ''}
-            onClick={() => switchLocale('es')}
-          >
-            ES
-          </button>
-        </div>
         {isAuthenticated ? (
           <Link href="/account" className="nav-cta">
             {tAccount('title')}
@@ -92,7 +68,9 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
             className="nav-cta"
             onClick={(e) => {
               e.preventDefault();
-              scrollToId('contact');
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => scrollToId('contact'));
+              });
             }}
           >
             {t('cta')}
