@@ -2,7 +2,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth/session';
 import { SubscriptionActions } from '@/components/workspace/subscription-actions';
-import { TIER_CAPS, buildQuotaRows } from '@/lib/billing/tiers';
+import { TIER_CAPS, buildQuotaRows, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
 
 export default async function SubscriptionPage({
   params,
@@ -14,34 +14,76 @@ export default async function SubscriptionPage({
 
   const session = await getSessionUser();
   if (!session) redirect('/sign-in?next=/app/subscription');
-  const tier = session.tier;
-  const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ADMIN';
+  // For admins, quotas + capabilities follow the EFFECTIVE tier (ALL_ACCESS).
+  // The stored tier is still shown in the "Plan card" so the billing row is
+  // honest — admins are simply not gated by it.
+  const storedTier = session.tier;
+  const role = session.role;
+  const isAdmin = isAdminRole(role);
+  const tier = effectiveTier(role, storedTier);
   const caps = TIER_CAPS[tier];
+  const storedCaps = TIER_CAPS[storedTier];
   const quotaRows = buildQuotaRows(tier);
 
   return (
     <div className="cc-scroll">
+      {isAdmin && (
+        <div
+          style={{
+            padding: '12px 16px',
+            border: '1px solid var(--cc-purple)',
+            background: 'var(--cc-purple-g)',
+            borderRadius: 'var(--cc-r-l)',
+            marginBottom: 18,
+            fontSize: 12.5,
+            color: 'var(--cc-txt-2)',
+            lineHeight: 1.55,
+          }}
+        >
+          ● <b style={{ color: 'var(--cc-purple)' }}>Modo {role.replace('_', ' ')}</b> — tu rol pasa
+          por encima del tier almacenado. Tienes acceso completo a todos los sistemas sin importar
+          el plan que aparezca abajo. La columna <code>profiles.tier</code> sigue presente para
+          probar la experiencia de subscribers; cambiarla no te limita.
+        </div>
+      )}
+
       <div className="cc-mod-section">
         <div className="cc-mod-statgrid">
           <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Plan actual</div>
-            <div className="cc-mod-stat-v gr">{caps.label}</div>
+            <div className="cc-mod-stat-l">
+              {isAdmin ? 'Plan almacenado' : 'Plan actual'}
+            </div>
+            <div className="cc-mod-stat-v gr">{storedCaps.label}</div>
             <div className="cc-mod-stat-sub">
-              {tier === 'FREE' ? 'Sin cargo · sin tarjeta' : `${caps.price} / ${caps.per}`}
+              {storedTier === 'FREE'
+                ? 'Sin cargo · sin tarjeta'
+                : `${storedCaps.price} / ${storedCaps.per}`}
             </div>
           </div>
-          <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Renovación</div>
-            <div className="cc-mod-stat-v">{tier === 'FREE' ? '—' : '01 jun'}</div>
-            <div className="cc-mod-stat-sub">
-              {tier === 'FREE' ? 'Free no caduca' : 'cargo automático'}
+          {isAdmin ? (
+            <div className="cc-mod-stat">
+              <div className="cc-mod-stat-l">Acceso efectivo</div>
+              <div className="cc-mod-stat-v pu">All-Access</div>
+              <div className="cc-mod-stat-sub">vía rol {role.replace('_', ' ')}</div>
             </div>
-          </div>
+          ) : (
+            <div className="cc-mod-stat">
+              <div className="cc-mod-stat-l">Renovación</div>
+              <div className="cc-mod-stat-v">{storedTier === 'FREE' ? '—' : '01 jun'}</div>
+              <div className="cc-mod-stat-sub">
+                {storedTier === 'FREE' ? 'Free no caduca' : 'cargo automático'}
+              </div>
+            </div>
+          )}
           <div className="cc-mod-stat">
             <div className="cc-mod-stat-l">Método de pago</div>
-            <div className="cc-mod-stat-v">{tier === 'FREE' ? '—' : 'Mercado Pago'}</div>
+            <div className="cc-mod-stat-v">{storedTier === 'FREE' ? '—' : 'Mercado Pago'}</div>
             <div className="cc-mod-stat-sub">
-              {tier === 'FREE' ? 'No requerido en Free' : 'wires en step 05'}
+              {storedTier === 'FREE'
+                ? isAdmin
+                  ? 'Admin no necesita pago'
+                  : 'No requerido en Free'
+                : 'wires en step 05'}
             </div>
           </div>
           <div className="cc-mod-stat">

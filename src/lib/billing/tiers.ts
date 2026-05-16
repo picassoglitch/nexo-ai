@@ -2,7 +2,23 @@
 // Every UI badge, quota meter, server-side check, and paywall reads from here.
 // Updating a tier's capabilities = edit this file. No magic numbers elsewhere.
 
-import type { SubscriptionTier } from '@/lib/auth/session';
+import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
+
+/**
+ * ROLE OVERRIDES TIER.
+ * SUPER_ADMIN and ADMIN bypass all tier restrictions — they get ALL_ACCESS
+ * capabilities regardless of what's stored in profiles.tier. The stored tier
+ * is still shown on /app/subscription for billing transparency, but every
+ * other surface (quotas, live-bot badges, paywalls) reads effectiveTier().
+ */
+export function isAdminRole(role: UserRole): boolean {
+  return role === 'SUPER_ADMIN' || role === 'ADMIN';
+}
+
+export function effectiveTier(role: UserRole, storedTier: SubscriptionTier): SubscriptionTier {
+  if (isAdminRole(role)) return 'ALL_ACCESS';
+  return storedTier;
+}
 
 export interface TierCapabilities {
   /** How many bots the user can run in LIVE execution (not simulation).

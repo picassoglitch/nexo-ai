@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import { Link } from '@/i18n/routing';
 import { getSessionUser } from '@/lib/auth/session';
 import { listBots } from '@/lib/data/bots';
-import { TIER_CAPS } from '@/lib/billing/tiers';
+import { TIER_CAPS, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
 
 export default async function WorkspaceHomePage({
   params,
@@ -20,7 +20,10 @@ export default async function WorkspaceHomePage({
     (typeof meta.name === 'string' && meta.name) ||
     session?.user.email?.split('@')[0] ||
     'Operator';
-  const tier = session?.tier ?? 'FREE';
+  const role = session?.role ?? 'VIEWER';
+  const storedTier = session?.tier ?? 'FREE';
+  const tier = effectiveTier(role, storedTier);
+  const isAdmin = isAdminRole(role);
   const caps = TIER_CAPS[tier];
 
   // Find their live bot (for PRO) so the landing can spotlight it.
@@ -30,14 +33,15 @@ export default async function WorkspaceHomePage({
     selectedBotName = bots.find((b) => b.id === session.selectedBotId)?.name ?? null;
   }
 
-  const heroSub =
-    tier === 'FREE'
+  const heroSub = isAdmin
+    ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los sistemas, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
+    : tier === 'FREE'
       ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Ejecuta sistemas en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
       : tier === 'PRO'
         ? `Estás en <b style="color:var(--cc-green)">Pro</b>${
             selectedBotName
               ? ` — tu slot en vivo lo tiene <b>${selectedBotName}</b>.`
-              : ' — todavía no elegiste tu sistema en vivo. Pasa a "Mis bots" para activar uno.'
+              : ' — todavía no elegiste tu sistema en vivo. Pasa a Mis bots para activar uno.'
           }`
         : `Estás en <b style="color:var(--cc-green)">All-Access</b>. Todos los sistemas corren en vivo con los límites más altos.`;
 

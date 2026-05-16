@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { getSessionUser } from '@/lib/auth/session';
-import { TIER_CAPS, buildQuotaRows } from '@/lib/billing/tiers';
+import { TIER_CAPS, buildQuotaRows, effectiveTier } from '@/lib/billing/tiers';
 
 export default async function UsagePage({
   params,
@@ -11,7 +11,9 @@ export default async function UsagePage({
   setRequestLocale(locale);
 
   const session = await getSessionUser();
-  const tier = session?.tier ?? 'FREE';
+  const role = session?.role ?? 'VIEWER';
+  const storedTier = session?.tier ?? 'FREE';
+  const tier = effectiveTier(role, storedTier);
   const caps = TIER_CAPS[tier];
   const rows = buildQuotaRows(tier);
 

@@ -1,6 +1,7 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
+import { effectiveTier, isAdminRole, tierLabelShort } from '@/lib/billing/tiers';
 import '../dashboard/dashboard.css';
 
 const inter = Inter({
@@ -33,12 +34,15 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     email.split('@')[0] ||
     'Operator';
   const initial = fullName.charAt(0).toUpperCase();
-  // Real tier read from profiles.tier (0004 migration). The sidebar pill flips
-  // automatically when the admin changes someone's tier from /dashboard/team
-  // or the user upgrades their own plan from /app/subscription.
-  const tier = session?.tier ?? 'FREE';
-  const tierLabel = tier === 'ALL_ACCESS' ? 'ALL-ACCESS' : tier;
-  const isAdmin = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
+  // Stored tier from profiles.tier — only matters for non-admin users.
+  // Admins get effective ALL_ACCESS no matter what, via effectiveTier().
+  // The sidebar pill shows the EFFECTIVE tier so the experience matches what
+  // they can actually do — admins see "ALL-ACCESS" regardless of billing row.
+  const role = session?.role ?? 'VIEWER';
+  const isAdmin = isAdminRole(role);
+  const storedTier = session?.tier ?? 'FREE';
+  const tier = effectiveTier(role, storedTier);
+  const tierLabel = isAdmin ? `${tierLabelShort(tier)} · ADMIN` : tierLabelShort(tier);
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>

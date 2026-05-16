@@ -4,7 +4,7 @@ import { Link } from '@/i18n/routing';
 import { listBots } from '@/lib/data/bots';
 import { ENV_LABEL } from '@/lib/data/types';
 import { getSessionUser } from '@/lib/auth/session';
-import { botCanRunLive, TIER_CAPS } from '@/lib/billing/tiers';
+import { botCanRunLive, TIER_CAPS, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
 import { LiveBotSelectButton } from '@/components/workspace/live-bot-selector';
 
 export default async function MyBotsPage({
@@ -16,13 +16,17 @@ export default async function MyBotsPage({
   setRequestLocale(locale);
 
   const [bots, session] = await Promise.all([listBots(), getSessionUser()]);
-  const tier = session?.tier ?? 'FREE';
+  const role = session?.role ?? 'VIEWER';
+  const storedTier = session?.tier ?? 'FREE';
+  const tier = effectiveTier(role, storedTier);
+  const isAdmin = isAdminRole(role);
   const selectedBotId = session?.selectedBotId ?? null;
   const caps = TIER_CAPS[tier];
 
-  // Tier-specific page intro copy.
-  const intro =
-    tier === 'FREE'
+  // Tier-specific page intro copy. Admin gets its own copy noting role-overrides-tier.
+  const intro = isAdmin
+    ? `Como ${role.replace('_', ' ')}, tienes acceso completo a todos los sistemas — tu rol pasa por encima del tier almacenado (${storedTier.replace('_', '-')}).`
+    : tier === 'FREE'
       ? 'Estás en el plan Free — todos los sistemas están disponibles en modo simulación. Pasa a Pro para ejecutar uno en vivo, o All-Access para todos.'
       : tier === 'PRO'
         ? 'Estás en Pro — elige UN sistema para correr en vivo. El resto sigue disponible en simulación. Cambia tu selección cuando quieras.'
