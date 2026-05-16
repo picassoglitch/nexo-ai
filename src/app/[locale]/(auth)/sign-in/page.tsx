@@ -25,23 +25,50 @@ export default async function SignInPage({
     error === 'missing_code' ? t('errorMissingCode') : error ? t('errorGeneric') : null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-md border border-white/10 rounded-2xl bg-panel p-10 shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight mb-2">{t('title')}</h1>
-          <p className="text-sm text-ink-dim">{t('subtitle')}</p>
+    <main className="auth-shell">
+      <div className="auth-status">
+        <span className="auth-status-dot" />
+        {t('liveStatus')}
+      </div>
+
+      <div className="auth-card">
+        <div className="auth-section auth-section-primary">
+          <div className="auth-kicker">{t('newTitle')}</div>
+          <h1 className="auth-headline">{t('newSubtitle')}</h1>
+
+          {errorMessage && <div className="auth-error">{errorMessage}</div>}
+
+          <GoogleSignInButton next={next} variant="premium" />
+
+          <ul className="auth-benefits">
+            <li>
+              <span className="ab-tick">✓</span>
+              {t('benefits.1')}
+            </li>
+            <li>
+              <span className="ab-tick">✓</span>
+              {t('benefits.2')}
+            </li>
+            <li>
+              <span className="ab-tick">✓</span>
+              {t('benefits.3')}
+            </li>
+          </ul>
         </div>
 
-        {errorMessage && (
-          <div className="mb-6 rounded-lg border border-ember/40 bg-ember/10 px-4 py-3 text-sm text-ember">
-            {errorMessage}
-          </div>
-        )}
+        <div className="auth-divider">
+          <span>{t('returningTitle')}</span>
+        </div>
 
-        <GoogleSignInButton next={next} />
+        <div className="auth-section auth-section-returning">
+          <p className="auth-returning-copy">{t('returningSubtitle')}</p>
+          <GoogleSignInButton next={next} variant="compact" />
+        </div>
 
-        <p className="mt-6 text-center text-xs text-ink-faint">{t('fine')}</p>
+        <p className="auth-social-proof">{t('socialProof')}</p>
       </div>
+
+      <p className="auth-fine">{t('fine')}</p>
     </main>
   );
 }

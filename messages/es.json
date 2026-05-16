@@ -8,9 +8,23 @@
       "title": "Iniciar sesión en Nexo AI",
       "subtitle": "Continúa con tu cuenta de Google para acceder a la plataforma.",
       "googleButton": "Continuar con Google",
+      "googleFastNote": "La forma más rápida de empezar",
       "errorGeneric": "Ocurrió un error al iniciar sesión. Inténtalo de nuevo.",
       "errorMissingCode": "Flujo de inicio de sesión incompleto. Inténtalo de nuevo.",
-      "fine": "Al continuar aceptas los Términos y la Política de Privacidad."
+      "fine": "Al continuar aceptas los Términos y la Política de Privacidad.",
+      "liveStatus": "Plataforma en vivo · sistemas en producción",
+      "newTitle": "¿Primera vez?",
+      "newSubtitle": "Crea tu espacio de operador en segundos.",
+      "newCta": "Empezar gratis",
+      "returningTitle": "Bienvenido de vuelta.",
+      "returningSubtitle": "Retoma donde lo dejaste — bots, agentes IA, historial de ejecución.",
+      "returningCta": "Continuar →",
+      "benefits": {
+        "1": "Ejecuta cualquier sistema en simulación",
+        "2": "Monitoreo en vivo e historial de ejecución",
+        "3": "Paga solo por lo que uses"
+      },
+      "socialProof": "Construido por operadores que ejecutan sistemas reales en producción."
     },
     "account": {
       "title": "Cuenta",

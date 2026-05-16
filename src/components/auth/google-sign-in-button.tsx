@@ -4,7 +4,12 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-export function GoogleSignInButton({ next }: { next?: string }) {
+interface Props {
+  next?: string;
+  variant?: 'premium' | 'compact';
+}
+
+export function GoogleSignInButton({ next, variant = 'premium' }: Props) {
   const t = useTranslations('auth.signIn');
   const [loading, setLoading] = useState(false);
 
@@ -26,11 +31,12 @@ export function GoogleSignInButton({ next }: { next?: string }) {
 
   return (
     <button
+      type="button"
       onClick={handleSignIn}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 bg-ink text-black font-semibold text-sm py-3.5 rounded-xl transition disabled:opacity-50 hover:translate-y-[-1px] hover:shadow-lg"
+      className={`auth-google auth-google-${variant}`}
     >
-      <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+      <svg className="ag-icon" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
         <path
           fill="#FFC107"
           d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22 22-9.8 22-22c0-1.5-.2-2.6-.4-3.5z"
@@ -48,7 +54,8 @@ export function GoogleSignInButton({ next }: { next?: string }) {
           d="M43.6 20.5h-1.9V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.5 5.5c-.5.4 7-5.1 7-15 0-1.5-.2-2.6-.4-3.5z"
         />
       </svg>
-      {loading ? '...' : t('googleButton')}
+      <span className="ag-label">{loading ? '...' : t('googleButton')}</span>
+      {variant === 'premium' && <span className="ag-note">{t('googleFastNote')} →</span>}
     </button>
   );
 }

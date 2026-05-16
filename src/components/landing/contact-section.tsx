@@ -110,24 +110,40 @@ export function ContactSection() {
           )}
 
           {pane === 'earn' && (
-            <div className="cc-pane active">
-              <GoogleSignInButton />
-              <div className="cc-divider">{tForm('or')}</div>
-              <div className="cc-field">
-                <label>{tForm('email')}</label>
-                <input type="email" placeholder="you@email.com" />
-              </div>
-              <div className="cc-field">
-                <label>{tForm('password')}</label>
-                <input type="password" placeholder="••••••••••" />
-              </div>
-              <PrototypeSubmit label={tForm('earn.submit')} />
-              <p className="cc-fine">{tForm('earn.fine')}</p>
-            </div>
+            <EarnPane />
           )}
         </div>
       </div>
     </section>
+  );
+}
+
+function EarnPane() {
+  const t = useTranslations('auth.signIn');
+  return (
+    <div className="cc-pane active">
+      <div className="auth-status auth-status-compact">
+        <span className="auth-status-dot" />
+        {t('liveStatus')}
+      </div>
+      <p className="cc-earn-headline">{t('newSubtitle')}</p>
+      <GoogleSignInButton variant="premium" />
+      <ul className="auth-benefits auth-benefits-compact">
+        <li>
+          <span className="ab-tick">✓</span>
+          {t('benefits.1')}
+        </li>
+        <li>
+          <span className="ab-tick">✓</span>
+          {t('benefits.2')}
+        </li>
+        <li>
+          <span className="ab-tick">✓</span>
+          {t('benefits.3')}
+        </li>
+      </ul>
+      <p className="cc-fine">{t('socialProof')}</p>
+    </div>
   );
 }
 

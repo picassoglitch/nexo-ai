@@ -8,9 +8,23 @@
       "title": "Sign in to Nexo AI",
       "subtitle": "Continue with your Google account to access the platform.",
       "googleButton": "Continue with Google",
+      "googleFastNote": "Fastest way to start",
       "errorGeneric": "Something went wrong signing you in. Try again.",
       "errorMissingCode": "Sign-in flow incomplete. Try again.",
-      "fine": "By continuing you agree to the Terms and Privacy Policy."
+      "fine": "By continuing you agree to the Terms and Privacy Policy.",
+      "liveStatus": "Platform live · systems in production",
+      "newTitle": "New here?",
+      "newSubtitle": "Create your operator workspace in seconds.",
+      "newCta": "Start free",
+      "returningTitle": "Welcome back.",
+      "returningSubtitle": "Pick up where you left off — bots, AI agents, execution history.",
+      "returningCta": "Continue →",
+      "benefits": {
+        "1": "Run any system in simulation",
+        "2": "Live monitoring & execution history",
+        "3": "Pay only for what you use"
+      },
+      "socialProof": "Built by operators running real systems in production."
     },
     "account": {
       "title": "Account",
