@@ -19,7 +19,7 @@ export function CtaSection() {
   return (
     <section id="cta">
       <div className="reveal">
-        <h2 className="cta-big" dangerouslySetInnerHTML={{ __html: tCta('big') }} />
+        <h2 className="cta-big" dangerouslySetInnerHTML={{ __html: tCta.raw('big') as string }} />
         <p className="cta-sub">{sub}</p>
         <button type="button" className="btn-primary" onClick={() => scrollToId('contact')}>
           <span>{tCta('btn')}</span>

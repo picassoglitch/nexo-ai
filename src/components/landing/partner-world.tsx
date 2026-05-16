@@ -28,14 +28,17 @@ export function PartnerWorld() {
           <div className="section-num">
             02 — <span>{t('num')}</span>
           </div>
-          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t('title') }} />
+          <h2
+            className="section-title"
+            dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
+          />
         </div>
         <p className="section-desc">{t('desc')}</p>
       </div>
 
       <div className="partner-hero">
         <div>
-          <h3 dangerouslySetInnerHTML={{ __html: t('hero.title') }} />
+          <h3 dangerouslySetInnerHTML={{ __html: t.raw('hero.title') as string }} />
           <p>{t('hero.p1')}</p>
           <p>{t('hero.p2')}</p>
         </div>
@@ -63,7 +66,7 @@ export function PartnerWorld() {
       </div>
 
       <div className="equity-note reveal">
-        <p dangerouslySetInnerHTML={{ __html: tEquity('note') }} />
+        <p dangerouslySetInnerHTML={{ __html: tEquity.raw('note') as string }} />
       </div>
     </section>
   );

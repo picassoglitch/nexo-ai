@@ -11,7 +11,7 @@ export function ProofSection() {
           <div className="section-num">
             00 — <span>{t('num')}</span>
           </div>
-          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t('title') }} />
+          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t.raw('title') as string }} />
         </div>
         <p className="section-desc">{t('desc')}</p>
       </div>
@@ -24,7 +24,7 @@ export function ProofSection() {
         </div>
         <div className="stat">
           <div className="num">
-            PCI<span className="unit"> 4.0</span>
+            PCI<span className="unit"> DSS 4.0</span>
           </div>
           <div className="label">{t('stat2')}</div>
         </div>
@@ -36,12 +36,15 @@ export function ProofSection() {
         </div>
         <div className="stat">
           <div className="num">
-            3<span className="unit"> verticals</span>
+            3<span className="unit"> {t('units.verticals')}</span>
           </div>
           <div className="label">{t('stat4')}</div>
         </div>
       </div>
-      <p className="proof-line reveal d1" dangerouslySetInnerHTML={{ __html: t('line') }} />
+      <p
+        className="proof-line reveal d1"
+        dangerouslySetInnerHTML={{ __html: t.raw('line') as string }}
+      />
     </section>
   );
 }

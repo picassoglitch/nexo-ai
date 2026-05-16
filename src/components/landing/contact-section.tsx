@@ -23,7 +23,9 @@ export function ContactSection() {
     if (path) setPane(path);
   }, [path]);
 
-  const heading = path ? tPath(`${path}.contactH3`) : tNeutral('contactH3');
+  const heading = (
+    path ? tPath.raw(`${path}.contactH3`) : tNeutral.raw('contactH3')
+  ) as string;
   const lead = path ? tPath(`${path}.contactP`) : tNeutral('contactP');
 
   return (

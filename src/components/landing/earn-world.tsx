@@ -39,14 +39,14 @@ export function EarnWorld() {
           <div className="section-num">
             03 — <span>{t('num')}</span>
           </div>
-          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t('title') }} />
+          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t.raw('title') as string }} />
         </div>
         <p className="section-desc">{t('desc')}</p>
       </div>
 
       <div className="bots-wrap">
         <div className="bots-copy reveal">
-          <h3 dangerouslySetInnerHTML={{ __html: tBots('title') }} />
+          <h3 dangerouslySetInnerHTML={{ __html: tBots.raw('title') as string }} />
           <p>{tBots('p')}</p>
           <ul className="bots-feats">
             {[1, 2, 3, 4].map((i) => (
@@ -145,7 +145,10 @@ export function EarnWorld() {
           <div className="section-num" style={{ color: 'var(--acid)' }}>
             03.1 — <span>{tPricing('num')}</span>
           </div>
-          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: tPricing('title') }} />
+          <h2
+            className="section-title"
+            dangerouslySetInnerHTML={{ __html: tPricing.raw('title') as string }}
+          />
         </div>
         <p className="section-desc">{tPricing('desc')}</p>
       </div>
@@ -181,12 +184,12 @@ export function EarnWorld() {
 
       <div
         className="price-addon reveal"
-        dangerouslySetInnerHTML={{ __html: tPrice('addon') }}
+        dangerouslySetInnerHTML={{ __html: tPrice.raw('addon') as string }}
       />
 
       <div className="academy-strip reveal">
         <div>
-          <h4 dangerouslySetInnerHTML={{ __html: tAcademy('title') }} />
+          <h4 dangerouslySetInnerHTML={{ __html: tAcademy.raw('title') as string }} />
           <p>{tAcademy('p')}</p>
         </div>
         <PrototypeButton className="as-btn" label={tAcademy('btn')} />

@@ -68,7 +68,10 @@
     "stat2": "Gobernanza DSS a escala empresarial",
     "stat3": "Sistemas en producción entregados",
     "stat4": "Equipo, partnerships, plataforma",
-    "line": "Sistemas en producción sobre AWS · Apps y plataformas desplegadas · Arquitectura lista para escalar · Bots y agentes de IA en operación · Base de clientes internacional"
+    "line": "Sistemas en producción sobre AWS · Apps y plataformas desplegadas · Arquitectura lista para escalar · Bots y agentes de IA en operación · Base de clientes internacional",
+    "units": {
+      "verticals": "verticales"
+    }
   },
   "client": {
     "tag": "Para clientes",
@@ -234,7 +237,7 @@
   "pricing": {
     "num": "Acceso",
     "title": "Empieza gratis. <em>Escala cuando rinda.</em>",
-    "desc": "Sin contratos, sin llamadas de ventas. Elige un plan, conéctate con Google, operando en menos de un minuto."
+    "desc": "Sin contratos, sin llamadas comerciales innecesarias. Elige un plan, conéctate con Google, operando en menos de un minuto."
   },
   "price": {
     "free": {
@@ -251,10 +254,10 @@
     },
     "pro": {
       "name": "Pro",
-      "amt": "$39",
+      "amt": "USD $39",
       "per": " /mes",
       "badge": "El más elegido",
-      "tag": "Acceso completo en vivo a un sistema de tu elección.",
+      "tag": "Acceso completo en vivo a un sistema (bot, agente o automatización) a tu elección.",
       "f1": "Todo lo de Gratis",
       "f2": "Un sistema, totalmente desbloqueado y en vivo",
       "f3": "Ejecución real y límites estándar",
@@ -264,9 +267,9 @@
     },
     "vip": {
       "name": "Acceso completo",
-      "amt": "$129",
+      "amt": "USD $129",
       "per": " /mes",
-      "tag": "Todos los sistemas, todas las capacidades, los límites más altos.",
+      "tag": "Todos los sistemas (bots, agentes, automatizaciones), todas las capacidades, los límites más altos.",
       "f1": "Todo lo de Pro",
       "f2": "Todos los sistemas desbloqueados, en vivo",
       "f3": "Los límites de uso más altos",
@@ -317,7 +320,7 @@
     "or": "O",
     "client": {
       "submit": "Enviar brief del proyecto",
-      "fine": "Prototipo — el formulario aún no está conectado. Se activa en la fase de desarrollo."
+      "fine": "Te respondemos en un día hábil."
     },
     "partner": {
       "submit": "Presentar la sociedad",
@@ -325,7 +328,7 @@
     },
     "earn": {
       "submit": "Crear cuenta gratis",
-      "fine": "Cuenta gratis, sin tarjeta. Prototipo — la autenticación se conecta en la fase de desarrollo."
+      "fine": "Cuenta gratis, sin tarjeta requerida."
     }
   },
   "budget": {

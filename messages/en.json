@@ -68,7 +68,10 @@
     "stat2": "DSS governance at enterprise scale",
     "stat3": "Production systems shipped",
     "stat4": "Studio, partnerships, platform",
-    "line": "Production systems on AWS · Apps &amp; platforms shipped · Architecture built to scale · Bots &amp; AI agents in operation · International client base"
+    "line": "Production systems on AWS · Apps &amp; platforms shipped · Architecture built to scale · Bots &amp; AI agents in operation · International client base",
+    "units": {
+      "verticals": "verticals"
+    }
   },
   "client": {
     "tag": "For clients",
@@ -234,7 +237,7 @@
   "pricing": {
     "num": "Access",
     "title": "Start free. <em>Scale when it pays.</em>",
-    "desc": "No contracts, no sales calls. Pick a tier, connect with Google, running in under a minute."
+    "desc": "No contracts, no unnecessary sales calls. Pick a tier, connect with Google, running in under a minute."
   },
   "price": {
     "free": {
@@ -251,10 +254,10 @@
     },
     "pro": {
       "name": "Pro",
-      "amt": "$39",
+      "amt": "USD $39",
       "per": " /month",
       "badge": "Most chosen",
-      "tag": "Full live access to one system of your choice.",
+      "tag": "Full live access to one system (bot, agent, or automation) of your choice.",
       "f1": "Everything in Free",
       "f2": "One system, fully unlocked & live",
       "f3": "Real execution & standard limits",
@@ -264,9 +267,9 @@
     },
     "vip": {
       "name": "All-Access",
-      "amt": "$129",
+      "amt": "USD $129",
       "per": " /month",
-      "tag": "Every system, every capability, highest limits.",
+      "tag": "Every system (bot, agent, automation), every capability, highest limits.",
       "f1": "Everything in Pro",
       "f2": "All systems unlocked, live",
       "f3": "Highest usage limits",
@@ -317,7 +320,7 @@
     "or": "OR",
     "client": {
       "submit": "Send project brief",
-      "fine": "Prototype — form is not yet wired. Goes live in the build phase."
+      "fine": "We reply within one business day."
     },
     "partner": {
       "submit": "Pitch the partnership",
@@ -325,7 +328,7 @@
     },
     "earn": {
       "submit": "Create free account",
-      "fine": "Free account, no card required. Prototype — auth wires up in the build phase."
+      "fine": "Free account, no card required."
     }
   },
   "budget": {

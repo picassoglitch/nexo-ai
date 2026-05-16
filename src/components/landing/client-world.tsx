@@ -32,7 +32,7 @@ export function ClientWorld() {
           <div className="section-num">
             01 — <span>{t('num')}</span>
           </div>
-          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t('title') }} />
+          <h2 className="section-title" dangerouslySetInnerHTML={{ __html: t.raw('title') as string }} />
         </div>
         <p className="section-desc">{t('desc')}</p>
       </div>
@@ -43,7 +43,7 @@ export function ClientWorld() {
             <div className="service-idx">/0{i}</div>
             <div
               className="service-name"
-              dangerouslySetInnerHTML={{ __html: tSvc(`${i}.name`) }}
+              dangerouslySetInnerHTML={{ __html: tSvc.raw(`${i}.name`) as string }}
             />
             <div className="service-meta">
               {tSvc(`${i}.meta`)} <span className="service-arrow">→</span>
@@ -66,7 +66,7 @@ export function ClientWorld() {
               className={`process-step reveal${idx > 0 ? ` d${Math.min(idx, 3)}` : ''}`}
             >
               <div className="ps-num">{tProcess(`${i}.num`)}</div>
-              <h5 dangerouslySetInnerHTML={{ __html: tProcess(`${i}.title`) }} />
+              <h5 dangerouslySetInnerHTML={{ __html: tProcess.raw(`${i}.title`) as string }} />
               <p>{tProcess(`${i}.body`)}</p>
             </div>
           ))}
