@@ -4,6 +4,8 @@ import { getSessionUser } from '@/lib/auth/session';
 import { SubscriptionActions } from '@/components/workspace/subscription-actions';
 import { TIER_CAPS, buildQuotaRows, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
 
+export const metadata = { title: 'Suscripción' };
+
 export default async function SubscriptionPage({
   params,
 }: {
@@ -87,16 +89,16 @@ export default async function SubscriptionPage({
             </div>
           </div>
           <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Sistemas en vivo</div>
+            <div className="cc-mod-stat-l">Engines en vivo</div>
             <div className="cc-mod-stat-v gr">
-              {caps.liveBotsCount === Infinity ? '∞' : caps.liveBotsCount}
+              {caps.liveEnginesCount === Infinity ? '∞' : caps.liveEnginesCount}
             </div>
             <div className="cc-mod-stat-sub">
               {tier === 'FREE'
                 ? 'solo simulación'
                 : tier === 'PRO'
                   ? 'tú eliges cuál'
-                  : 'todos los sistemas'}
+                  : 'todos los engines'}
             </div>
           </div>
         </div>

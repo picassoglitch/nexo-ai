@@ -2,29 +2,39 @@
 
 import { useState, useTransition } from 'react';
 import { useWorkspace } from '@/lib/workspace/store';
-import { setSelectedLiveBot } from '@/lib/auth/selected-bot-actions';
+import { setSelectedLiveEngine } from '@/lib/auth/selected-engine-actions';
 
 interface Props {
-  botId: string;
-  botName: string;
+  engineId: string;
+  engineName: string;
   isCurrentlySelected: boolean;
+  /** If the engine is coming_soon or deprecated, the button is disabled with
+   *  a teaser message instead of an active CTA. */
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
-export function LiveBotSelectButton({ botId, botName, isCurrentlySelected }: Props) {
+export function LiveEngineSelectButton({
+  engineId,
+  engineName,
+  isCurrentlySelected,
+  disabled,
+  disabledReason,
+}: Props) {
   const [pending, startTransition] = useTransition();
   const [selected, setSelected] = useState(isCurrentlySelected);
   const showToast = useWorkspace((s) => s.showToast);
 
   function handleClick() {
-    if (pending || selected) return;
+    if (pending || selected || disabled) return;
     startTransition(async () => {
-      const res = await setSelectedLiveBot(botId);
+      const res = await setSelectedLiveEngine(engineId);
       if (!res.ok) {
         showToast(`<b>Error</b> · ${res.error}`);
         return;
       }
       setSelected(true);
-      showToast(`<b>${botName}</b> ahora corre en vivo. Tu slot Pro está ocupado.`);
+      showToast(`<b>${engineName}</b> ahora corre en vivo. Tu slot Pro está ocupado.`);
     });
   }
 
@@ -42,6 +52,29 @@ export function LiveBotSelectButton({ botId, botName, isCurrentlySelected }: Pro
         }}
       >
         ● EN VIVO
+      </button>
+    );
+  }
+
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        disabled
+        title={disabledReason}
+        style={{
+          background: 'transparent',
+          border: '1px dashed var(--cc-line-2)',
+          color: 'var(--cc-txt-4)',
+          padding: '6px 12px',
+          borderRadius: 7,
+          fontFamily: 'inherit',
+          fontSize: 11.5,
+          fontWeight: 500,
+          cursor: 'not-allowed',
+        }}
+      >
+        {disabledReason ?? 'No disponible'}
       </button>
     );
   }
@@ -67,3 +100,6 @@ export function LiveBotSelectButton({ botId, botName, isCurrentlySelected }: Pro
     </button>
   );
 }
+
+// Back-compat alias for any straggler import sites.
+export { LiveEngineSelectButton as LiveBotSelectButton };

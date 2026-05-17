@@ -55,7 +55,7 @@ export function ActivityFeedLive() {
             <div className="cc-ev-c">
               <div className="cc-ev-t">{e.title}</div>
               <div className="cc-ev-m">
-                <span className="cc-ev-bot">{e.bot}</span>
+                <span className="cc-ev-bot">{e.engine}</span>
                 <span>{e.meta}</span>
                 <span>{e.time}</span>
               </div>

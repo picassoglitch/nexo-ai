@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
  * import it without pulling in next/headers via the server supabase client.
  */
 export async function toggleFavoriteClient(
-  botId: string,
+  engineId: string,
   currentlyFavorite: boolean,
 ): Promise<void> {
   const supabase = createClient();
@@ -16,8 +16,8 @@ export async function toggleFavoriteClient(
   } = await supabase.auth.getUser();
   if (!user) return;
   if (currentlyFavorite) {
-    await supabase.from('favorites').delete().eq('user_id', user.id).eq('bot_id', botId);
+    await supabase.from('favorites').delete().eq('user_id', user.id).eq('engine_id', engineId);
   } else {
-    await supabase.from('favorites').insert({ user_id: user.id, bot_id: botId });
+    await supabase.from('favorites').insert({ user_id: user.id, engine_id: engineId });
   }
 }

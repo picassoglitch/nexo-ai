@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/dashboard/store';
-import { type Bot, ENV_LABEL, STATE_LABEL } from '@/lib/data/types';
+import { type Engine, ENV_LABEL, STATE_LABEL } from '@/lib/data/types';
 
 const TABS: Array<{ id: 'metrics' | 'logs' | 'console' | 'ai' | 'autos' | 'api'; label: string }> = [
   { id: 'metrics', label: 'Métricas' },
@@ -13,7 +14,7 @@ const TABS: Array<{ id: 'metrics' | 'logs' | 'console' | 'ai' | 'autos' | 'api';
   { id: 'api', label: 'API & Costos' },
 ];
 
-function fakeLogs(b: Bot) {
+function fakeLogs(b: Engine) {
   const lines: Array<[string, string]> = [
     ['c', `worker boot · region ${b.region}`],
     ['', `config loaded · env=${ENV_LABEL[b.env]}`],
@@ -37,7 +38,7 @@ function fakeLogs(b: Bot) {
   return lines;
 }
 
-function MetricsTab({ b }: { b: Bot }) {
+function MetricsTab({ b }: { b: Engine }) {
   return (
     <>
       <div className="cc-dw-grid">
@@ -102,16 +103,22 @@ function MetricsTab({ b }: { b: Bot }) {
 }
 
 export function DetailDrawer() {
-  const drawerBotId = useDashboard((s) => s.drawerBotId);
+  const router = useRouter();
+  const drawerEngineId = useDashboard((s) => s.drawerEngineId);
   const drawerTab = useDashboard((s) => s.drawerTab);
   const setDrawerTab = useDashboard((s) => s.setDrawerTab);
   const closeDrawer = useDashboard((s) => s.closeDrawer);
-  const bots = useDashboard((s) => s.bots);
+  const engines = useDashboard((s) => s.engines);
   const showToast = useDashboard((s) => s.showToast);
 
-  const bot = useMemo(() => bots.find((b) => b.id === drawerBotId) ?? null, [bots, drawerBotId]);
-  if (!bot) return null;
-
+  const engine = useMemo(
+    () => engines.find((e) => e.id === drawerEngineId) ?? null,
+    [engines, drawerEngineId],
+  );
+  if (!engine) return null;
+  // Internal name kept as `bot` for the rest of the file because all the JSX
+  // already uses b/bot.* — renaming the local would be churn for no gain.
+  const bot = engine;
   const lbl = STATE_LABEL[bot.stateCode];
 
   return (
@@ -281,17 +288,38 @@ export function DetailDrawer() {
           )}
         </div>
         <div className="cc-dw-foot">
+          {/* Primary action: navigate to the engine workspace. The workspace
+              page handles tier-aware rendering (live vs simulation vs upgrade
+              gate) so we don't duplicate that logic here. */}
           <button
             type="button"
             className="cc-b go"
-            onClick={() => showToast(`Abriendo <b>${bot.name}</b>…`)}
+            onClick={() => {
+              closeDrawer();
+              router.push(`/app/engines/${bot.slug}` as never);
+            }}
           >
-            {bot.stateCode === 'o' ? 'Iniciar sistema' : 'Abrir consola'}
+            {bot.stateCode === 'o' ? 'Iniciar sistema →' : 'Abrir consola →'}
           </button>
+          {/* Secondary action: simulated restart. Real worker restart hooks in
+              when the engine workers are deployed and expose an admin API. For
+              now this is a clear placeholder so the button isn't a dead end. */}
           <button
             type="button"
             className="cc-b gh"
-            onClick={() => showToast(`Reiniciando worker de <b>${bot.name}</b>…`)}
+            onClick={() => {
+              if (
+                !confirm(
+                  `¿Reiniciar el worker de ${bot.name}?\n\n` +
+                    'Esto se encolará para ejecución cuando los workers reales estén desplegados.',
+                )
+              ) {
+                return;
+              }
+              showToast(
+                `Reinicio de <b>${bot.name}</b> encolado · pendiente integración con workers.`,
+              );
+            }}
           >
             Reiniciar worker
           </button>

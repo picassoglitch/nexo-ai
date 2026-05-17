@@ -12,8 +12,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const messages = (await import(`../../../messages/${locale}.json`)).default;
+  // Title template: pages that export `metadata: { title: 'Engines' }` will
+  // render as "Engines · Nexo AI" in the browser tab. Pages without a title
+  // fall back to the locale-level meta.title (the marketing tagline).
   return {
-    title: messages.meta.title,
+    title: {
+      default: messages.meta.title,
+      template: '%s · Nexo AI',
+    },
     description: messages.meta.description,
   };
 }

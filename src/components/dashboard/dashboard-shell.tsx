@@ -10,10 +10,10 @@ import { CommandPalette } from './command-palette';
 import { DetailDrawer } from './detail-drawer';
 import { Toast } from './toast';
 import { PAGE_META } from './nav-data';
-import type { Bot } from '@/lib/data/types';
+import type { Engine } from '@/lib/data/types';
 
 interface Props {
-  initialBots: Bot[];
+  initialEngines: Engine[];
   userInitial: string;
   userName: string;
   userRole: string;
@@ -21,23 +21,23 @@ interface Props {
 }
 
 export function DashboardShell({
-  initialBots,
+  initialEngines,
   userInitial,
   userName,
   userRole,
   children,
 }: Props) {
   const pathname = usePathname();
-  const setBots = useDashboard((s) => s.setBots);
+  const setEngines = useDashboard((s) => s.setEngines);
   const openPalette = useDashboard((s) => s.openPalette);
   const mobileSidebarOpen = useDashboard((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen = useDashboard((s) => s.setMobileSidebarOpen);
   const showToast = useDashboard((s) => s.showToast);
 
-  // Hydrate Zustand from server-fetched bots once.
+  // Hydrate Zustand from server-fetched engines once.
   useEffect(() => {
-    setBots(initialBots);
-  }, [initialBots, setBots]);
+    setEngines(initialEngines);
+  }, [initialEngines, setEngines]);
 
   const meta = PAGE_META[pathname] ?? {
     title: 'Módulo',
@@ -57,7 +57,7 @@ export function DashboardShell({
       />
 
       <main className="cc-main">
-        <MetricStrip totalBots={initialBots.length} />
+        <MetricStrip totalEngines={initialEngines.length} />
 
         <div className="cc-ph">
           <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>

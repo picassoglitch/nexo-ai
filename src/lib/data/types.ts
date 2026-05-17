@@ -1,12 +1,36 @@
 // Shared types for the command center data layer.
 // UI components depend on these — never on Supabase row shapes directly.
+//
+// NAMING: We call these "Engines" (the revenue-producing products), paired
+// conceptually with Nexo Academy on the learn side. The codebase used to
+// say "bots" everywhere; renamed in migration 0010 since not all engines
+// are bots (NexoClip is a video pipeline, NexoStreamManager is a control
+// panel, NexoRealtor is a scraper, etc.).
 
-export type BotState = 'HEALTHY' | 'TRAINING' | 'RENDERING' | 'DELAYED' | 'ERROR' | 'OFFLINE';
-export type BotStateCode = 'g' | 'c' | 'p' | 'a' | 'r' | 'o';
-export type BotCategory = 'TRADING' | 'STREAMING' | 'CONTENT' | 'AGENTS' | 'RESEARCH' | 'INTERNAL';
-export type BotEnv = 'PRODUCTION' | 'STAGING' | 'LOCAL' | 'GPU_NODE';
+import type { SubscriptionTier } from '@/lib/auth/session';
 
-export const STATE_TO_CODE: Record<BotState, BotStateCode> = {
+export type EngineState = 'HEALTHY' | 'TRAINING' | 'RENDERING' | 'DELAYED' | 'ERROR' | 'OFFLINE';
+export type EngineStateCode = 'g' | 'c' | 'p' | 'a' | 'r' | 'o';
+export type EngineCategory =
+  | 'TRADING'
+  | 'STREAMING'
+  | 'CONTENT'
+  | 'AGENTS'
+  | 'RESEARCH'
+  | 'INTERNAL';
+export type EngineEnv = 'PRODUCTION' | 'STAGING' | 'LOCAL' | 'GPU_NODE';
+/** Lifecycle of an engine listing. Drives the UI badges + whether the
+ *  "activate" button is enabled. */
+export type EngineStatus = 'active' | 'coming_soon' | 'deprecated';
+
+/** How "Abrir engine →" actually opens the thing. See migration 0012 for the
+ *  full rationale of each mode. */
+export type EngineIntegrationMode =
+  | 'internal_placeholder'
+  | 'external_sso_redirect'
+  | 'iframe_embed';
+
+export const STATE_TO_CODE: Record<EngineState, EngineStateCode> = {
   HEALTHY: 'g',
   TRAINING: 'c',
   RENDERING: 'p',
@@ -15,7 +39,7 @@ export const STATE_TO_CODE: Record<BotState, BotStateCode> = {
   OFFLINE: 'o',
 };
 
-export const STATE_LABEL: Record<BotStateCode, string> = {
+export const STATE_LABEL: Record<EngineStateCode, string> = {
   g: 'Healthy',
   c: 'Training',
   p: 'Rendering',
@@ -24,14 +48,14 @@ export const STATE_LABEL: Record<BotStateCode, string> = {
   o: 'Offline',
 };
 
-export const ENV_LABEL: Record<BotEnv, string> = {
+export const ENV_LABEL: Record<EngineEnv, string> = {
   PRODUCTION: 'Production',
   STAGING: 'Staging',
   LOCAL: 'Local',
   GPU_NODE: 'GPU node',
 };
 
-export const CATS: { id: BotCategory; label: string; slug: string }[] = [
+export const CATS: { id: EngineCategory; label: string; slug: string }[] = [
   { id: 'TRADING', label: 'Trading', slug: 'trading' },
   { id: 'STREAMING', label: 'Streaming', slug: 'streaming' },
   { id: 'CONTENT', label: 'Content AI', slug: 'content' },
@@ -40,28 +64,41 @@ export const CATS: { id: BotCategory; label: string; slug: string }[] = [
   { id: 'INTERNAL', label: 'Internal', slug: 'internal' },
 ];
 
-export interface Bot {
+export interface Engine {
   id: string;
   slug: string;
   name: string;
   icon: string;
-  category: BotCategory;
+  category: EngineCategory;
   type: string;
-  env: BotEnv;
+  env: EngineEnv;
   region: string;
   node: string;
   description: string;
   featured: boolean;
-  state: BotState;
-  stateCode: BotStateCode;
+  state: EngineState;
+  stateCode: EngineStateCode;
   health: number;
   latencyMs: number;
   revenueCents: number;
   favorite: boolean;
-  persona?: BotPersona;
+  /** Lifecycle status — 'active' engines can be activated live, 'coming_soon'
+   *  show a teaser badge and disabled CTA. */
+  status: EngineStatus;
+  /** Minimum subscription tier required to run this engine live. */
+  tierRequired: SubscriptionTier;
+  /** External URL where the engine's UI lives (NULL for internal-only engines). */
+  externalUrl: string | null;
+  /** How the "Open engine" CTA opens the thing. */
+  integrationMode: EngineIntegrationMode;
+  /** Base URL for Nexo AI's admin-side API calls into this engine. */
+  adminApiBase: string | null;
+  /** When true, Nexo AI provisions a tenant in the engine on first activation. */
+  requiresProvisioning: boolean;
+  persona?: EnginePersona;
 }
 
-export interface BotPersona {
+export interface EnginePersona {
   persona: string;
   tone: string;
   goals: string;
@@ -72,9 +109,10 @@ export interface BotPersona {
 
 export interface ActivityEvent {
   id: string;
-  kind: BotStateCode;
+  kind: EngineStateCode;
   title: string;
-  bot: string;
+  /** The engine that produced this event (display name). */
+  engine: string;
   meta: string;
   time: string; // HH:MM
 }
@@ -91,7 +129,7 @@ export interface StreamTick {
   kind: 'strip' | 'activity' | 'health' | 'rail';
   strip?: StripValue[];
   event?: ActivityEvent;
-  health?: Array<{ botId: string; health: number }>;
+  health?: Array<{ engineId: string; health: number }>;
   rail?: {
     jobsPerHour: number;
     queue: number;
@@ -99,3 +137,14 @@ export interface StreamTick {
     revenueToday: number;
   };
 }
+
+// ── Back-compat aliases ──────────────────────────────────────────────────
+// Old names still used in a few un-migrated component spots. Keep these
+// re-exports so the migration can happen file-by-file without breaking the
+// build at each commit. Remove once all imports point at the new names.
+export type Bot = Engine;
+export type BotPersona = EnginePersona;
+export type BotState = EngineState;
+export type BotStateCode = EngineStateCode;
+export type BotCategory = EngineCategory;
+export type BotEnv = EngineEnv;

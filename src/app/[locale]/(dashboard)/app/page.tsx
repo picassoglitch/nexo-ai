@@ -2,8 +2,10 @@ import { setRequestLocale } from 'next-intl/server';
 import type { Route } from 'next';
 import { Link } from '@/i18n/routing';
 import { getSessionUser } from '@/lib/auth/session';
-import { listBots } from '@/lib/data/bots';
+import { listEngines } from '@/lib/data/engines';
 import { TIER_CAPS, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
+
+export const metadata = { title: 'Tu espacio' };
 
 export default async function WorkspaceHomePage({
   params,
@@ -26,24 +28,25 @@ export default async function WorkspaceHomePage({
   const isAdmin = isAdminRole(role);
   const caps = TIER_CAPS[tier];
 
-  // Find their live bot (for PRO) so the landing can spotlight it.
-  let selectedBotName: string | null = null;
-  if (tier === 'PRO' && session?.selectedBotId) {
-    const bots = await listBots();
-    selectedBotName = bots.find((b) => b.id === session.selectedBotId)?.name ?? null;
+  // Find their live engine (for PRO) so the landing can spotlight it.
+  let selectedEngineName: string | null = null;
+  if (tier === 'PRO' && session?.selectedEngineId) {
+    const engines = await listEngines();
+    selectedEngineName =
+      engines.find((e) => e.id === session.selectedEngineId)?.name ?? null;
   }
 
   const heroSub = isAdmin
-    ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los sistemas, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
+    ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los engines, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
     : tier === 'FREE'
-      ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Ejecuta sistemas en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
+      ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Explora los engines en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
       : tier === 'PRO'
         ? `Estás en <b style="color:var(--cc-green)">Pro</b>${
-            selectedBotName
-              ? ` — tu slot en vivo lo tiene <b>${selectedBotName}</b>.`
-              : ' — todavía no elegiste tu sistema en vivo. Pasa a Mis bots para activar uno.'
+            selectedEngineName
+              ? ` — tu slot en vivo lo tiene <b>${selectedEngineName}</b>.`
+              : ' — todavía no elegiste tu engine en vivo. Pasa a Mis engines para activar uno.'
           }`
-        : `Estás en <b style="color:var(--cc-green)">All-Access</b>. Todos los sistemas corren en vivo con los límites más altos.`;
+        : `Estás en <b style="color:var(--cc-green)">All-Access</b>. Todos los engines disponibles corren en vivo con los límites más altos.`;
 
   return (
     <div className="cc-scroll">
@@ -67,16 +70,16 @@ export default async function WorkspaceHomePage({
 
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Sistemas en vivo</div>
+          <div className="cc-mod-stat-l">Engines en vivo</div>
           <div className="cc-mod-stat-v gr">
-            {caps.liveBotsCount === Infinity ? '∞' : caps.liveBotsCount}
+            {caps.liveEnginesCount === Infinity ? '∞' : caps.liveEnginesCount}
           </div>
           <div className="cc-mod-stat-sub">
             {tier === 'FREE'
               ? 'solo simulación'
               : tier === 'PRO'
-                ? selectedBotName
-                  ? `activo: ${selectedBotName}`
+                ? selectedEngineName
+                  ? `activo: ${selectedEngineName}`
                   : 'todavía no elegido'
                 : 'todos disponibles'}
           </div>
@@ -106,26 +109,34 @@ export default async function WorkspaceHomePage({
         </div>
         <div className="cc-mod-grid cc-mod-grid-2">
           <Link
-            href={'/app/bots' as Route}
+            href={'/app/engines' as Route}
             className="cc-mod-card"
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
             <div className="cc-mod-card-head">
               <span className="cc-mod-tag">01</span>
               <span className="cc-mod-badge gr">
-                {tier === 'FREE' ? 'Empezar aquí' : tier === 'PRO' ? 'Tu live bot' : 'Todo en vivo'}
+                {tier === 'FREE'
+                  ? 'Empezar aquí'
+                  : tier === 'PRO'
+                    ? 'Tu engine en vivo'
+                    : 'Todo en vivo'}
               </span>
             </div>
-            <h4>{tier === 'FREE' ? 'Explora tus bots disponibles' : 'Administra tus sistemas'}</h4>
+            <h4>
+              {tier === 'FREE'
+                ? 'Explora los engines disponibles'
+                : 'Administra tus engines'}
+            </h4>
             <p>
               {tier === 'FREE'
-                ? 'Todos los sistemas están en simulación. Prueba cualquiera antes de subir a Pro.'
+                ? 'NexoClip y NexoStreamManager están en simulación. Pruébalos antes de subir a Pro.'
                 : tier === 'PRO'
-                  ? 'Elige tu sistema en vivo, o cambia tu selección cuando quieras.'
-                  : 'Los 16 sistemas corren en vivo. Monitorea desde aquí.'}
+                  ? 'Elige tu engine en vivo, o cambia tu selección cuando quieras.'
+                  : 'Los engines activos corren en vivo. Monitorea desde aquí.'}
             </p>
             <div className="cc-mod-meta">
-              <span>→ Ir a mis bots</span>
+              <span>→ Ir a mis engines</span>
             </div>
           </Link>
 
@@ -153,9 +164,9 @@ export default async function WorkspaceHomePage({
             </h4>
             <p>
               {tier === 'FREE'
-                ? `Pro (${TIER_CAPS.PRO.price}/${TIER_CAPS.PRO.per}) para un sistema en vivo, o All-Access (${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per}) para todos.`
+                ? `Pro (${TIER_CAPS.PRO.price}/${TIER_CAPS.PRO.per}) para un engine en vivo, o All-Access (${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per}) para todos.`
                 : tier === 'PRO'
-                  ? `${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per} para desbloquear los 16 sistemas en vivo y los límites más altos.`
+                  ? `${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per} para desbloquear todos los engines en vivo y los límites más altos.`
                   : 'Cambia tu método de pago, descarga facturas, o cancela en cualquier momento.'}
             </p>
             <div className="cc-mod-meta">
@@ -174,7 +185,7 @@ export default async function WorkspaceHomePage({
             </div>
             <h4>Mide tu uso en vivo</h4>
             <p>
-              Cuotas, ejecuciones y costo IA — actualizados en tiempo real conforme tus sistemas
+              Cuotas, ejecuciones y costo IA — actualizados en tiempo real conforme tus engines
               trabajan.
             </p>
             <div className="cc-mod-meta">

@@ -3,12 +3,54 @@
 import { useState, useTransition } from 'react';
 import { useWorkspace } from '@/lib/workspace/store';
 import { changeUserTier } from '@/lib/auth/tier-actions';
+import { createTierCheckout } from '@/lib/payments/checkout-actions';
+import { TIER_CAPS } from '@/lib/billing/tiers';
 import type { SubscriptionTier } from '@/lib/auth/session';
 
+// Pull display labels straight from TIER_CAPS — single source of truth for
+// names. Pricing strings ALSO come from TIER_CAPS below in the cards array.
 const TIER_LABELS: Record<SubscriptionTier, string> = {
-  FREE: 'Free',
-  PRO: 'Pro',
-  ALL_ACCESS: 'All-Access',
+  FREE: TIER_CAPS.FREE.label,
+  PRO: TIER_CAPS.PRO.label,
+  ALL_ACCESS: TIER_CAPS.ALL_ACCESS.label,
+};
+
+// Marketing copy that DOESN'T live in TIER_CAPS (taglines, feature bullets,
+// "featured" flag for the recommended card). Pricing + name come from caps.
+const TIER_MARKETING: Record<
+  SubscriptionTier,
+  { tagline: string; features: string[]; featured?: boolean }
+> = {
+  FREE: {
+    tagline: 'Explora la plataforma sin compromiso.',
+    features: [
+      'Cuenta Google completa',
+      'Cualquier sistema en simulación',
+      'Dashboard en vivo (solo lectura)',
+      'Hasta 100 trabajos / mes',
+    ],
+  },
+  PRO: {
+    tagline: 'Acceso en vivo a un sistema a tu elección.',
+    featured: true,
+    features: [
+      'Todo lo de Free',
+      'Un bot/agente/automatización en vivo',
+      'Ejecución real · límites estándar',
+      'Historial completo y analíticas',
+      'Soporte por correo',
+    ],
+  },
+  ALL_ACCESS: {
+    tagline: 'Todos los sistemas desbloqueados.',
+    features: [
+      'Todo lo de Pro',
+      'Todos los sistemas en vivo',
+      'Los límites de uso más altos',
+      'Acceso anticipado a nuevas herramientas',
+      'Soporte prioritario',
+    ],
+  },
 };
 
 interface Props {
@@ -26,26 +68,44 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
   async function changeTier(next: SubscriptionTier) {
     if (next === tier || isPending) return;
     setPendingTier(next);
+
+    // Branch 1: Downgrades and admins go through direct tier-actions write.
+    //  - Downgrade to FREE: no money changes hands, direct write.
+    //  - Admin: their changes bypass MP (admin override).
+    if (next === 'FREE' || isAdmin) {
+      startTransition(async () => {
+        const prev = tier;
+        setTier(next); // optimistic
+        const res = await changeUserTier(userId, next);
+        setPendingTier(null);
+        if (!res.ok) {
+          setTier(prev);
+          showToast(`<b>Error</b> · ${res.error ?? 'no se pudo cambiar el plan'}`);
+          return;
+        }
+        showToast(
+          next === 'FREE'
+            ? `Suscripción cambiada a <b>${TIER_LABELS[next]}</b>.`
+            : `Plan <b>${TIER_LABELS[next]}</b> activado.`,
+        );
+      });
+      return;
+    }
+
+    // Branch 2: Non-admin upgrading → Mercado Pago checkout.
+    //  Returns a URL we redirect the browser to. After payment, MP fires the
+    //  webhook which writes profiles.tier asynchronously; this user lands on
+    //  /app/billing?status=success.
     startTransition(async () => {
-      const prev = tier;
-      // Optimistic
-      setTier(next);
-      const res = await changeUserTier(userId, next);
-      setPendingTier(null);
-      if (!res.ok) {
-        setTier(prev);
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo cambiar el plan'}`);
+      const res = await createTierCheckout(next);
+      if (!res.ok || !res.url) {
+        setPendingTier(null);
+        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo iniciar el checkout'}`);
         return;
       }
-      if (res.paymentRequired) {
-        showToast(
-          `Plan <b>${TIER_LABELS[next]}</b> activado en modo demo. El checkout real (Mercado Pago) se conecta en step 05.`,
-        );
-      } else if (next === 'FREE') {
-        showToast(`Suscripción cambiada a <b>${TIER_LABELS[next]}</b>.`);
-      } else {
-        showToast(`Plan <b>${TIER_LABELS[next]}</b> activado.`);
-      }
+      // Don't reset pendingTier — the browser is about to navigate away.
+      showToast(`Redirigiendo a Mercado Pago…`);
+      window.location.href = res.url;
     });
   }
 
@@ -64,58 +124,21 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
     void changeTier('FREE');
   }
 
-  const cards: Array<{
-    id: SubscriptionTier;
-    name: string;
-    price: string;
-    per: string;
-    tagline: string;
-    features: string[];
-    featured?: boolean;
-  }> = [
-    {
-      id: 'FREE',
-      name: 'Free',
-      price: '$0',
-      per: '/siempre',
-      tagline: 'Explora la plataforma sin compromiso.',
-      features: [
-        'Cuenta Google completa',
-        'Cualquier sistema en simulación',
-        'Dashboard en vivo (solo lectura)',
-        'Hasta 100 trabajos / mes',
-      ],
-    },
-    {
-      id: 'PRO',
-      name: 'Pro',
-      price: 'USD $39',
-      per: '/mes',
-      tagline: 'Acceso en vivo a un sistema a tu elección.',
-      featured: true,
-      features: [
-        'Todo lo de Free',
-        'Un bot/agente/automatización en vivo',
-        'Ejecución real · límites estándar',
-        'Historial completo y analíticas',
-        'Soporte por correo',
-      ],
-    },
-    {
-      id: 'ALL_ACCESS',
-      name: 'All-Access',
-      price: 'USD $129',
-      per: '/mes',
-      tagline: 'Todos los sistemas desbloqueados.',
-      features: [
-        'Todo lo de Pro',
-        'Todos los sistemas en vivo',
-        'Los límites de uso más altos',
-        'Acceso anticipado a nuevas herramientas',
-        'Soporte prioritario',
-      ],
-    },
-  ];
+  // Build cards by composing TIER_CAPS (name + price + per) with TIER_MARKETING
+  // (tagline + features + featured). To change a price, only edit:
+  //   - TIER_CAPS in src/lib/billing/tiers.ts  (display string)
+  //   - TIER_PRICING in src/lib/payments/pricing.ts  (real MP cents)
+  // To change feature bullets, edit TIER_MARKETING above.
+  const ORDER: SubscriptionTier[] = ['FREE', 'PRO', 'ALL_ACCESS'];
+  const cards = ORDER.map((id) => ({
+    id,
+    name: TIER_CAPS[id].label,
+    price: TIER_CAPS[id].price,
+    per: `/${TIER_CAPS[id].per}`,
+    tagline: TIER_MARKETING[id].tagline,
+    features: TIER_MARKETING[id].features,
+    featured: TIER_MARKETING[id].featured,
+  }));
 
   return (
     <>

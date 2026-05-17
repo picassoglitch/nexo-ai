@@ -512,9 +512,15 @@ footer { background: var(--bg); border-top: 1px solid var(--line); padding: 56px
 
 .auth-field { display: flex; flex-direction: column; gap: 6px; }
 .auth-field label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); }
-.auth-field input { width: 100%; min-width: 0; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--ink); font-family: var(--font-display); font-size: 14px; transition: border-color .25s, box-shadow .25s; }
-.auth-field input::placeholder { color: var(--ink-faint); }
-.auth-field input:focus { outline: none; border-color: var(--path); box-shadow: 0 0 0 3px var(--path-glow); }
+.auth-field input,
+.auth-field textarea { width: 100%; min-width: 0; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--ink); font-family: var(--font-display); font-size: 14px; transition: border-color .25s, box-shadow .25s; }
+.auth-field textarea { font-family: var(--font-display); resize: vertical; min-height: 120px; line-height: 1.55; }
+.auth-field input::placeholder,
+.auth-field textarea::placeholder { color: var(--ink-faint); }
+.auth-field input:focus,
+.auth-field textarea:focus { outline: none; border-color: var(--path); box-shadow: 0 0 0 3px var(--path-glow); }
+.auth-field.err input,
+.auth-field.err textarea { border-color: var(--ember); }
 
 .auth-submit { width: 100%; padding: 14px 18px; border-radius: 12px; border: none; background: var(--path); color: #000; font-family: var(--font-display); font-weight: 700; font-size: 14.5px; letter-spacing: -0.005em; cursor: pointer; transition: all .25s cubic-bezier(.16, 1, .3, 1); margin-top: 4px; }
 .auth-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px -10px var(--path-glow); filter: brightness(1.05); }

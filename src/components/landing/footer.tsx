@@ -1,6 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
 import { FusionLogo } from './fusion-logo';
 
 export function LandingFooter() {
@@ -23,7 +25,9 @@ export function LandingFooter() {
           <a href="#client-world">{tNav('client')}</a>
           <a href="#partner-world">{tNav('partner')}</a>
           <a href="#proof">{tFooter('track')}</a>
-          <a href="#contact">{tFooter('contact')}</a>
+          {/* Dedicated contact form page — separate from the inline section
+              on the landing, useful as a shareable link. */}
+          <Link href={'/contacto' as Route}>{tFooter('contact')}</Link>
         </div>
         <div className="footer-col">
           <h6>{tFooter('earn')}</h6>

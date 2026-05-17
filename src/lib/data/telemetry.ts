@@ -1,7 +1,7 @@
 // SWAP POINT: replace generators with real worker telemetry (WS/SSE/Supabase Realtime).
-// UI contracts above (Bot, ActivityEvent, StripValue, StreamTick from ./types) must not change.
+// UI contracts above (Engine, ActivityEvent, StripValue, StreamTick from ./types) must not change.
 
-import { type ActivityEvent, type BotStateCode, type StripValue } from './types';
+import { type ActivityEvent, type EngineStateCode, type StripValue } from './types';
 
 export const MOCK = true;
 
@@ -37,19 +37,18 @@ export function tickStrip(): StripValue[] {
   });
 }
 
-const ACTS: Array<[BotStateCode, string, string, string]> = [
-  ['c', 'Generando subtítulos', 'SubtitleForge', 'word-level · es'],
+// Activity feed seeds — only references the active engines (NexoClip,
+// NexoStreamManager). Coming-soon engines don't emit events. Update this
+// list when new engines go live.
+const ACTS: Array<[EngineStateCode, string, string, string]> = [
   ['p', 'Renderizando short', 'NexoClip', 'batch 12/40'],
-  ['g', 'Publicando a TikTok', 'Publishing', 'clip #4187'],
-  ['c', 'Analizando stream', 'AVA Streamer', 'retención +14%'],
-  ['p', 'Entrenando persona', 'Nexo Persona', 'step 4180'],
-  ['g', 'Trade ejecutado', 'Quantorpolybot', '+$42 shadow'],
-  ['p', 'Comprimiendo VOD', 'VOD Compressor', '3.2GB → 840MB'],
-  ['g', 'Lead capturado', 'Realestate Scraper', 'CDMX · $540'],
-  ['a', 'Cola con backpressure', 'SignalWatch', '41% carga'],
+  ['g', 'Publicando a TikTok', 'NexoClip', 'clip #4187'],
   ['c', 'Generando variantes', 'NexoClip', '3 cortes'],
-  ['g', 'Stream en vivo', 'AVA Streamer', '312 viewers'],
-  ['r', 'Rate limit OpenAI', 'BackupRunner', 'reintento 2/3'],
+  ['g', 'Stream en vivo', 'NexoStreamManager', '312 viewers'],
+  ['c', 'Analizando stream', 'NexoStreamManager', 'retención +14%'],
+  ['g', 'Routing a Kick + Twitch', 'NexoStreamManager', '2 destinos'],
+  ['p', 'Comprimiendo VOD', 'NexoClip', '3.2GB → 840MB'],
+  ['a', 'Cola con backpressure', 'NexoClip', '41% carga'],
 ];
 
 let eventSeq = 0;
@@ -60,7 +59,7 @@ export function nextActivityEvent(): ActivityEvent {
     id: `e${Date.now()}-${eventSeq}`,
     kind: a[0],
     title: a[1],
-    bot: a[2],
+    engine: a[2],
     meta: a[3],
     time: new Date().toTimeString().slice(0, 5),
   };
@@ -76,15 +75,17 @@ export function tickRail() {
 }
 
 /**
- * Health drift — small random walk for non-offline/error bots.
- * Returns an array of {botId, health} for the SSE client to merge into local state.
+ * Health drift — small random walk for non-offline/error engines.
+ * Returns an array of {engineId, health} for the SSE client to merge into local state.
  * NOT persisted to Supabase (rev: keep DB stable, drift is purely visual).
  */
-export function driftHealth(current: Array<{ id: string; health: number; stateCode: BotStateCode }>) {
+export function driftHealth(
+  current: Array<{ id: string; health: number; stateCode: EngineStateCode }>,
+) {
   return current
-    .filter((b) => b.stateCode !== 'o' && b.stateCode !== 'r')
-    .map((b) => ({
-      botId: b.id,
-      health: Math.max(20, Math.min(99, Math.round(b.health + (Math.random() - 0.5) * 4))),
+    .filter((e) => e.stateCode !== 'o' && e.stateCode !== 'r')
+    .map((e) => ({
+      engineId: e.id,
+      health: Math.max(20, Math.min(99, Math.round(e.health + (Math.random() - 0.5) * 4))),
     }));
 }

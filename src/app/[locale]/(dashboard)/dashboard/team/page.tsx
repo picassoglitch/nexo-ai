@@ -6,6 +6,8 @@ import { TeamTierSelect } from '@/components/dashboard/team-tier-select';
 import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
+export const metadata = { title: 'Team & Roles' };
+
 interface ProfileRow {
   id: string;
   email: string | null;

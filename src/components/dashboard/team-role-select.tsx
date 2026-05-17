@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/dashboard/store';
 import { changeUserRole } from '@/lib/auth/role-actions';
 import type { UserRole } from '@/lib/auth/session';
@@ -23,6 +24,7 @@ interface Props {
 export function TeamRoleSelect({ userId, current, envLocked }: Props) {
   const [role, setRole] = useState<UserRole>(current);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const showToast = useDashboard((s) => s.showToast);
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -34,9 +36,12 @@ export function TeamRoleSelect({ userId, current, envLocked }: Props) {
       if (!res.ok) {
         setRole(prev); // revert
         showToast(`<b>Error</b> · ${res.error}`);
-      } else {
-        showToast(`Rol cambiado a <b>${next.replace('_', ' ')}</b>`);
+        return;
       }
+      showToast(`Rol cambiado a <b>${next.replace('_', ' ')}</b>`);
+      // Pull authoritative server state — also refreshes the role count
+      // tile + any other admins viewing the page in this browser tab.
+      router.refresh();
     });
   }
 

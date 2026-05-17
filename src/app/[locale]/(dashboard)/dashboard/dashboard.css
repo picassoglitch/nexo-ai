@@ -1655,6 +1655,34 @@ body:has(.cc-shell) {
   .cc-dw-grid {
     grid-template-columns: 1fr;
   }
+  /* Team page rows: dropdowns drop below the name section at narrow widths
+     so they get full row width instead of squeezing the name to ~80px. */
+  .cc-mod-row {
+    flex-wrap: wrap;
+  }
+  .cc-mod-row .cc-mod-body {
+    flex-basis: calc(100% - 46px); /* avatar 32 + gap 14 */
+  }
+  .cc-mod-row .cc-mod-right {
+    flex-basis: 100%;
+    margin-left: 46px;
+    margin-top: 4px;
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Stat grid: 2 cols max on phones instead of squeezing to one tiny column. */
+  .cc-mod-statgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* Quotas: progress bar drops below the count instead of trying to share a row. */
+  .cc-mod-row .cc-mod-sub .cc-bar-track {
+    flex-basis: 100%;
+    max-width: 100% !important;
+    margin-top: 4px;
+  }
 }
 
 /* ============ GENERIC MODULE PAGE UTILITIES ============ */

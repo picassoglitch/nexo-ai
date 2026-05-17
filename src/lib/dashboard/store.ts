@@ -1,15 +1,15 @@
 'use client';
 
 import { create } from 'zustand';
-import type { Bot, BotCategory } from '@/lib/data/types';
+import type { Engine, EngineCategory } from '@/lib/data/types';
 
 type DrawerTab = 'metrics' | 'logs' | 'console' | 'ai' | 'autos' | 'api';
 
 interface DashboardState {
-  // Drawer
-  drawerBotId: string | null;
+  // Drawer — which engine row is expanded in the detail panel
+  drawerEngineId: string | null;
   drawerTab: DrawerTab;
-  openDrawer: (botId: string) => void;
+  openDrawer: (engineId: string) => void;
   closeDrawer: () => void;
   setDrawerTab: (tab: DrawerTab) => void;
 
@@ -21,17 +21,17 @@ interface DashboardState {
 
   // Filters
   query: string;
-  activeCats: Set<BotCategory>;
+  activeCats: Set<EngineCategory>;
   viewMode: 'rows' | 'fav';
   setQuery: (q: string) => void;
-  toggleCat: (c: BotCategory) => void;
+  toggleCat: (c: EngineCategory) => void;
   setViewMode: (m: 'rows' | 'fav') => void;
 
-  // Local bot overrides (favorite toggle + health drift from SSE)
-  bots: Bot[];
-  setBots: (bots: Bot[]) => void;
-  toggleFavorite: (botId: string) => void;
-  applyHealthDrift: (drift: Array<{ botId: string; health: number }>) => void;
+  // Local engine overrides (favorite toggle + health drift from SSE)
+  engines: Engine[];
+  setEngines: (engines: Engine[]) => void;
+  toggleFavorite: (engineId: string) => void;
+  applyHealthDrift: (drift: Array<{ engineId: string; health: number }>) => void;
 
   // Mobile sidebar
   mobileSidebarOpen: boolean;
@@ -44,10 +44,10 @@ interface DashboardState {
 }
 
 export const useDashboard = create<DashboardState>((set) => ({
-  drawerBotId: null,
+  drawerEngineId: null,
   drawerTab: 'metrics',
-  openDrawer: (botId) => set({ drawerBotId: botId, drawerTab: 'metrics' }),
-  closeDrawer: () => set({ drawerBotId: null }),
+  openDrawer: (engineId) => set({ drawerEngineId: engineId, drawerTab: 'metrics' }),
+  closeDrawer: () => set({ drawerEngineId: null }),
   setDrawerTab: (tab) => set({ drawerTab: tab }),
 
   paletteOpen: false,
@@ -68,16 +68,22 @@ export const useDashboard = create<DashboardState>((set) => ({
     }),
   setViewMode: (m) => set({ viewMode: m }),
 
-  bots: [],
-  setBots: (bots) => set({ bots }),
-  toggleFavorite: (botId) =>
+  engines: [],
+  setEngines: (engines) => set({ engines }),
+  toggleFavorite: (engineId) =>
     set((s) => ({
-      bots: s.bots.map((b) => (b.id === botId ? { ...b, favorite: !b.favorite } : b)),
+      engines: s.engines.map((e) =>
+        e.id === engineId ? { ...e, favorite: !e.favorite } : e,
+      ),
     })),
   applyHealthDrift: (drift) =>
     set((s) => {
-      const m = new Map(drift.map((d) => [d.botId, d.health]));
-      return { bots: s.bots.map((b) => (m.has(b.id) ? { ...b, health: m.get(b.id)! } : b)) };
+      const m = new Map(drift.map((d) => [d.engineId, d.health]));
+      return {
+        engines: s.engines.map((e) =>
+          m.has(e.id) ? { ...e, health: m.get(e.id)! } : e,
+        ),
+      };
     }),
 
   mobileSidebarOpen: false,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/dashboard/store';
 import { changeUserTier } from '@/lib/auth/tier-actions';
 import type { SubscriptionTier } from '@/lib/auth/session';
@@ -19,6 +20,7 @@ interface Props {
 export function TeamTierSelect({ userId, current }: Props) {
   const [tier, setTier] = useState<SubscriptionTier>(current);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const showToast = useDashboard((s) => s.showToast);
 
   function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -33,6 +35,10 @@ export function TeamTierSelect({ userId, current }: Props) {
         return;
       }
       showToast(`Tier cambiado a <b>${next.replace('_', '-')}</b>`);
+      // Refresh the team page so the row reflects the authoritative server
+      // value (also re-runs the "paid subscriptions" stat at the top). The
+      // target user's other tabs get auto-synced by ProfileSubscriber.
+      router.refresh();
     });
   }
 

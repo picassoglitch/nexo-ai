@@ -1,5 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
-import { listBots } from '@/lib/data/bots';
+import { listEngines } from '@/lib/data/engines';
 
 export default async function RevenuePage({
   params,
@@ -9,9 +9,11 @@ export default async function RevenuePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const bots = await listBots();
-  const total = bots.reduce((a, b) => a + b.revenueCents, 0);
-  const revenueBots = bots.filter((b) => b.revenueCents > 0).sort((a, b) => b.revenueCents - a.revenueCents);
+  const engines = await listEngines();
+  const total = engines.reduce((a, e) => a + e.revenueCents, 0);
+  const revenueEngines = engines
+    .filter((e) => e.revenueCents > 0)
+    .sort((a, b) => b.revenueCents - a.revenueCents);
 
   return (
     <div className="cc-scroll">
@@ -28,8 +30,8 @@ export default async function RevenuePage({
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Sistemas con ingreso</div>
-          <div className="cc-mod-stat-v cy">{revenueBots.length}</div>
-          <div className="cc-mod-stat-sub">de {bots.length} totales</div>
+          <div className="cc-mod-stat-v cy">{revenueEngines.length}</div>
+          <div className="cc-mod-stat-sub">de {engines.length} totales</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Costo IA hoy</div>
@@ -41,13 +43,13 @@ export default async function RevenuePage({
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Ingresos por sistema</div>
         <div className="cc-mod-list">
-          {revenueBots.map((b) => {
-            const pct = total > 0 ? (b.revenueCents / total) * 100 : 0;
+          {revenueEngines.map((e) => {
+            const pct = total > 0 ? (e.revenueCents / total) * 100 : 0;
             return (
-              <div key={b.id} className="cc-mod-row">
-                <div className="cc-mod-ic">{b.icon}</div>
+              <div key={e.id} className="cc-mod-row">
+                <div className="cc-mod-ic">{e.icon}</div>
                 <div className="cc-mod-body">
-                  <div className="cc-mod-name">{b.name}</div>
+                  <div className="cc-mod-name">{e.name}</div>
                   <div
                     className="cc-mod-sub"
                     style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6 }}
@@ -59,8 +61,8 @@ export default async function RevenuePage({
                   </div>
                 </div>
                 <div className="cc-mod-right">
-                  <b className="gr">${Math.round(b.revenueCents / 100).toLocaleString()}</b>
-                  <span>{b.type}</span>
+                  <b className="gr">${Math.round(e.revenueCents / 100).toLocaleString()}</b>
+                  <span>{e.type}</span>
                 </div>
               </div>
             );

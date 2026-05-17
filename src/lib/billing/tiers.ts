@@ -21,11 +21,11 @@ export function effectiveTier(role: UserRole, storedTier: SubscriptionTier): Sub
 }
 
 export interface TierCapabilities {
-  /** How many bots the user can run in LIVE execution (not simulation).
+  /** How many engines the user can run in LIVE execution (not simulation).
    *  FREE = 0 (all simulation only).
-   *  PRO = 1 (the bot they pick via profiles.selected_bot_id).
-   *  ALL_ACCESS = Infinity (every bot in their org is live). */
-  liveBotsCount: number;
+   *  PRO = 1 (the engine they pick via profiles.selected_engine_id).
+   *  ALL_ACCESS = Infinity (every engine in their org is live). */
+  liveEnginesCount: number;
   /** Monthly job execution cap. */
   jobsPerMonth: number;
   /** Monthly AI token budget. */
@@ -50,7 +50,7 @@ export interface TierCapabilities {
 
 export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
   FREE: {
-    liveBotsCount: 0,
+    liveEnginesCount: 0,
     jobsPerMonth: 100,
     tokensPerMonth: 50_000,
     storageMB: 500,
@@ -64,7 +64,7 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     per: 'siempre',
   },
   PRO: {
-    liveBotsCount: 1,
+    liveEnginesCount: 1,
     jobsPerMonth: 2_000,
     tokensPerMonth: 2_000_000,
     storageMB: 5_000,
@@ -74,11 +74,11 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     hasPrioritySupport: false,
     hasEarlyAccess: false,
     label: 'Pro',
-    price: 'USD $39',
+    price: 'MXN $749',
     per: 'mes',
   },
   ALL_ACCESS: {
-    liveBotsCount: Infinity,
+    liveEnginesCount: Infinity,
     jobsPerMonth: 20_000,
     tokensPerMonth: 20_000_000,
     storageMB: 50_000,
@@ -88,28 +88,35 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     hasPrioritySupport: true,
     hasEarlyAccess: true,
     label: 'All-Access',
-    price: 'USD $129',
+    price: 'MXN $2,499',
     per: 'mes',
   },
 };
 
 /**
- * Returns whether a specific bot is allowed in LIVE mode for the given user state.
+ * Returns whether a specific engine is allowed in LIVE mode for the given user state.
  * - FREE: never live.
- * - PRO: live if it's their selected_bot_id, else simulation.
+ * - PRO: live if it's their selected_engine_id, else simulation.
  * - ALL_ACCESS: always live.
+ *
+ * Tier-required check is separate — even an ALL_ACCESS user can't activate
+ * an engine marked tier_required = ALL_ACCESS if their effective tier is lower.
+ * Callers should combine: engineCanRunLive(...) && tier >= engine.tierRequired.
  */
-export function botCanRunLive(
+export function engineCanRunLive(
   tier: SubscriptionTier,
-  botId: string,
-  selectedBotId: string | null,
+  engineId: string,
+  selectedEngineId: string | null,
 ): boolean {
   const caps = TIER_CAPS[tier];
-  if (caps.liveBotsCount === 0) return false;
-  if (caps.liveBotsCount === Infinity) return true;
+  if (caps.liveEnginesCount === 0) return false;
+  if (caps.liveEnginesCount === Infinity) return true;
   // PRO (or any finite > 0 case) — must match selection.
-  return botId === selectedBotId;
+  return engineId === selectedEngineId;
 }
+
+// Back-compat alias — remove after all call sites migrated.
+export { engineCanRunLive as botCanRunLive };
 
 /** Pretty tier name for sidebar pills + headings. */
 export function tierLabelShort(tier: SubscriptionTier): string {
@@ -150,10 +157,10 @@ export function buildQuotaRows(tier: SubscriptionTier): QuotaRow[] {
       sub: 'Clips · VODs · uploads',
     },
     {
-      label: 'Sistemas en vivo',
+      label: 'Engines en vivo',
       used: 0,
-      cap: caps.liveBotsCount === Infinity ? 999 : caps.liveBotsCount,
-      unit: caps.liveBotsCount === 0 ? 'sistema en vivo · solo simulación' : 'sistemas',
+      cap: caps.liveEnginesCount === Infinity ? 999 : caps.liveEnginesCount,
+      unit: caps.liveEnginesCount === 0 ? 'engine en vivo · solo simulación' : 'engines',
       sub: tier === 'PRO' ? 'tú eliges cuál' : tier === 'FREE' ? 'upgrade a Pro' : 'todos disponibles',
     },
   ];

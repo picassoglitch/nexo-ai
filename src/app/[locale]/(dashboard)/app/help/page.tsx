@@ -1,31 +1,9 @@
 import { setRequestLocale } from 'next-intl/server';
+import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
+import { HelpFaq } from '@/components/workspace/help-faq';
 
-const RESOURCES = [
-  {
-    ic: '📖',
-    title: 'Guía de inicio rápido',
-    body: 'Conecta tu primer sistema en menos de 3 minutos. Setup paso a paso.',
-    href: '#',
-  },
-  {
-    ic: '🤖',
-    title: 'Catálogo de bots',
-    body: 'Qué hace cada sistema, en qué tier está disponible, y casos de uso.',
-    href: '#',
-  },
-  {
-    ic: '💳',
-    title: 'Cambiar de plan',
-    body: 'Cómo subir o bajar de tier, cancelar, y cobros prorrateados.',
-    href: '#',
-  },
-  {
-    ic: '🛟',
-    title: 'Soporte directo',
-    body: 'Escríbenos en cualquier momento — respondemos en un día hábil.',
-    href: 'mailto:support@nexo-ai.world',
-  },
-];
+export const metadata = { title: 'Ayuda' };
 
 export default async function HelpPage({
   params,
@@ -34,6 +12,7 @@ export default async function HelpPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
   return (
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
@@ -44,28 +23,65 @@ export default async function HelpPage({
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Tiempo de respuesta</div>
-          <div className="cc-mod-stat-v">&lt; 1<small>día hábil</small></div>
-          <div className="cc-mod-stat-sub">support@nexo-ai.world</div>
+          <div className="cc-mod-stat-v">
+            &lt; 24<small>hrs hábiles</small>
+          </div>
+          <div className="cc-mod-stat-sub">vía /contacto</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Recursos</div>
-        <div className="cc-mod-grid cc-mod-grid-2">
-          {RESOURCES.map((r) => (
-            <a
-              key={r.title}
-              href={r.href}
-              className="cc-mod-card"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div className="cc-mod-card-head">
-                <span style={{ fontSize: 22 }}>{r.ic}</span>
-              </div>
-              <h4>{r.title}</h4>
-              <p>{r.body}</p>
-            </a>
-          ))}
+        <p
+          style={{
+            color: 'var(--cc-txt-3)',
+            fontSize: 13.5,
+            maxWidth: '64ch',
+            lineHeight: 1.55,
+          }}
+        >
+          Lo que la mayoría de operadores preguntan los primeros días. Si tu duda no aparece
+          aquí, escríbenos directamente y te respondemos rápido.
+        </p>
+      </div>
+
+      <HelpFaq />
+
+      <div className="cc-mod-section">
+        <div className="cc-mod-sl">¿No encontraste lo que buscabas?</div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 14,
+            padding: '20px 22px',
+            border: '1px solid var(--cc-line-2)',
+            background: 'var(--cc-panel)',
+            borderRadius: 'var(--cc-r-l)',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
+              Escríbenos directamente
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--cc-txt-3)' }}>
+              Respuesta de un humano en menos de 24 horas hábiles. Sin tickets, sin bots.
+            </div>
+          </div>
+          <Link
+            href={'/contacto' as Route}
+            style={{
+              background: 'var(--cc-green)',
+              color: '#070809',
+              padding: '11px 18px',
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 13,
+              textDecoration: 'none',
+              alignSelf: 'center',
+            }}
+          >
+            Ir a contacto →
+          </Link>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ const META: Array<{
   led?: boolean;
   format: (v: number, total?: number) => string;
 }> = [
-  { id: 'active', label: 'Sistemas activos', led: true, format: (v) => `${v}` },
+  { id: 'active', label: 'Engines activos', led: true, format: (v) => `${v}` },
   { id: 'aicalls', label: 'AI calls / min', format: (v) => `${v}` },
   { id: 'rev', label: 'Ingresos hoy', format: (v) => `$${v.toLocaleString()}` },
   { id: 'streams', label: 'Streams en vivo', led: true, format: (v) => `${v}` },
@@ -32,7 +32,7 @@ function Sparkline({ hist }: { hist: number[] }) {
   );
 }
 
-export function MetricStrip({ totalBots }: { totalBots: number }) {
+export function MetricStrip({ totalEngines }: { totalEngines: number }) {
   const [strip, setStrip] = useState<StripValue[]>([]);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function MetricStrip({ totalBots }: { totalBots: number }) {
             </div>
             <div className="cc-metric-v">
               {m.format(value)}
-              {m.id === 'active' && <small>/ {totalBots}</small>}
+              {m.id === 'active' && <small>/ {totalEngines}</small>}
             </div>
             <Sparkline hist={hist} />
           </div>

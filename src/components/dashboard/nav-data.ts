@@ -21,23 +21,21 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
-    grp: 'Operaciones',
+    // "Plataforma" = AI infra surfaces that operate on engines. The top-level
+    // "Operaciones" entry above is the live ops view of those engines.
+    grp: 'Plataforma',
     items: [
-      { id: 'bots', href: '/dashboard/bots', ic: '🤖', label: 'Bots', ct: '62' },
-      { id: 'models', href: '/dashboard/models', ic: '◈', label: 'AI Models', ct: '9' },
+      // First-class engines management (catalog status + tier_required).
+      { id: 'engines', href: '/dashboard/engines', ic: '◈', label: 'Engines', ct: '6' },
+      { id: 'models', href: '/dashboard/models', ic: '⌬', label: 'AI Models', ct: '9' },
       { id: 'streams', href: '/dashboard/streams', ic: '▶', label: 'Streams', live: true },
       { id: 'autos', href: '/dashboard/automations', ic: '⟳', label: 'Automations', ct: '31' },
       { id: 'queues', href: '/dashboard/queues', ic: '≡', label: 'Queues', ct: '7' },
     ],
   },
-  {
-    grp: 'Contenido',
-    items: [
-      { id: 'content', href: '/dashboard/clips', ic: '✂', label: 'Clips & VODs', ct: '418' },
-      { id: 'publish', href: '/dashboard/publishing', ic: '↗', label: 'Publishing' },
-      { id: 'uploads', href: '/dashboard/uploads', ic: '⬆', label: 'Uploads' },
-    ],
-  },
+  // "Contenido" group removed — clips/publishing/uploads are NexoClip-internal
+  // features, not platform-admin concerns. Same reason "Clients" got removed
+  // from Organización: Nexo AI is a SaaS, not an agency with client engagements.
   {
     grp: 'Inteligencia',
     items: [
@@ -57,8 +55,8 @@ export const NAV: NavGroup[] = [
     grp: 'Organización',
     items: [
       { id: 'team', href: '/dashboard/team', ic: '👥', label: 'Team & Roles' },
-      { id: 'clients', href: '/dashboard/clients', ic: '◎', label: 'Clients', ct: '4' },
-      { id: 'billing', href: '/dashboard/billing', ic: '▦', label: 'Billing' },
+      { id: 'billing', href: '/dashboard/billing', ic: '▦', label: 'Billing (P&L)' },
+      { id: 'audit', href: '/dashboard/audit', ic: '◉', label: 'Audit log' },
       { id: 'settings', href: '/dashboard/settings', ic: '⚙', label: 'Settings' },
     ],
   },
@@ -81,7 +79,7 @@ export const SUBSCRIBER_NAV: NavGroup[] = [
   {
     grp: 'Plataforma',
     items: [
-      { id: 'mybots', href: '/app/bots', ic: '🤖', label: 'Mis bots' },
+      { id: 'myengines', href: '/app/engines', ic: '◈', label: 'Mis engines' },
       { id: 'history', href: '/app/history', ic: '≡', label: 'Historial' },
     ],
   },
@@ -103,9 +101,9 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
     title: 'Overview',
     sub: 'Resumen ejecutivo de toda la plataforma.',
   },
-  '/dashboard/bots': {
-    title: 'Bots',
-    sub: 'Cada sistema operativo, por categoría.',
+  '/dashboard/engines': {
+    title: 'Engines',
+    sub: 'Catálogo de productos: status, tier requerido, visibilidad.',
   },
   '/dashboard/models': {
     title: 'AI Models',
@@ -122,18 +120,6 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard/queues': {
     title: 'Queues',
     sub: 'Cola de trabajos por worker y prioridad.',
-  },
-  '/dashboard/clips': {
-    title: 'Clips & VODs',
-    sub: 'Biblioteca de cortos generados y VODs originales.',
-  },
-  '/dashboard/publishing': {
-    title: 'Publishing',
-    sub: 'Distribución multi-plataforma y schedules.',
-  },
-  '/dashboard/uploads': {
-    title: 'Uploads',
-    sub: 'Archivos subidos, ingesta y procesamiento.',
   },
   '/dashboard/analytics': {
     title: 'Analytics',
@@ -159,13 +145,13 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
     title: 'Team & Roles',
     sub: 'Usuarios, permisos y registro de actividad.',
   },
-  '/dashboard/clients': {
-    title: 'Clients',
-    sub: 'Cuentas de cliente, accesos y proyectos activos.',
-  },
   '/dashboard/billing': {
     title: 'Billing',
     sub: 'Plan actual, facturas y método de pago.',
+  },
+  '/dashboard/audit': {
+    title: 'Audit log',
+    sub: 'Eventos de cuenta: cambios de plan, rol y pagos automáticos.',
   },
   '/dashboard/settings': {
     title: 'Settings',
@@ -187,9 +173,9 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
     title: 'Facturación',
     sub: 'Historial de facturas y método de pago.',
   },
-  '/app/bots': {
-    title: 'Mis bots',
-    sub: 'Sistemas disponibles en tu tier actual.',
+  '/app/engines': {
+    title: 'Mis engines',
+    sub: 'NexoClip, NexoStreamManager y próximos productos — disponibles en tu tier actual.',
   },
   '/app/history': {
     title: 'Historial',

@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
-import { listBots } from '@/lib/data/bots';
+import { listEngines } from '@/lib/data/engines';
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
+import { ProfileSubscriber } from '@/components/workspace/profile-subscriber';
 import './dashboard.css';
 
 const inter = Inter({
@@ -69,12 +70,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const initial = fullName.charAt(0).toUpperCase();
   const role = session?.role ?? 'VIEWER';
 
-  const bots = await listBots();
+  const engines = await listEngines();
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+      {/* Auto-refresh the admin's view when their own profile changes (e.g.
+          if another super-admin demotes them, the redirect to /app fires on
+          the next render instead of waiting for a manual reload). */}
+      {session?.user.id && <ProfileSubscriber userId={session.user.id} />}
       <DashboardShell
-        initialBots={bots}
+        initialEngines={engines}
         userInitial={initial}
         userName={fullName}
         userRole={roleLabel(role)}

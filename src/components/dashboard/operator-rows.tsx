@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import { toggleFavoriteClient } from '@/lib/data/favorites-client';
 import {
-  type Bot,
-  type BotStateCode,
+  type Engine,
+  type EngineStateCode,
   CATS,
   ENV_LABEL,
   STATE_LABEL,
 } from '@/lib/data/types';
 import { useDashboard } from '@/lib/dashboard/store';
 
-const COLOR_VAR: Record<BotStateCode, string> = {
+const COLOR_VAR: Record<EngineStateCode, string> = {
   g: '--cc-green',
   c: '--cc-cyan',
   p: '--cc-purple',
@@ -20,7 +20,7 @@ const COLOR_VAR: Record<BotStateCode, string> = {
   o: '--cc-txt-4',
 };
 
-function HealthBars({ bot }: { bot: Bot }) {
+function HealthBars({ bot }: { bot: Engine }) {
   const n = 10;
   const on = Math.round((bot.health / 100) * n);
   const cls = bot.stateCode === 'g' ? '' : bot.stateCode;
@@ -41,7 +41,7 @@ function HealthBars({ bot }: { bot: Bot }) {
   );
 }
 
-function OperatorRow({ bot }: { bot: Bot }) {
+function OperatorRow({ bot }: { bot: Engine }) {
   const openDrawer = useDashboard((s) => s.openDrawer);
   const toggleFav = useDashboard((s) => s.toggleFavorite);
   const showToast = useDashboard((s) => s.showToast);
@@ -111,7 +111,7 @@ function OperatorRow({ bot }: { bot: Bot }) {
   );
 }
 
-function CategorySection({ catId, bots }: { catId: Bot['category']; bots: Bot[] }) {
+function CategorySection({ catId, bots }: { catId: Engine['category']; bots: Engine[] }) {
   const [collapsed, setCollapsed] = useState(false);
   const cat = CATS.find((c) => c.id === catId)!;
   const live = bots.filter((b) => b.stateCode !== 'o' && b.stateCode !== 'r').length;
@@ -156,7 +156,7 @@ function CategorySection({ catId, bots }: { catId: Bot['category']; bots: Bot[] 
   );
 }
 
-function FeaturedStrip({ bots }: { bots: Bot[] }) {
+function FeaturedStrip({ bots }: { bots: Engine[] }) {
   const openDrawer = useDashboard((s) => s.openDrawer);
   if (!bots.length) return null;
   return (
@@ -212,7 +212,7 @@ function FeaturedStrip({ bots }: { bots: Bot[] }) {
 }
 
 export function OperatorSurface() {
-  const bots = useDashboard((s) => s.bots);
+  const bots = useDashboard((s) => s.engines);
   const query = useDashboard((s) => s.query);
   const activeCats = useDashboard((s) => s.activeCats);
   const viewMode = useDashboard((s) => s.viewMode);
@@ -254,7 +254,7 @@ export function OperatorSurface() {
 }
 
 export function Toolbar() {
-  const bots = useDashboard((s) => s.bots);
+  const bots = useDashboard((s) => s.engines);
   const query = useDashboard((s) => s.query);
   const activeCats = useDashboard((s) => s.activeCats);
   const viewMode = useDashboard((s) => s.viewMode);

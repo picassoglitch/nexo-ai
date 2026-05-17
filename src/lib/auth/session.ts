@@ -29,7 +29,9 @@ export interface SessionUser {
   role: UserRole;
   tier: SubscriptionTier;
   orgId: string | null;
-  selectedBotId: string | null;
+  /** Which engine the user has chosen to run LIVE (PRO tier only).
+   *  Backed by profiles.selected_engine_id (was selected_bot_id pre-migration 0010). */
+  selectedEngineId: string | null;
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -51,7 +53,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, tier, org_id, selected_bot_id')
+    .select('role, tier, org_id, selected_engine_id')
     .eq('id', user.id)
     .maybeSingle();
   const storedRole = (profile?.role as UserRole | undefined) ?? 'VIEWER';
@@ -62,7 +64,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     role,
     tier,
     orgId: (profile?.org_id as string | null) ?? null,
-    selectedBotId: (profile?.selected_bot_id as string | null) ?? null,
+    selectedEngineId: (profile?.selected_engine_id as string | null) ?? null,
   };
 }
 

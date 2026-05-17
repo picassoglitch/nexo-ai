@@ -10,26 +10,26 @@ interface Cmd {
   n: string;
   s: string;
   k?: string;
-  botId?: string;
+  engineId?: string;
 }
 
 const STATIC_CMDS: Cmd[] = [
-  { g: 'Acciones', ic: '▶', n: 'Iniciar stream', s: 'AVA Streamer · Kick', k: 'S' },
+  { g: 'Acciones', ic: '▶', n: 'Iniciar stream', s: 'NexoStreamManager', k: 'S' },
   { g: 'Acciones', ic: '✂', n: 'Crear clip', s: 'NexoClip · último VOD' },
-  { g: 'Acciones', ic: '💬', n: 'Generar subtítulos', s: 'SubtitleForge' },
   { g: 'Acciones', ic: '↗', n: 'Publicar a TikTok', s: 'Publishing' },
-  { g: 'Acciones', ic: '⟳', n: 'Reiniciar worker', s: 'Selecciona un sistema' },
+  { g: 'Acciones', ic: '⟳', n: 'Reiniciar worker', s: 'Selecciona un engine' },
   { g: 'Acciones', ic: '👥', n: 'Invitar miembro', s: 'Team & Roles' },
   { g: 'Navegar', ic: '◑', n: 'Abrir Analytics', s: 'Métricas e ingresos' },
-  { g: 'Navegar', ic: '$', n: 'Abrir Revenue', s: 'MRR por sistema' },
+  { g: 'Navegar', ic: '$', n: 'Abrir Revenue', s: 'MRR por engine' },
   { g: 'Navegar', ic: '▤', n: 'Abrir Infra', s: 'Workers · GPU · costos' },
+  { g: 'Navegar', ic: '◉', n: 'Abrir Audit log', s: 'Eventos de cuenta' },
 ];
 
 export function CommandPalette() {
   const open = useDashboard((s) => s.paletteOpen);
   const toggle = useDashboard((s) => s.togglePalette);
   const close = useDashboard((s) => s.closePalette);
-  const bots = useDashboard((s) => s.bots);
+  const engines = useDashboard((s) => s.engines);
   const openDrawer = useDashboard((s) => s.openDrawer);
   const showToast = useDashboard((s) => s.showToast);
 
@@ -39,15 +39,15 @@ export function CommandPalette() {
   const listRef = useRef<HTMLDivElement>(null);
 
   const allCmds = useMemo<Cmd[]>(() => {
-    const botCmds: Cmd[] = bots.map((b) => ({
-      g: 'Sistemas',
-      ic: b.icon,
-      n: `Abrir ${b.name}`,
-      s: `${b.type} · ${ENV_LABEL[b.env]}`,
-      botId: b.id,
+    const engineCmds: Cmd[] = engines.map((e) => ({
+      g: 'Engines',
+      ic: e.icon,
+      n: `Abrir ${e.name}`,
+      s: `${e.type} · ${ENV_LABEL[e.env]}`,
+      engineId: e.id,
     }));
-    return [...STATIC_CMDS, ...botCmds];
-  }, [bots]);
+    return [...STATIC_CMDS, ...engineCmds];
+  }, [engines]);
 
   const items = useMemo(() => {
     if (!q) return allCmds.slice(0, 40);
@@ -102,8 +102,8 @@ export function CommandPalette() {
 
   function runCmd(c: Cmd) {
     close();
-    if (c.botId) {
-      openDrawer(c.botId);
+    if (c.engineId) {
+      openDrawer(c.engineId);
       return;
     }
     showToast(`<b>${c.n}</b> — ejecutado`);
@@ -128,7 +128,7 @@ export function CommandPalette() {
               setQ(e.target.value);
               setSel(0);
             }}
-            placeholder="Escribe un comando o busca un sistema…"
+            placeholder="Escribe un comando o busca un engine…"
             autoComplete="off"
           />
           <kbd>ESC</kbd>
