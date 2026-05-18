@@ -62,6 +62,18 @@ body:has(.cc-shell) {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Workspace layout — the subscriber shell (/app/*) has no right rail, so it
+   wants 2 columns instead of 3. Previously this was set via an inline
+   `style={{ gridTemplateColumns: '...' }}` on the React component, but inline
+   styles beat media queries in the cascade — that broke the ≤920 px mobile
+   case where the sidebar should slide off-canvas and main should be 1fr.
+   The mobile result was a 236 px ghost gutter pushing the page content
+   half-off-screen. Done as a modifier class so the existing responsive
+   rules at 1240 px and 920 px still apply. */
+.cc-shell--no-rail {
+  grid-template-columns: var(--cc-sb) 1fr;
+}
+
 .cc-shell *,
 .cc-shell *::before,
 .cc-shell *::after {
@@ -555,7 +567,12 @@ body:has(.cc-shell) {
   }
 }
 @media (max-width: 920px) {
-  .cc-shell {
+  .cc-shell,
+  .cc-shell--no-rail {
+    /* Mobile: sidebar becomes a fixed off-canvas drawer, so the grid is
+       a single column. Modifier class needs to be listed explicitly here
+       because `.cc-shell--no-rail` has higher specificity than `.cc-shell`
+       and would otherwise win the cascade with its 2-column rule. */
     grid-template-columns: 1fr;
   }
   .cc-sb {

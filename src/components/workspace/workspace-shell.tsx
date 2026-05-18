@@ -22,7 +22,13 @@ export function WorkspaceShell({ userInitial, userName, tierLabel, isAdmin, chil
   const meta = PAGE_META[pathname] ?? { title: 'Tu espacio', sub: '' };
 
   return (
-    <div className="cc-shell" style={{ gridTemplateColumns: 'var(--cc-sb) 1fr' }}>
+    // `cc-shell--no-rail` swaps the default 3-column grid (sidebar + main +
+    // right rail) for a 2-column one. The subscriber workspace has no rail
+    // content. We use a class instead of an inline `style` so the responsive
+    // media queries in dashboard.css can still collapse to 1fr at ≤920 px —
+    // inline styles win the cascade and broke mobile by leaving a 236 px
+    // ghost column that pushed the page half-off-screen.
+    <div className="cc-shell cc-shell--no-rail">
       {mobileSidebarOpen && (
         <div className="cc-sbscrim show" onClick={() => setMobileSidebarOpen(false)} />
       )}
