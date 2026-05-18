@@ -6,7 +6,10 @@ import { logAudit } from '@/lib/audit/log';
 import { provisionAllAccessEngines } from '@/lib/engines/subscriptions';
 import { getSessionUser, type SubscriptionTier } from './session';
 
-const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'ALL_ACCESS'];
+// PARTNER is admin-grant only — there's no MP checkout for it, so the
+// VALID_TIERS allowlist DOES include it (admins can promote) while the
+// self-change branch below blocks non-admins from picking it.
+const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'PARTNER', 'ALL_ACCESS'];
 
 interface ChangeResult {
   ok: boolean;
@@ -34,6 +37,13 @@ export async function changeUserTier(
   // Permission gate at the Next.js layer (authoritative — includes env-locked admins).
   if (!isSelf && !isAdmin) {
     return { ok: false, error: 'Solo admins pueden cambiar el tier de otros' };
+  }
+
+  // PARTNER is admin-grant only. A self-promote to PARTNER would bypass the
+  // intent (it's a relationship, not a SKU). Block it explicitly so the
+  // dropdown can't be hand-rolled by a non-admin to claim partner perks.
+  if (newTier === 'PARTNER' && !isAdmin) {
+    return { ok: false, error: 'El tier Partner solo se asigna desde el admin' };
   }
 
   // Use the service-role client so the write bypasses RLS. This is the only

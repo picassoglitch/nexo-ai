@@ -55,6 +55,10 @@ export const NAV: NavGroup[] = [
     grp: 'Organización',
     items: [
       { id: 'team', href: '/dashboard/team', ic: '👥', label: 'Team & Roles' },
+      // Inbox: subscriber threads + landing-form partner inquiries.
+      // Count is rendered live by the admin sidebar from
+      // countUnreadForAdmin() + countUnreadInquiriesForAdmin().
+      { id: 'messages', href: '/dashboard/messages', ic: '✉', label: 'Mensajes' },
       { id: 'billing', href: '/dashboard/billing', ic: '▦', label: 'Billing (P&L)' },
       { id: 'audit', href: '/dashboard/audit', ic: '◉', label: 'Audit log' },
       { id: 'settings', href: '/dashboard/settings', ic: '⚙', label: 'Settings' },
@@ -86,6 +90,10 @@ export const SUBSCRIBER_NAV: NavGroup[] = [
   {
     grp: 'Ajustes',
     items: [
+      // Messages → bidirectional thread with the admin team. Partners use this
+      // for product feedback + ideas; any user can ping the admin from here.
+      // Unread count is rendered server-side in the WorkspaceSidebar.
+      { id: 'messages', href: '/app/messages', ic: '✉', label: 'Mensajes' },
       { id: 'profile', href: '/app/settings', ic: '⚙', label: 'Perfil & seguridad' },
       { id: 'help', href: '/app/help', ic: '?', label: 'Ayuda' },
     ],
@@ -145,6 +153,10 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
     title: 'Team & Roles',
     sub: 'Usuarios, permisos y registro de actividad.',
   },
+  '/dashboard/messages': {
+    title: 'Mensajes',
+    sub: 'Hilos con subscribers + leads de partners desde la landing.',
+  },
   '/dashboard/billing': {
     title: 'Billing',
     sub: 'Plan actual, facturas y método de pago.',
@@ -180,6 +192,10 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/app/history': {
     title: 'Historial',
     sub: 'Tus ejecuciones recientes y trabajos completados.',
+  },
+  '/app/messages': {
+    title: 'Mensajes',
+    sub: 'Habla directo con el equipo. Ideas, problemas, propuestas — todo va aquí.',
   },
   '/app/settings': {
     title: 'Perfil & seguridad',

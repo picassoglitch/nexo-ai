@@ -20,6 +20,15 @@ export function effectiveTier(role: UserRole, storedTier: SubscriptionTier): Sub
   return storedTier;
 }
 
+/**
+ * Is this tier the partner program tier?
+ * Centralized so /app surfaces can render the "Partner · plus your own engine"
+ * badge consistently without re-coding the comparison everywhere.
+ */
+export function isPartnerTier(tier: SubscriptionTier): boolean {
+  return tier === 'PARTNER';
+}
+
 export interface TierCapabilities {
   /** How many engines the user can run in LIVE execution (not simulation).
    *  FREE = 0 (all simulation only).
@@ -77,6 +86,26 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     price: 'MXN $749',
     per: 'mes',
   },
+  // PARTNER = PRO + 1 owned engine. The owned engine is ALWAYS live regardless
+  // of selected_engine_id (enforced in engineCanRunLive below), so the
+  // effective live count is 2: their owned + the slot they pick. We keep
+  // liveEnginesCount = 1 here because the value drives the *selectable* slot
+  // count on /app surfaces — partners pick 1 like PRO does. The owned engine
+  // is bonus capacity outside the slot mechanic.
+  PARTNER: {
+    liveEnginesCount: 1,
+    jobsPerMonth: 2_000,
+    tokensPerMonth: 2_000_000,
+    storageMB: 5_000,
+    activeStreams: 1,
+    historyDays: 180,
+    hasAdvancedAnalytics: true,
+    hasPrioritySupport: true,
+    hasEarlyAccess: true,
+    label: 'Partner',
+    price: 'Programa',
+    per: '',
+  },
   ALL_ACCESS: {
     liveEnginesCount: Infinity,
     jobsPerMonth: 20_000,
@@ -97,6 +126,10 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
  * Returns whether a specific engine is allowed in LIVE mode for the given user state.
  * - FREE: never live.
  * - PRO: live if it's their selected_engine_id, else simulation.
+ * - PARTNER: same as PRO for selection-slot mechanics, PLUS their owned engine
+ *   is always live regardless of selection. Callers must pass `isOwnedByUser`
+ *   so this function stays a pure predicate; the caller is responsible for
+ *   joining engines.owner_user_id against the current user id.
  * - ALL_ACCESS: always live.
  *
  * Tier-required check is separate — even an ALL_ACCESS user can't activate
@@ -107,11 +140,16 @@ export function engineCanRunLive(
   tier: SubscriptionTier,
   engineId: string,
   selectedEngineId: string | null,
+  isOwnedByUser: boolean = false,
 ): boolean {
+  // Partner-owned engines short-circuit to always-live. The owned engine is
+  // bonus capacity outside the selection mechanic — partners get their slot
+  // AND their own.
+  if (isOwnedByUser) return true;
   const caps = TIER_CAPS[tier];
   if (caps.liveEnginesCount === 0) return false;
   if (caps.liveEnginesCount === Infinity) return true;
-  // PRO (or any finite > 0 case) — must match selection.
+  // PRO + PARTNER (or any finite > 0 case) — must match selection.
   return engineId === selectedEngineId;
 }
 
@@ -120,7 +158,8 @@ export { engineCanRunLive as botCanRunLive };
 
 /** Pretty tier name for sidebar pills + headings. */
 export function tierLabelShort(tier: SubscriptionTier): string {
-  return tier === 'ALL_ACCESS' ? 'ALL-ACCESS' : tier;
+  if (tier === 'ALL_ACCESS') return 'ALL-ACCESS';
+  return tier; // 'FREE' | 'PRO' | 'PARTNER'
 }
 
 /** Quotas formatted as the UI list expects them. */
@@ -161,7 +200,14 @@ export function buildQuotaRows(tier: SubscriptionTier): QuotaRow[] {
       used: 0,
       cap: caps.liveEnginesCount === Infinity ? 999 : caps.liveEnginesCount,
       unit: caps.liveEnginesCount === 0 ? 'engine en vivo · solo simulación' : 'engines',
-      sub: tier === 'PRO' ? 'tú eliges cuál' : tier === 'FREE' ? 'upgrade a Pro' : 'todos disponibles',
+      sub:
+        tier === 'PRO'
+          ? 'tú eliges cuál'
+          : tier === 'FREE'
+            ? 'upgrade a Pro'
+            : tier === 'PARTNER'
+              ? '1 a elegir · tu engine propio siempre activo'
+              : 'todos disponibles',
     },
   ];
 }

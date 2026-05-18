@@ -95,6 +95,16 @@ export interface Engine {
   adminApiBase: string | null;
   /** When true, Nexo AI provisions a tenant in the engine on first activation. */
   requiresProvisioning: boolean;
+  /** Partner who owns this engine (null = platform-owned default). The
+   *  marketplace shows a "by Partner X" attribution chip on owned engines,
+   *  and the owner's /app surfaces treat the engine as always-live regardless
+   *  of selected_engine_id (see engineCanRunLive). */
+  ownerUserId: string | null;
+  /** Display name for the owner — pre-joined for the "by Partner X" badge.
+   *  Empty when no owner or when the owner has no full_name set on their
+   *  profile (we fall back to email local-part on the UI side). */
+  ownerDisplayName: string | null;
+  ownerEmail: string | null;
   persona?: EnginePersona;
 }
 

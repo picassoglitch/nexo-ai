@@ -1,9 +1,11 @@
 import { setRequestLocale } from 'next-intl/server';
 import { getSessionUser, isSuperAdminEmail } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { TeamRoleSelect } from '@/components/dashboard/team-role-select';
 import { TeamTierSelect } from '@/components/dashboard/team-tier-select';
 import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
+import { PartnerEngineSelect, type EngineOption } from '@/components/dashboard/partner-engine-select';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
 export const metadata = { title: 'Team & Roles' };
@@ -36,6 +38,51 @@ export default async function TeamPage({
 
   const canEdit = session?.role === 'SUPER_ADMIN' || session?.role === 'ADMIN';
   const paidCount = profiles.filter((p) => p.tier !== 'FREE').length;
+  const partnerCount = profiles.filter((p) => p.tier === 'PARTNER').length;
+
+  // Engine catalog for the PartnerEngineSelect dropdown. We pull all engines
+  // + their current owner so the select can disable engines already claimed
+  // by a different partner. Joining owner email via a follow-up profiles
+  // lookup keeps the query simple (no PostgREST embedding).
+  let engineOptions: EngineOption[] = [];
+  if (canEdit && partnerCount > 0) {
+    const admin = createAdminClient();
+    const { data: enginesRaw } = await admin
+      .from('engines')
+      .select('id, slug, name, owner_user_id')
+      .order('name');
+    const engines = (enginesRaw ?? []) as Array<{
+      id: string;
+      slug: string;
+      name: string;
+      owner_user_id: string | null;
+    }>;
+    const ownerIds = engines
+      .map((e) => e.owner_user_id)
+      .filter((x): x is string => x !== null);
+    let ownersById = new Map<string, string | null>();
+    if (ownerIds.length > 0) {
+      const { data: owners } = await admin
+        .from('profiles')
+        .select('id, email')
+        .in('id', ownerIds);
+      ownersById = new Map(
+        (owners ?? []).map((o) => [o.id as string, (o.email as string | null) ?? null]),
+      );
+    }
+    engineOptions = engines.map((e) => ({
+      id: e.id,
+      slug: e.slug,
+      name: e.name,
+      ownerUserId: e.owner_user_id,
+      ownerEmail: e.owner_user_id ? (ownersById.get(e.owner_user_id) ?? null) : null,
+    }));
+  }
+  // Cheap lookup by user → currently owned engine id (for default in the select).
+  const ownedEngineByUser = new Map<string, string>();
+  for (const e of engineOptions) {
+    if (e.ownerUserId) ownedEngineByUser.set(e.ownerUserId, e.id);
+  }
 
   return (
     <div className="cc-scroll">
@@ -52,6 +99,7 @@ export default async function TeamPage({
           <div className="cc-mod-stat-v gr">{paidCount}</div>
           <div className="cc-mod-stat-sub">
             {profiles.filter((p) => p.tier === 'PRO').length} Pro ·{' '}
+            {partnerCount} Partner ·{' '}
             {profiles.filter((p) => p.tier === 'ALL_ACCESS').length} All-Access
           </div>
         </div>
@@ -103,6 +151,17 @@ export default async function TeamPage({
                   {canEdit ? (
                     <>
                       <TeamTierSelect userId={p.id} current={p.tier} />
+                      {/* Owner-engine picker — only renders for PARTNER rows.
+                          Hidden on FREE/PRO/ALL_ACCESS users since the column
+                          on engines is partner-specific (no other tier owns
+                          engines today). */}
+                      {p.tier === 'PARTNER' && (
+                        <PartnerEngineSelect
+                          userId={p.id}
+                          currentEngineId={ownedEngineByUser.get(p.id) ?? null}
+                          engines={engineOptions}
+                        />
+                      )}
                       <TeamRoleSelect
                         userId={p.id}
                         current={p.role}

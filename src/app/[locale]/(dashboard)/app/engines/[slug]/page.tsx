@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
-import { getSessionUser } from '@/lib/auth/session';
+import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
 import { ENV_LABEL } from '@/lib/data/types';
 import {
@@ -43,8 +43,17 @@ export async function generateMetadata({
 // CTA for the user's state, with a "Build phase" placeholder for the actual
 // interface.
 
-const TIER_LABEL_SHORT = { FREE: 'Free', PRO: 'Pro', ALL_ACCESS: 'All-Access' } as const;
-const TIER_ORDER = { FREE: 0, PRO: 1, ALL_ACCESS: 2 } as const;
+// PARTNER ranks alongside PRO for tier-required gates: they get PRO-equivalent
+// access. The owned-engine override (always live) is handled separately in
+// engineCanRunLive via the `isOwnedByUser` flag — engine.tier_required still
+// applies to the engines a partner DOESN'T own.
+const TIER_LABEL_SHORT = {
+  FREE: 'Free',
+  PRO: 'Pro',
+  PARTNER: 'Partner',
+  ALL_ACCESS: 'All-Access',
+} as const;
+const TIER_ORDER = { FREE: 0, PRO: 1, PARTNER: 1, ALL_ACCESS: 2 } as const;
 
 export default async function EngineWorkspacePage({
   params,
@@ -66,11 +75,21 @@ export default async function EngineWorkspacePage({
   const tier = effectiveTier(role, storedTier);
   const isAdmin = isAdminRole(role);
   const meetsTier = TIER_ORDER[tier] >= TIER_ORDER[engine.tierRequired];
+  // Partner-owned override: the engine's owner sees their own engine as
+  // always-live (additive to any selected_engine_id they may also have).
+  const isOwnedByMe =
+    engine.ownerUserId !== null && engine.ownerUserId === session.user.id;
   const isLive =
     engine.status === 'active' &&
     meetsTier &&
-    engineCanRunLive(tier, engine.id, session.selectedEngineId);
+    engineCanRunLive(tier, engine.id, session.selectedEngineId, isOwnedByMe);
   const isComingSoon = engine.status === 'coming_soon';
+  const ownerLabel =
+    engine.ownerUserId === null
+      ? null
+      : engine.ownerDisplayName ||
+        engine.ownerEmail?.split('@')[0] ||
+        'Partner';
 
   // Lazy admin provisioning: admins have effective ALL_ACCESS via role
   // override, so they should auto-have engine access. If migration 0011's
@@ -133,9 +152,32 @@ export default async function EngineWorkspacePage({
               fontWeight: 700,
               letterSpacing: '-0.02em',
               marginBottom: 4,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              flexWrap: 'wrap',
             }}
           >
             {engine.name}
+            {ownerLabel && (
+              <span
+                style={{
+                  fontFamily: 'var(--cc-mono), monospace',
+                  fontSize: 11,
+                  letterSpacing: '0.1em',
+                  color: 'var(--cc-purple)',
+                  background: 'var(--cc-purple-g)',
+                  border: '1px solid rgba(157,123,255,.3)',
+                  padding: '4px 10px',
+                  borderRadius: 5,
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}
+                title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
+              >
+                {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
+              </span>
+            )}
           </h2>
           <div
             style={{
@@ -283,7 +325,7 @@ function LaunchPanel({
   engineName: string;
   integrationMode: 'internal_placeholder' | 'external_sso_redirect' | 'iframe_embed';
   mode: 'live' | 'simulation';
-  tier?: 'FREE' | 'PRO' | 'ALL_ACCESS';
+  tier?: SubscriptionTier;
   isAdmin?: boolean;
 }) {
   const isLive = mode === 'live';
@@ -388,7 +430,7 @@ function UpgradeGatePanel({
   tierRequired,
 }: {
   engineName: string;
-  tierRequired: 'FREE' | 'PRO' | 'ALL_ACCESS';
+  tierRequired: SubscriptionTier;
 }) {
   return (
     <div

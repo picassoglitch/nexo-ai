@@ -20,7 +20,11 @@
 
 import { sendEmail, getContactInbox, isResendConfigured } from '@/lib/email/resend';
 import { contactInboxTemplate, contactConfirmTemplate } from '@/lib/email/templates';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { headers } from 'next/headers';
+
+type ContactPane = 'client' | 'partner' | 'earn';
+const VALID_PANES: ContactPane[] = ['client', 'partner', 'earn'];
 
 export interface ContactResult {
   ok: boolean;
@@ -57,6 +61,14 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const subject = String(formData.get('subject') ?? '').trim();
   const message = String(formData.get('message') ?? '').trim();
+  // Pane tags the lead source (client / partner / earn). The contact form
+  // can include a hidden <input name="pane"> set from the URL or the
+  // currently-active landing tab. Default to 'client' for forms that don't
+  // specify so behavior stays backward-compatible.
+  const paneRaw = String(formData.get('pane') ?? 'client').trim().toLowerCase();
+  const pane: ContactPane = VALID_PANES.includes(paneRaw as ContactPane)
+    ? (paneRaw as ContactPane)
+    : 'client';
 
   if (name.length < 2 || name.length > 120) {
     return { ok: false, fieldError: 'name', error: 'Nombre requerido (2–120 caracteres).' };
@@ -78,6 +90,7 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
     h.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     h.get('x-real-ip') ||
     'local';
+  const userAgent = h.get('user-agent') ?? null;
   if (!checkRate(ip)) {
     return {
       ok: false,
@@ -109,6 +122,35 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
 
   if (!inboxResult.ok && inboxResult.reason !== 'not_configured') {
     return { ok: false, error: 'No pudimos entregar tu mensaje. Intenta de nuevo en unos minutos.' };
+  }
+
+  // Persist to partner_inquiries so the admin inbox shows it even if the
+  // notification email goes to spam / Resend is down. The table holds every
+  // pane (client / partner / earn) — the pane column tags origin. We use
+  // the service-role client because anon writes are blocked by RLS (only
+  // admins read, only this server action writes).
+  //
+  // Best-effort: log + ignore failures. Losing the row is bad UX but the
+  // email is the primary delivery channel — don't fail the submission
+  // because a DB blip happened.
+  try {
+    const admin = createAdminClient();
+    const { error: dbError } = await admin.from('partner_inquiries').insert({
+      name,
+      email,
+      message: subject ? `${subject}\n\n${message}` : message,
+      pane,
+      ip_addr: ip === 'local' ? null : ip,
+      user_agent: userAgent,
+    });
+    if (dbError) {
+      console.warn('[contact] partner_inquiries insert failed:', dbError.message);
+    }
+  } catch (e) {
+    console.warn(
+      '[contact] partner_inquiries insert threw:',
+      e instanceof Error ? e.message : String(e),
+    );
   }
 
   // If Resend isn't configured (dev), still return ok — the warning in the

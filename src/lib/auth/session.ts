@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'OPERATOR' | 'EDITOR' | 'VIEWER' | 'CLIENT';
-export type SubscriptionTier = 'FREE' | 'PRO' | 'ALL_ACCESS';
+// PARTNER landed in migration 0014 as a 4th tier. Same access as PRO plus
+// one always-on owned engine — see TIER_CAPS.PARTNER in src/lib/billing/tiers.ts
+// and the engines.owner_user_id column for the ownership pointer.
+export type SubscriptionTier = 'FREE' | 'PRO' | 'PARTNER' | 'ALL_ACCESS';
 
 const ROLE_TIER: Record<UserRole, number> = {
   SUPER_ADMIN: 100,

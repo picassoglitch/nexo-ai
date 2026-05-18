@@ -15,7 +15,14 @@ import { LiveEngineSelectButton } from '@/components/workspace/live-engine-selec
 // Browser tab → "Mis engines · Nexo AI" (template in [locale]/layout.tsx).
 export const metadata = { title: 'Mis engines' };
 
-const TIER_LABEL_SHORT = { FREE: 'Free', PRO: 'Pro', ALL_ACCESS: 'All-Access' } as const;
+// PARTNER ranks alongside PRO for tier-required gates (same level of access).
+// The owned-engine override is handled separately via engineCanRunLive.
+const TIER_LABEL_SHORT = {
+  FREE: 'Free',
+  PRO: 'Pro',
+  PARTNER: 'Partner',
+  ALL_ACCESS: 'All-Access',
+} as const;
 
 export default async function MyEnginesPage({
   params,
@@ -152,13 +159,26 @@ export default async function MyEnginesPage({
           const isComingSoon = engine.status === 'coming_soon';
           const isDeprecated = engine.status === 'deprecated';
           // Available = engine is active AND user's tier qualifies for its tier_required.
-          const tierOrder = { FREE: 0, PRO: 1, ALL_ACCESS: 2 } as const;
+          const tierOrder = { FREE: 0, PRO: 1, PARTNER: 1, ALL_ACCESS: 2 } as const;
           const meetsTier = tierOrder[tier] >= tierOrder[engine.tierRequired];
+          // Partner-owned override: the engine's owner sees it as always-live,
+          // regardless of selected_engine_id. Marketplace viewers (other users)
+          // see the same badge metadata but the live flag uses the standard rule.
+          const isOwnedByMe =
+            engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
           const isLive =
             engine.status === 'active' &&
             meetsTier &&
-            engineCanRunLive(tier, engine.id, selectedEngineId);
+            engineCanRunLive(tier, engine.id, selectedEngineId, isOwnedByMe);
           const isSelected = engine.id === selectedEngineId;
+          // Owner attribution: empty for platform-owned engines. For partner
+          // engines, prefer full_name, fall back to email local-part.
+          const ownerLabel =
+            engine.ownerUserId === null
+              ? null
+              : engine.ownerDisplayName ||
+                engine.ownerEmail?.split('@')[0] ||
+                'Partner';
 
           return (
             <div
@@ -184,7 +204,32 @@ export default async function MyEnginesPage({
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 22 }}>{engine.icon}</span>
                   <div>
-                    <h4 style={{ fontSize: 14 }}>{engine.name}</h4>
+                    <h4 style={{ fontSize: 14 }}>
+                      {engine.name}
+                      {ownerLabel && (
+                        // "by Partner X" chip — colored purple to match the
+                        // admin-tier banner aesthetic + visually distinguishes
+                        // partner-built engines from platform-owned defaults.
+                        <span
+                          style={{
+                            marginLeft: 8,
+                            fontFamily: 'var(--cc-mono), monospace',
+                            fontSize: 9.5,
+                            letterSpacing: '0.1em',
+                            color: 'var(--cc-purple)',
+                            background: 'var(--cc-purple-g)',
+                            border: '1px solid rgba(157,123,255,.3)',
+                            padding: '2px 7px',
+                            borderRadius: 4,
+                            textTransform: 'uppercase',
+                            verticalAlign: 'middle',
+                          }}
+                          title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
+                        >
+                          {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
+                        </span>
+                      )}
+                    </h4>
                     <div
                       style={{
                         fontFamily: 'var(--cc-mono), monospace',

@@ -22,6 +22,7 @@ interface PaymentRow {
 const TIER_LABEL: Record<SubscriptionTier, string> = {
   FREE: 'Free',
   PRO: 'Pro',
+  PARTNER: 'Partner',
   ALL_ACCESS: 'All-Access',
 };
 

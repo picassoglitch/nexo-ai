@@ -25,6 +25,10 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPrice | null> = {
     currency: 'MXN',
     description: 'Nexo AI · Plan Pro · 1 sistema en vivo',
   },
+  // PARTNER is admin-granted, not sold via checkout. Keep at null so the
+  // MP preference builder skips it and any /subscription page knows there's
+  // no public price tag to show.
+  PARTNER: null,
   ALL_ACCESS: {
     // MXN $2,499.00 = 249,900 centavos.
     amountCents: 249900,

@@ -12,6 +12,7 @@ import type { SubscriptionTier } from '@/lib/auth/session';
 const TIER_LABELS: Record<SubscriptionTier, string> = {
   FREE: TIER_CAPS.FREE.label,
   PRO: TIER_CAPS.PRO.label,
+  PARTNER: TIER_CAPS.PARTNER.label,
   ALL_ACCESS: TIER_CAPS.ALL_ACCESS.label,
 };
 
@@ -39,6 +40,20 @@ const TIER_MARKETING: Record<
       'Ejecución real · límites estándar',
       'Historial completo y analíticas',
       'Soporte por correo',
+    ],
+  },
+  // PARTNER tier is admin-granted only — never shown as a buyable card.
+  // We still need the entry so Record<SubscriptionTier, ...> typechecks
+  // and the labels map can be indexed by any tier. The card-filtering
+  // ORDER array below excludes it.
+  PARTNER: {
+    tagline: 'Programa de partners · acceso por invitación.',
+    features: [
+      'Todo lo de Pro',
+      'Tu propio engine siempre activo + 1 a elegir',
+      'Historial extendido (180 días)',
+      'Soporte prioritario',
+      'Acceso anticipado a nuevas herramientas',
     ],
   },
   ALL_ACCESS: {

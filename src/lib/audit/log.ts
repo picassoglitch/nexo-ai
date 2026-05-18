@@ -17,7 +17,8 @@ export type AuditAction =
   | 'tier.payment' // MP webhook activated tier after approved payment
   | 'tier.downgrade' // subscriber self-downgraded
   | 'role.change' // admin changed a subscriber's role
-  | 'selected_bot.change'; // PRO subscriber swapped their live bot
+  | 'selected_bot.change' // PRO subscriber swapped their live bot
+  | 'partner.engine_assign'; // admin set / cleared which engine a partner owns
 
 export interface AuditPayload {
   action: AuditAction;

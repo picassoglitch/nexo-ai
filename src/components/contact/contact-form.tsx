@@ -4,8 +4,17 @@ import { useState, useTransition } from 'react';
 import { submitContactForm } from '@/lib/contact/contact-actions';
 
 type FieldError = 'name' | 'email' | 'subject' | 'message' | null;
+type Pane = 'client' | 'partner' | 'earn';
 
-export function ContactForm() {
+interface Props {
+  /** Tag the submission origin. Defaults to 'client' for backward compat.
+   *  Currently only the future landing-section wire-up will pass 'partner'
+   *  / 'earn'; the /contacto page itself doesn't differentiate, but the
+   *  prop is here so it can. */
+  pane?: Pane;
+}
+
+export function ContactForm({ pane = 'client' }: Props = {}) {
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +95,10 @@ export function ContactForm() {
           pointerEvents: 'none',
         }}
       />
+
+      {/* Pane tag — picked up by submitContactForm and persisted on the
+          partner_inquiries row so the admin inbox can filter / colorize. */}
+      <input type="hidden" name="pane" value={pane} />
 
       <div className={fieldClass('name')}>
         <label htmlFor="contact-name">Nombre</label>
