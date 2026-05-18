@@ -4,6 +4,10 @@ import { getSessionUser, requireUser } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { ProfileSubscriber } from '@/components/workspace/profile-subscriber';
+import {
+  countUnreadForAdmin,
+  countUnreadInquiriesForAdmin,
+} from '@/lib/messages/messages-data';
 import './dashboard.css';
 
 const inter = Inter({
@@ -72,6 +76,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const engines = await listEngines();
 
+  // Sidebar badge — combine inbound subscriber messages + landing-form
+  // partner inquiries into one number, since both surfaces live in the
+  // same /dashboard/messages inbox. Two parallel COUNTs (HEAD requests
+  // against the postgres count cache) — total round-trip stays sub-100 ms.
+  const [unreadMsgs, unreadInquiries] = await Promise.all([
+    countUnreadForAdmin(),
+    countUnreadInquiriesForAdmin(),
+  ]);
+  const unreadMessages = unreadMsgs + unreadInquiries;
+
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
       {/* Auto-refresh the admin's view when their own profile changes (e.g.
@@ -83,6 +97,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userInitial={initial}
         userName={fullName}
         userRole={roleLabel(role)}
+        unreadMessages={unreadMessages}
       >
         {children}
       </DashboardShell>

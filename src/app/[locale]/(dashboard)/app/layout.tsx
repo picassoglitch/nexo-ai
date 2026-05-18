@@ -3,6 +3,7 @@ import { getSessionUser, requireUser } from '@/lib/auth/session';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { WorkspaceProfileSubscriber } from '@/components/workspace/workspace-profile-subscriber';
 import { effectiveTier, isAdminRole, tierLabelShort } from '@/lib/billing/tiers';
+import { countUnreadForUser } from '@/lib/messages/messages-data';
 import '../dashboard/dashboard.css';
 
 const inter = Inter({
@@ -45,6 +46,13 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   const tier = effectiveTier(role, storedTier);
   const tierLabel = isAdmin ? `${tierLabelShort(tier)} · ADMIN` : tierLabelShort(tier);
 
+  // Sidebar badge — admin-sent messages this user hasn't opened yet.
+  // The /app/messages page auto-marks the thread read on render via
+  // markThreadReadAsUser, so this drops to 0 as soon as they visit.
+  const unreadMessages = session?.user.id
+    ? await countUnreadForUser(session.user.id)
+    : 0;
+
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
       {session?.user.id && <WorkspaceProfileSubscriber userId={session.user.id} />}
@@ -53,6 +61,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
         userName={fullName}
         tierLabel={tierLabel}
         isAdmin={isAdmin}
+        unreadMessages={unreadMessages}
       >
         {children}
       </WorkspaceShell>

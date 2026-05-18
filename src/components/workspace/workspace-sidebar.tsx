@@ -11,9 +11,23 @@ interface Props {
   userName: string;
   tierLabel: string;
   isAdmin: boolean;
+  /** Render as the ct chip on the Mensajes nav item. 0 hides it.
+   *  Counts ≥ 100 collapse to "99+" so the chip width stays predictable. */
+  unreadMessages?: number;
 }
 
-export function WorkspaceSidebar({ userInitial, userName, tierLabel, isAdmin }: Props) {
+function formatBadgeCount(n: number): string {
+  if (n >= 100) return '99+';
+  return String(n);
+}
+
+export function WorkspaceSidebar({
+  userInitial,
+  userName,
+  tierLabel,
+  isAdmin,
+  unreadMessages = 0,
+}: Props) {
   const pathname = usePathname();
   const setMobileSidebarOpen = useWorkspace((s) => s.setMobileSidebarOpen);
   const mobileOpen = useWorkspace((s) => s.mobileSidebarOpen);
@@ -38,19 +52,46 @@ export function WorkspaceSidebar({ userInitial, userName, tierLabel, isAdmin }: 
           <div key={g.grp} className="cc-sb-grp">
             <div className="cc-gl">{g.grp}</div>
             <div className="cc-nav">
-              {g.items.map((it) => (
-                <Link
-                  key={it.id}
-                  href={it.href as Route}
-                  className={`cc-nav-item${isActive(it.href) ? ' on' : ''}`}
-                  onClick={() => setMobileSidebarOpen(false)}
-                >
-                  <span className="cc-ic">{it.ic}</span>
-                  <span>{it.label}</span>
-                  {it.live && <span className="cc-dot" />}
-                  {it.ct && <span className="cc-ct">{it.ct}</span>}
-                </Link>
-              ))}
+              {g.items.map((it) => {
+                // Override the static `ct` on the Mensajes item with the
+                // live unread count from the server. Static NAV stays
+                // count-agnostic for every other item.
+                const ct =
+                  it.id === 'messages' && unreadMessages > 0
+                    ? formatBadgeCount(unreadMessages)
+                    : it.ct;
+                return (
+                  <Link
+                    key={it.id}
+                    href={it.href as Route}
+                    className={`cc-nav-item${isActive(it.href) ? ' on' : ''}`}
+                    onClick={() => setMobileSidebarOpen(false)}
+                  >
+                    <span className="cc-ic">{it.ic}</span>
+                    <span>{it.label}</span>
+                    {it.live && <span className="cc-dot" />}
+                    {ct && (
+                      <span
+                        className="cc-ct"
+                        style={
+                          // Highlight unread-message badge in green so it's
+                          // the eye-catcher in the sidebar (vs. neutral counts
+                          // used by other items).
+                          it.id === 'messages' && unreadMessages > 0
+                            ? {
+                                background: 'var(--cc-green-g)',
+                                color: 'var(--cc-green)',
+                                border: '1px solid rgba(158,234,58,.3)',
+                              }
+                            : undefined
+                        }
+                      >
+                        {ct}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         ))}

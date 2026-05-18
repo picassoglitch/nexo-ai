@@ -17,6 +17,10 @@ interface Props {
   userInitial: string;
   userName: string;
   userRole: string;
+  /** Unread message count rendered as a chip on the "Mensajes" nav item.
+   *  Combines subscriber-thread unreads + landing-form inquiries that
+   *  haven't been opened yet. 0 hides the badge. */
+  unreadMessages?: number;
   children: React.ReactNode;
 }
 
@@ -25,6 +29,7 @@ export function DashboardShell({
   userInitial,
   userName,
   userRole,
+  unreadMessages = 0,
   children,
 }: Props) {
   const pathname = usePathname();
@@ -54,6 +59,7 @@ export function DashboardShell({
         userName={userName}
         userRole={userRole}
         mobileOpen={mobileSidebarOpen}
+        unreadMessages={unreadMessages}
       />
 
       <main className="cc-main">

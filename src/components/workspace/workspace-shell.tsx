@@ -10,10 +10,19 @@ interface Props {
   userName: string;
   tierLabel: string;
   isAdmin: boolean;
+  /** Unread admin-sent messages shown as a chip on the Mensajes nav item. */
+  unreadMessages?: number;
   children: React.ReactNode;
 }
 
-export function WorkspaceShell({ userInitial, userName, tierLabel, isAdmin, children }: Props) {
+export function WorkspaceShell({
+  userInitial,
+  userName,
+  tierLabel,
+  isAdmin,
+  unreadMessages = 0,
+  children,
+}: Props) {
   const pathname = usePathname();
   const mobileSidebarOpen = useWorkspace((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen = useWorkspace((s) => s.setMobileSidebarOpen);
@@ -37,6 +46,7 @@ export function WorkspaceShell({ userInitial, userName, tierLabel, isAdmin, chil
         userName={userName}
         tierLabel={tierLabel}
         isAdmin={isAdmin}
+        unreadMessages={unreadMessages}
       />
 
       <main className="cc-main">
