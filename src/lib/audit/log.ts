@@ -18,7 +18,9 @@ export type AuditAction =
   | 'tier.downgrade' // subscriber self-downgraded
   | 'role.change' // admin changed a subscriber's role
   | 'selected_bot.change' // PRO subscriber swapped their live bot
-  | 'partner.engine_assign'; // admin set / cleared which engine a partner owns
+  | 'partner.engine_assign' // admin set / cleared which engine a partner owns
+  | 'tokens.grant' // admin manually granted bonus tokens (vs. MP payment / promo)
+  | 'tokens.revoke'; // admin removed bonus tokens (subtracted from balance)
 
 export interface AuditPayload {
   action: AuditAction;

@@ -2,8 +2,19 @@ import { setRequestLocale } from 'next-intl/server';
 import type { Route } from 'next';
 import { Link } from '@/i18n/routing';
 import { listEngines } from '@/lib/data/engines';
+import { getPlatformTokenStats } from '@/lib/usage/platform-stats';
 
 export const metadata = { title: 'Overview' };
+
+// Format token counts as a compact string. We render large numbers a lot
+// (millions of tokens per engine) so the K/M/B suffix keeps cards aligned.
+function formatTokens(n: number): string {
+  if (n === 0) return '0';
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return n.toLocaleString('es-MX');
+}
 
 export default async function OverviewPage({
   params,
@@ -13,7 +24,12 @@ export default async function OverviewPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const engines = await listEngines();
+  // Run the engines query and the token-stats query in parallel — both feed
+  // independent sections of the page and neither needs the other's output.
+  const [engines, tokenStats] = await Promise.all([
+    listEngines(),
+    getPlatformTokenStats(),
+  ]);
   const active = engines.filter(
     (e) => e.status === 'active' && e.stateCode !== 'o' && e.stateCode !== 'r',
   ).length;
@@ -60,9 +76,16 @@ export default async function OverviewPage({
           </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Trabajos IA / día</div>
-          <div className="cc-mod-stat-v cy">3.4k</div>
-          <div className="cc-mod-stat-sub">+12% vs 7d</div>
+          <div className="cc-mod-stat-l">Tokens IA · mes</div>
+          <div className={`cc-mod-stat-v ${tokenStats.monthTotal > 0 ? 'cy' : ''}`}>
+            {formatTokens(tokenStats.monthTotal)}
+          </div>
+          <div className="cc-mod-stat-sub">
+            {tokenStats.activeUsersThisMonth} usuario
+            {tokenStats.activeUsersThisMonth === 1 ? '' : 's'} activo
+            {tokenStats.activeUsersThisMonth === 1 ? '' : 's'} ·{' '}
+            {formatTokens(tokenStats.weekTotal)} en 7d
+          </div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Engines con persona IA</div>
@@ -76,6 +99,123 @@ export default async function OverviewPage({
               : 'aún no se entrena ninguna'}
           </div>
         </div>
+      </div>
+
+      {/* Tokens consumed per engine, this calendar month. The query runs even
+          when there's no data so the empty state is informative (vs. a missing
+          section that looks like a bug). Lifetime total is rendered alongside
+          so the admin can see "this is what we've spent ever vs. just this
+          month". */}
+      <div className="cc-mod-section">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 12,
+          }}
+        >
+          <div className="cc-mod-sl" style={{ marginBottom: 0 }}>
+            Consumo de tokens · este mes
+          </div>
+          <small
+            style={{
+              fontFamily: 'var(--cc-mono), monospace',
+              fontSize: 10.5,
+              color: 'var(--cc-txt-4)',
+              letterSpacing: '0.08em',
+            }}
+          >
+            HISTÓRICO TOTAL · {formatTokens(tokenStats.allTimeTotal)}
+          </small>
+        </div>
+        {tokenStats.byEngineThisMonth.length === 0 ? (
+          <div
+            style={{
+              padding: '24px 22px',
+              border: '1px dashed var(--cc-line-2)',
+              borderRadius: 'var(--cc-r-l)',
+              textAlign: 'center',
+              color: 'var(--cc-txt-3)',
+              fontSize: 13,
+            }}
+          >
+            Ningún engine ha reportado tokens este mes.
+            <br />
+            <span
+              style={{
+                color: 'var(--cc-txt-4)',
+                fontSize: 11.5,
+                fontFamily: 'var(--cc-mono), monospace',
+                marginTop: 6,
+                display: 'inline-block',
+              }}
+            >
+              Los engines pushean a <code>/api/engines/[slug]/usage</code> en
+              cada llamada LLM exitosa.
+            </span>
+          </div>
+        ) : (
+          <div className="cc-mod-list">
+            {tokenStats.byEngineThisMonth.map((row) => {
+              // Pct of month total — visualized as a thin bar below the row.
+              const pct =
+                tokenStats.monthTotal > 0
+                  ? Math.max(2, Math.round((row.tokens / tokenStats.monthTotal) * 100))
+                  : 0;
+              return (
+                <div
+                  key={row.engineId}
+                  className="cc-mod-row"
+                  style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}
+                >
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+                  >
+                    <div className="cc-mod-ic">⌬</div>
+                    <div className="cc-mod-body">
+                      <div className="cc-mod-name">{row.engineName}</div>
+                      <div className="cc-mod-sub">
+                        slug: <code>{row.engineSlug}</code> · {row.activeUsers}{' '}
+                        usuario{row.activeUsers === 1 ? '' : 's'} activo
+                        {row.activeUsers === 1 ? '' : 's'} este mes
+                      </div>
+                    </div>
+                    <div className="cc-mod-right">
+                      <b className="cy">{formatTokens(row.tokens)}</b>
+                      <span>
+                        {tokenStats.monthTotal > 0
+                          ? `${((row.tokens / tokenStats.monthTotal) * 100).toFixed(1)}% del total`
+                          : '—'}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Mini-bar showing share of the month — cyan to match the
+                      "Tokens IA · mes" stat tile above. */}
+                  <div
+                    style={{
+                      height: 4,
+                      width: '100%',
+                      background: 'var(--cc-bg-3)',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${pct}%`,
+                        background: 'var(--cc-cyan)',
+                        opacity: 0.7,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="cc-mod-section">

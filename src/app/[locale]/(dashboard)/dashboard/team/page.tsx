@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { TeamRoleSelect } from '@/components/dashboard/team-role-select';
 import { TeamTierSelect } from '@/components/dashboard/team-tier-select';
 import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
+import { TeamGrantTokens } from '@/components/dashboard/team-grant-tokens';
 import { PartnerEngineSelect, type EngineOption } from '@/components/dashboard/partner-engine-select';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
@@ -16,6 +17,7 @@ interface ProfileRow {
   full_name: string | null;
   role: UserRole;
   tier: SubscriptionTier;
+  token_bonus_balance: number | null;
   created_at: string;
 }
 
@@ -32,7 +34,7 @@ export default async function TeamPage({
 
   const { data: profilesRaw } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, tier, created_at')
+    .select('id, email, full_name, role, tier, token_bonus_balance, created_at')
     .order('created_at');
   const profiles = (profilesRaw ?? []) as ProfileRow[];
 
@@ -160,6 +162,18 @@ export default async function TeamPage({
                           userId={p.id}
                           currentEngineId={ownedEngineByUser.get(p.id) ?? null}
                           engines={engineOptions}
+                        />
+                      )}
+                      {/* Token-grant control. Shows current bonus balance as
+                          a cyan chip; click opens an inline popover with
+                          +/− amount input and quick-grant buttons. Hidden
+                          for the actor themselves (no self-grant) to keep
+                          the audit log honest. */}
+                      {!isSelf && (
+                        <TeamGrantTokens
+                          userId={p.id}
+                          userName={displayName}
+                          bonusBalance={p.token_bonus_balance ?? 0}
                         />
                       )}
                       <TeamRoleSelect
