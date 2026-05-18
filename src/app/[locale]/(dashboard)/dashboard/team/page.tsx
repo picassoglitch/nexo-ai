@@ -6,6 +6,8 @@ import { TeamRoleSelect } from '@/components/dashboard/team-role-select';
 import { TeamTierSelect } from '@/components/dashboard/team-tier-select';
 import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
 import { TeamGrantTokens } from '@/components/dashboard/team-grant-tokens';
+import { TeamRelinkEngine } from '@/components/dashboard/team-relink-engine';
+import { TeamReconcileEngine } from '@/components/dashboard/team-reconcile-engine';
 import { PartnerEngineSelect, type EngineOption } from '@/components/dashboard/partner-engine-select';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
@@ -120,7 +122,24 @@ export default async function TeamPage({
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Miembros</div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 10,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div className="cc-mod-sl" style={{ marginBottom: 0 }}>
+            Miembros
+          </div>
+          {/* Bulk reconcile control — B3. Forces a re-provision sweep
+              against an engine for every profile. Idempotent + supports
+              dry-run preview before pulling the trigger. */}
+          {canEdit && <TeamReconcileEngine />}
+        </div>
         <div className="cc-mod-list">
           {profiles.map((p) => {
             const isSelf = p.id === session?.user.id;
@@ -176,6 +195,13 @@ export default async function TeamPage({
                           bonusBalance={p.token_bonus_balance ?? 0}
                         />
                       )}
+                      {/* Re-link control. Forces the integration to
+                          re-provision this user in NexoClip; combined with
+                          the engine-side B2 self-healing this reclaims any
+                          orphan tenant by email. Always shown — relinking
+                          yourself is the most common case (admin's own
+                          tenant from CLI-era never got an external_user_id). */}
+                      <TeamRelinkEngine userId={p.id} userName={displayName} />
                       <TeamRoleSelect
                         userId={p.id}
                         current={p.role}

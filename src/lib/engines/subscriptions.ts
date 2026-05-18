@@ -38,7 +38,8 @@ export async function provisionEngineAccess(
   userId: string,
   engineId: string,
   source: SubscriptionSource,
-): Promise<void> {
+  options: { force?: boolean } = {},
+): Promise<ProvisionEngineAccessResult> {
   const admin = createAdminClient();
 
   // Step 1: ensure the access row exists on our side.
@@ -58,12 +59,23 @@ export async function provisionEngineAccess(
 
   if (upsertErr) {
     console.error('[engine_subs] provision failed', { userId, engineId, source }, upsertErr.message);
-    return;
+    return { ok: false, reason: 'db_write_failed', error: upsertErr.message };
   }
 
   // Skip external provisioning if we already have a tenant id stored — the
   // engine integration is idempotent but the round-trip is wasteful.
-  if (upserted?.external_user_id) return;
+  // `force` overrides this for the reconciliation paths (per-user re-link
+  // button + bulk reconcile sweep): we WANT to round-trip even when the
+  // local row says it's already provisioned because the engine side may
+  // have lost or never properly stored its link (CLI-era tenants on the
+  // engine side, deploy that wiped state, etc).
+  if (upserted?.external_user_id && !options.force) {
+    return {
+      ok: true,
+      status: 'already_provisioned',
+      externalUserId: upserted.external_user_id as string,
+    };
+  }
 
   // Step 2: fetch engine + user details for external provisioning.
   // Also pull role + tier so we can compute the effective tier (admin override
@@ -84,19 +96,25 @@ export async function provisionEngineAccess(
       .maybeSingle(),
   ]);
 
-  if (!engineRow?.requires_provisioning) return;
+  if (!engineRow?.requires_provisioning) {
+    return { ok: true, status: 'no_provisioning_needed' };
+  }
 
   const integration = getIntegration(engineRow.slug as string);
   if (!integration) {
     console.warn(
       `[engine_subs] no integration registered for slug=${engineRow.slug} — skipping external provisioning`,
     );
-    return;
+    return {
+      ok: false,
+      reason: 'no_integration',
+      error: `No integration registered for slug=${engineRow.slug}`,
+    };
   }
 
   if (!profile?.email) {
     console.error('[engine_subs] cannot provision externally: profile missing email', userId);
-    return;
+    return { ok: false, reason: 'missing_profile_email' };
   }
 
   // Effective tier — admin override applied. Admins land as ALL_ACCESS on the
@@ -131,7 +149,11 @@ export async function provisionEngineAccess(
       result.reason,
       result.error,
     );
-    return;
+    return {
+      ok: false,
+      reason: result.reason ?? 'unknown',
+      error: result.error,
+    };
   }
 
   // Persist what the integration gave us back.
@@ -146,8 +168,37 @@ export async function provisionEngineAccess(
 
   if (writeErr) {
     console.error('[engine_subs] credential persist failed', writeErr.message);
+    return {
+      ok: false,
+      reason: 'db_write_failed',
+      error: writeErr.message,
+    };
   }
+  return {
+    ok: true,
+    status: 'provisioned',
+    externalUserId: (result.externalUserId as string | undefined) ?? null,
+  };
 }
+
+// Result shape from provisionEngineAccess. Existing callers ignore the
+// return value (it was previously void) so this is purely additive — the
+// reconciliation paths use it to decide whether each user was newly-linked,
+// already-linked, or errored.
+export type ProvisionEngineAccessResult =
+  | {
+      ok: true;
+      /** `provisioned` = new external link established this call.
+       *  `already_provisioned` = local row already had external_user_id.
+       *  `no_provisioning_needed` = engine doesn't require external provisioning. */
+      status: 'provisioned' | 'already_provisioned' | 'no_provisioning_needed';
+      externalUserId?: string | null;
+    }
+  | {
+      ok: false;
+      reason: string;
+      error?: string;
+    };
 
 /** Seed subscriptions for ALL currently-active engines in the user's org.
  *  Called when a user reaches ALL_ACCESS (admin grant, MP payment for top tier,
