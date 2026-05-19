@@ -6,6 +6,10 @@ import { getTokenBalance } from '@/lib/usage/tokens';
 import { createClient } from '@/lib/supabase/server';
 import { TokenPackBuyButton } from '@/components/workspace/token-pack-buy-button';
 import { TOKEN_PACKS } from '@/lib/payments/pricing';
+import {
+  getCurrentAccrualsForPartner,
+  getPayoutsForPartner,
+} from '@/lib/usage/royalties';
 
 export const metadata = { title: 'Uso' };
 
@@ -15,6 +19,20 @@ interface UsageEventRow {
   kind: string;
   amount: number;
   occurred_at: string;
+  operation: string | null;
+}
+
+// One "run" = group of usage events sharing (engine_id, operation, date).
+// Renders as a single row showing total cost + call count. Events without
+// an operation tag render individually (one row each), same as before.
+interface RunGroup {
+  key: string; // engine_id + operation + date
+  engineId: string;
+  operation: string;
+  occurredAt: string; // earliest in group
+  count: number;
+  totalAmount: number;
+  kinds: Set<string>;
 }
 
 const KIND_LABEL: Record<string, string> = {
@@ -56,19 +74,66 @@ export default async function UsagePage({
   const tier = effectiveTier(role, storedTier);
   const isAdmin = isAdminRole(role);
 
-  const [balance, supabase] = await Promise.all([
+  const [balance, supabase, royaltyAccruals, royaltyPayouts] = await Promise.all([
     getTokenBalance(session.user.id),
     createClient(),
+    // Partner-scoped royalty data — empty array for non-partners, which makes
+    // the section render-or-hide condition trivial below.
+    getCurrentAccrualsForPartner(session.user.id),
+    getPayoutsForPartner(session.user.id),
   ]);
 
-  // Last 20 usage events for this user across all engines + map engine_id → name.
+  // Last 60 events. We over-fetch (vs. the prior 20) so the grouping has
+  // enough source rows to surface meaningful runs even when a single
+  // operation produces 5-10 individual LLM call events.
   const { data: eventsRaw } = await supabase
     .from('usage_events')
-    .select('id, engine_id, kind, amount, occurred_at')
+    .select('id, engine_id, kind, amount, occurred_at, operation')
     .eq('user_id', session.user.id)
     .order('occurred_at', { ascending: false })
-    .limit(20);
+    .limit(60);
   const events = (eventsRaw ?? []) as UsageEventRow[];
+
+  // Collapse events into runs. Events with the same (engine, operation, date)
+  // become a single row; events without an operation tag stay as
+  // individual rows. Result is sorted newest-first across both groups.
+  type Row = { kind: 'run'; group: RunGroup } | { kind: 'event'; event: UsageEventRow };
+  const runMap = new Map<string, RunGroup>();
+  const standalone: UsageEventRow[] = [];
+  for (const e of events) {
+    if (!e.operation) {
+      standalone.push(e);
+      continue;
+    }
+    const date = e.occurred_at.slice(0, 10);
+    const key = `${e.engine_id}|${e.operation}|${date}`;
+    const existing = runMap.get(key);
+    if (existing) {
+      existing.count += 1;
+      existing.totalAmount += e.amount;
+      existing.kinds.add(e.kind);
+      if (e.occurred_at < existing.occurredAt) existing.occurredAt = e.occurred_at;
+    } else {
+      runMap.set(key, {
+        key,
+        engineId: e.engine_id,
+        operation: e.operation,
+        occurredAt: e.occurred_at,
+        count: 1,
+        totalAmount: e.amount,
+        kinds: new Set([e.kind]),
+      });
+    }
+  }
+  const rows: Row[] = [
+    ...Array.from(runMap.values()).map((g) => ({ kind: 'run' as const, group: g })),
+    ...standalone.map((e) => ({ kind: 'event' as const, event: e })),
+  ].sort((a, b) => {
+    const ta = a.kind === 'run' ? a.group.occurredAt : a.event.occurred_at;
+    const tb = b.kind === 'run' ? b.group.occurredAt : b.event.occurred_at;
+    return tb.localeCompare(ta);
+  });
+  const visibleRows = rows.slice(0, 25);
   const engineIds = Array.from(new Set(events.map((e) => e.engine_id)));
   const { data: enginesRaw } =
     engineIds.length > 0
@@ -251,10 +316,111 @@ export default async function UsagePage({
         </div>
       )}
 
-      {/* Recent usage events */}
+      {/* Partner royalty section — only renders if this user owns an
+          engine with a non-zero royalty rate. Shows live accruals for the
+          current period + paid history. Hidden for everyone else. */}
+      {(royaltyAccruals.length > 0 || royaltyPayouts.length > 0) && (
+        <div className="cc-mod-section">
+          <div className="cc-mod-sl">Royalties · tus engines</div>
+          <p
+            style={{
+              fontSize: 12.5,
+              color: 'var(--cc-txt-3)',
+              maxWidth: '64ch',
+              lineHeight: 1.55,
+              marginBottom: 14,
+            }}
+          >
+            Como owner de uno o más engines, acumulas regalías cada vez que
+            otros usuarios consumen tokens en ellos. El admin finaliza el
+            período al cierre del mes y procesa el pago offline.
+          </p>
+          {royaltyAccruals.length > 0 && (
+            <div className="cc-mod-list" style={{ marginBottom: 14 }}>
+              {royaltyAccruals.map((a) => (
+                <div key={a.engineId} className="cc-mod-row">
+                  <div className="cc-mod-ic">◆</div>
+                  <div className="cc-mod-body">
+                    <div className="cc-mod-name">
+                      {a.engineName}{' '}
+                      <span className="cc-mod-badge">
+                        {a.alreadyFinalized ? 'finalizado' : 'acumulando'}
+                      </span>
+                    </div>
+                    <div className="cc-mod-sub">
+                      {formatNumber(a.tokensThisPeriod)} tokens este mes · rate{' '}
+                      <code>
+                        ${(a.ratePerMillionCents / 100).toLocaleString('es-MX')}/1M
+                      </code>
+                    </div>
+                  </div>
+                  <div className="cc-mod-right">
+                    <b className={a.alreadyFinalized ? 'gr' : 'am'}>
+                      ${(a.accruedCents / 100).toLocaleString('es-MX')}
+                    </b>
+                    <span>MXN este período</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {royaltyPayouts.length > 0 && (
+            <details>
+              <summary
+                style={{
+                  cursor: 'pointer',
+                  color: 'var(--cc-txt-3)',
+                  fontSize: 12.5,
+                  marginBottom: 10,
+                }}
+              >
+                Historial de pagos ({royaltyPayouts.length})
+              </summary>
+              <div className="cc-mod-list">
+                {royaltyPayouts.map((p) => (
+                  <div key={p.id} className="cc-mod-row">
+                    <div className="cc-mod-ic">{p.status === 'paid' ? '✓' : p.status === 'cancelled' ? '✕' : '◷'}</div>
+                    <div className="cc-mod-body">
+                      <div className="cc-mod-name">
+                        {p.engineName}{' '}
+                        <span
+                          className={`cc-mod-badge ${p.status === 'paid' ? 'gr' : ''}`}
+                        >
+                          {p.status}
+                        </span>
+                      </div>
+                      <div className="cc-mod-sub">
+                        Período{' '}
+                        {new Date(p.periodStart).toLocaleDateString('es-MX', {
+                          month: 'long',
+                          year: 'numeric',
+                        })}{' '}
+                        · {formatNumber(p.tokensAttributed)} tokens
+                        {p.paymentReference && (
+                          <> · ref <code>{p.paymentReference}</code></>
+                        )}
+                      </div>
+                    </div>
+                    <div className="cc-mod-right">
+                      <b className={p.status === 'paid' ? 'gr' : ''}>
+                        ${(p.amountCents / 100).toLocaleString('es-MX')}
+                      </b>
+                      <span>MXN</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
+
+      {/* Recent usage events — collapsed into runs when the engine tags
+          them with an operation. Rows without an operation tag (legacy
+          + non-operation-aware engines) render individually. */}
       <div className="cc-mod-section">
         <div className="cc-mod-sl">Actividad reciente</div>
-        {events.length === 0 ? (
+        {visibleRows.length === 0 ? (
           <div
             style={{
               padding: '32px 22px',
@@ -282,7 +448,36 @@ export default async function UsagePage({
           </div>
         ) : (
           <div className="cc-mod-list">
-            {events.map((e) => {
+            {visibleRows.map((row) => {
+              if (row.kind === 'run') {
+                const g = row.group;
+                const eng = engineMap.get(g.engineId);
+                return (
+                  <div key={g.key} className="cc-mod-row">
+                    <div className="cc-mod-ic">{eng?.icon ?? '◆'}</div>
+                    <div className="cc-mod-body">
+                      <div className="cc-mod-name">
+                        {eng?.name ?? 'Engine'}{' '}
+                        <span className="cc-mod-badge">{g.operation}</span>{' '}
+                        <span className="cc-mod-badge gr">
+                          {g.count} llamada{g.count === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <div className="cc-mod-sub">
+                        {relativeDate(g.occurredAt, locale)} ·{' '}
+                        {Array.from(g.kinds)
+                          .map((k) => KIND_LABEL[k] ?? k)
+                          .join(' · ')}
+                      </div>
+                    </div>
+                    <div className="cc-mod-right">
+                      <b className="cy">{formatNumber(g.totalAmount)}</b>
+                      <span>tokens · run</span>
+                    </div>
+                  </div>
+                );
+              }
+              const e = row.event;
               const eng = engineMap.get(e.engine_id);
               return (
                 <div key={e.id} className="cc-mod-row">

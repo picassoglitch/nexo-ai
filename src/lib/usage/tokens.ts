@@ -118,6 +118,12 @@ export interface RecordedEvent {
   sourceId: string;
   /** Engine's clock for when it happened. Falls back to "now" if missing. */
   occurredAt?: string;
+  /** Optional operation tag (e.g. 'variants_generate', 'transcribe'). The UI
+   *  groups events with the same operation+date into a single "run" row. */
+  operation?: string;
+  /** Optional engine context bag — { stream_id, clip_id, est_tokens, … }.
+   *  Read-side pulls specific keys for display. */
+  metadata?: Record<string, unknown>;
 }
 
 /** Insert (or no-op if duplicate) a batch of usage events. The (engine_id,
@@ -151,6 +157,11 @@ export async function recordUsageEvents(
         amount: e.amount,
         source_id: e.sourceId,
         occurred_at: e.occurredAt ?? new Date().toISOString(),
+        // Operation + metadata are optional from the engine side. When
+        // present they drive the per-run grouping on /app/usage. Empty
+        // metadata defaults to {} on the DB side (column default).
+        operation: e.operation ?? null,
+        metadata: e.metadata ?? null,
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null);

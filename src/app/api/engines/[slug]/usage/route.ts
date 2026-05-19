@@ -74,6 +74,10 @@ interface PostBody {
     amount?: number;
     source_id?: string;
     occurred_at?: string;
+    /** Optional engine-supplied operation tag for /app/usage grouping. */
+    operation?: string;
+    /** Optional engine context bag (stream_id, clip_id, est_tokens, etc). */
+    metadata?: Record<string, unknown>;
   }>;
 }
 
@@ -150,6 +154,11 @@ export async function POST(
       amount: e.amount,
       sourceId: e.source_id,
       occurredAt: e.occurred_at,
+      operation: typeof e.operation === 'string' ? e.operation : undefined,
+      metadata:
+        e.metadata && typeof e.metadata === 'object' && !Array.isArray(e.metadata)
+          ? (e.metadata as Record<string, unknown>)
+          : undefined,
     });
   }
 

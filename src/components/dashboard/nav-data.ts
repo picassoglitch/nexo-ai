@@ -60,6 +60,10 @@ export const NAV: NavGroup[] = [
       // countUnreadForAdmin() + countUnreadInquiriesForAdmin().
       { id: 'messages', href: '/dashboard/messages', ic: '✉', label: 'Mensajes' },
       { id: 'billing', href: '/dashboard/billing', ic: '▦', label: 'Billing (P&L)' },
+      // Royalty payouts to partner engine owners — accruals + history.
+      // Lives next to billing because operationally they're the same
+      // surface (money flowing through the platform).
+      { id: 'royalties', href: '/dashboard/royalties', ic: '◆', label: 'Royalties' },
       { id: 'audit', href: '/dashboard/audit', ic: '◉', label: 'Audit log' },
       { id: 'settings', href: '/dashboard/settings', ic: '⚙', label: 'Settings' },
     ],
@@ -160,6 +164,10 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
   '/dashboard/billing': {
     title: 'Billing',
     sub: 'Plan actual, facturas y método de pago.',
+  },
+  '/dashboard/royalties': {
+    title: 'Royalties',
+    sub: 'Pagos a partners owners de engines — accruals del mes + historial.',
   },
   '/dashboard/audit': {
     title: 'Audit log',
