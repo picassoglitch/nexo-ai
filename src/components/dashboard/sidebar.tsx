@@ -4,6 +4,7 @@ import type { Route } from 'next';
 import { Link, usePathname } from '@/i18n/routing';
 import { FusionMark } from './fusion-mark';
 import { NAV } from './nav-data';
+import { SidebarSignOut } from './sidebar-sign-out';
 import { useDashboard } from '@/lib/dashboard/store';
 
 interface Props {
@@ -121,6 +122,9 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen, unreadMes
         >
           ⚙
         </Link>
+        {/* Always-visible logout next to settings. One click signs out
+            via supabase + bounces to landing. */}
+        <SidebarSignOut onBeforeNav={() => setMobileSidebarOpen(false)} />
       </div>
     </aside>
   );

@@ -4,6 +4,7 @@ import type { Route } from 'next';
 import { Link, usePathname } from '@/i18n/routing';
 import { FusionMark } from '@/components/dashboard/fusion-mark';
 import { SUBSCRIBER_NAV } from '@/components/dashboard/nav-data';
+import { SidebarSignOut } from '@/components/dashboard/sidebar-sign-out';
 import { useWorkspace } from '@/lib/workspace/store';
 
 interface Props {
@@ -130,6 +131,10 @@ export function WorkspaceSidebar({
         >
           ⚙
         </Link>
+        {/* Always-visible logout next to settings — same pattern as
+            the admin sidebar. One click signs out + lands on the public
+            landing page. */}
+        <SidebarSignOut onBeforeNav={() => setMobileSidebarOpen(false)} />
       </div>
     </aside>
   );
