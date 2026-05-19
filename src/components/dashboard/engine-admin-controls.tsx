@@ -8,6 +8,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/dashboard/store';
 import {
+  changeEngineRoyaltyRate,
   changeEngineStatus,
   changeEngineTierRequired,
 } from '@/lib/engines/admin-actions';
@@ -77,6 +78,161 @@ export function EngineStatusSelect({
       ))}
     </select>
   );
+}
+
+/** Inline editor for partner_royalty_per_million_tokens_cents.
+ *
+ *  UX: chip-style display ("$50 / 1M") that flips to a number input on click.
+ *  Input value is in DOLLARS for legibility (we store cents, divide by 100
+ *  on render and multiply on save). Enter / blur commits; Escape reverts.
+ *
+ *  Why cents under the hood: floating-point math on currency = bad. The DB
+ *  column is INTEGER. The input is a friendly $X.XX MXN for the operator. */
+export function EngineRoyaltyRateInput({
+  engineId,
+  currentCents,
+  engineName,
+}: {
+  engineId: string;
+  currentCents: number;
+  engineName: string;
+}) {
+  const [cents, setCents] = useState<number>(currentCents);
+  const [editing, setEditing] = useState(false);
+  // Track the input as a string so the user can type "50.50" without it
+  // getting parsed mid-keystroke and clobbering their cursor.
+  const [draft, setDraft] = useState<string>(centsToInputStr(currentCents));
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const showToast = useDashboard((s) => s.showToast);
+
+  function startEdit() {
+    setDraft(centsToInputStr(cents));
+    setEditing(true);
+  }
+
+  function commit() {
+    const parsed = parseInputToCents(draft);
+    if (parsed === null) {
+      showToast('<b>Cantidad inválida</b> · usa formato 50 o 50.25');
+      setDraft(centsToInputStr(cents));
+      setEditing(false);
+      return;
+    }
+    if (parsed === cents) {
+      setEditing(false);
+      return;
+    }
+    startTransition(async () => {
+      const res = await changeEngineRoyaltyRate(engineId, parsed);
+      if (!res.ok) {
+        showToast(`<b>Error</b> · ${res.error}`);
+        setDraft(centsToInputStr(cents));
+        return;
+      }
+      setCents(parsed);
+      showToast(
+        `<b>${engineName}</b> · royalty $${(parsed / 100).toLocaleString('es-MX')} / 1M tokens`,
+      );
+      setEditing(false);
+      router.refresh();
+    });
+  }
+
+  function cancel() {
+    setDraft(centsToInputStr(cents));
+    setEditing(false);
+  }
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={startEdit}
+        title="Click para editar la royalty rate"
+        style={{
+          padding: '5px 9px',
+          borderRadius: 7,
+          border: '1px solid var(--cc-line-2)',
+          background: cents > 0 ? 'var(--cc-cyan-g)' : 'var(--cc-bg-2)',
+          color: cents > 0 ? 'var(--cc-cyan)' : 'var(--cc-txt-3)',
+          fontFamily: 'var(--cc-mono), monospace',
+          fontSize: 11,
+          fontWeight: 600,
+          cursor: 'pointer',
+          letterSpacing: '0.02em',
+        }}
+      >
+        ${(cents / 100).toLocaleString('es-MX')} / 1M
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <span style={{ fontSize: 10.5, color: 'var(--cc-txt-4)', fontFamily: 'var(--cc-mono), monospace' }}>
+        $
+      </span>
+      <input
+        type="number"
+        min={0}
+        step={0.5}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commit();
+          } else if (e.key === 'Escape') {
+            cancel();
+          }
+        }}
+        onBlur={() => {
+          // Wait one tick — if the blur is going to a click on Save it
+          // would clobber the commit. Cheap to schedule via setTimeout 0.
+          setTimeout(() => {
+            if (editing) commit();
+          }, 0);
+        }}
+        autoFocus
+        disabled={pending}
+        style={{
+          width: 80,
+          padding: '5px 8px',
+          borderRadius: 7,
+          border: '1px solid var(--cc-line-2)',
+          background: 'var(--cc-bg-1)',
+          color: 'var(--cc-txt)',
+          fontFamily: 'var(--cc-mono), monospace',
+          fontSize: 11.5,
+        }}
+      />
+      <span
+        style={{
+          fontSize: 10,
+          color: 'var(--cc-txt-4)',
+          fontFamily: 'var(--cc-mono), monospace',
+          letterSpacing: '0.06em',
+        }}
+      >
+        / 1M
+      </span>
+    </div>
+  );
+}
+
+function centsToInputStr(cents: number): string {
+  if (cents <= 0) return '0';
+  if (cents % 100 === 0) return String(cents / 100);
+  return (cents / 100).toFixed(2);
+}
+
+function parseInputToCents(raw: string): number | null {
+  const cleaned = raw.replace(/[\s,$]/g, '');
+  if (!cleaned) return 0;
+  const n = parseFloat(cleaned);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n * 100);
 }
 
 export function EngineTierSelect({

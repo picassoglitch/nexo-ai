@@ -118,3 +118,66 @@ export async function changeEngineTierRequired(
   revalidatePath('/[locale]', 'layout');
   return { ok: true };
 }
+
+// Cap on the rate to prevent typo disasters. 500_000 cents = $5,000 MXN per
+// 1M tokens. That's already 100× what we'd realistically charge (current
+// guidance is $5-$100 MXN/1M), so anything above this is almost certainly
+// a missing decimal point.
+const MAX_ROYALTY_CENTS = 500_000;
+
+/** Update partner_royalty_per_million_tokens_cents for an engine. Admin-only.
+ *  Negative values rejected, large values capped. Stored as integer cents. */
+export async function changeEngineRoyaltyRate(
+  engineId: string,
+  nextCents: number,
+): Promise<Result> {
+  if (!Number.isFinite(nextCents) || nextCents < 0) {
+    return { ok: false, error: 'Cantidad inválida (debe ser ≥ 0)' };
+  }
+  if (nextCents > MAX_ROYALTY_CENTS) {
+    return {
+      ok: false,
+      error: `Máximo ${MAX_ROYALTY_CENTS.toLocaleString('es-MX')} centavos por 1M tokens`,
+    };
+  }
+  const cents = Math.round(nextCents);
+
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from('engines')
+    .select('name, partner_royalty_per_million_tokens_cents')
+    .eq('id', engineId)
+    .maybeSingle();
+
+  const { data, error } = await admin
+    .from('engines')
+    .update({ partner_royalty_per_million_tokens_cents: cents })
+    .eq('id', engineId)
+    .select('id');
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0) return { ok: false, error: 'Engine no encontrado' };
+
+  await logAudit({
+    action: 'partner.engine_assign', // closest existing verb; royalty config
+    actorId: auth.session.user.id,
+    actorEmail: auth.session.user.email ?? null,
+    targetUserId: auth.session.user.id,
+    targetEmail: auth.session.user.email ?? null,
+    before: {
+      royalty_per_million_cents:
+        (before?.partner_royalty_per_million_tokens_cents as number | null) ?? 0,
+    },
+    after: { royalty_per_million_cents: cents },
+    metadata: {
+      engine_id: engineId,
+      engine_name: (before?.name as string | null) ?? null,
+      kind: 'engine.royalty_rate',
+    },
+  });
+
+  revalidatePath('/[locale]', 'layout');
+  return { ok: true };
+}

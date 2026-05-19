@@ -105,6 +105,10 @@ export interface Engine {
    *  profile (we fall back to email local-part on the UI side). */
   ownerDisplayName: string | null;
   ownerEmail: string | null;
+  /** Royalty rate paid to the owner per 1M tokens consumed in this engine.
+   *  Integer cents. 0 = no royalty (default; platform-owned engines). Set
+   *  inline from the admin /dashboard/engines table. */
+  partnerRoyaltyPerMillionTokensCents: number;
   persona?: EnginePersona;
 }
 

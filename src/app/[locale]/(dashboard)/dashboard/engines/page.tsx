@@ -6,6 +6,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
 import { ENV_LABEL } from '@/lib/data/types';
 import {
+  EngineRoyaltyRateInput,
   EngineStatusSelect,
   EngineTierSelect,
 } from '@/components/dashboard/engine-admin-controls';
@@ -152,6 +153,29 @@ export default async function AdminEnginesPage({
                     <EngineTierSelect
                       engineId={e.id}
                       current={e.tierRequired}
+                      engineName={e.name}
+                    />
+                  </div>
+                  {/* Royalty rate — only meaningful when the engine has an
+                      owner (PARTNER tier user). We always render it though so
+                      the admin can set the rate BEFORE assigning the partner
+                      from /dashboard/team. 0 (default) renders as muted. */}
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span
+                      style={{
+                        fontFamily: 'var(--cc-mono), monospace',
+                        fontSize: 10,
+                        color: 'var(--cc-txt-4)',
+                        letterSpacing: '.08em',
+                        textTransform: 'uppercase',
+                      }}
+                      title="MXN cents per 1,000,000 tokens consumed in this engine"
+                    >
+                      Royalty
+                    </span>
+                    <EngineRoyaltyRateInput
+                      engineId={e.id}
+                      currentCents={e.partnerRoyaltyPerMillionTokensCents}
                       engineName={e.name}
                     />
                   </div>
