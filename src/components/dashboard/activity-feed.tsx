@@ -64,12 +64,16 @@ export function ActivityFeedLive() {
         ))}
       </div>
       <div className="cc-rail-foot">
+        {/* Labels mirror what we actually measure in telemetry.tickRail.
+            Cola → Suscripciones because we don't have a queue/backpressure
+            concept yet; the slot now carries real engine_subscriptions
+            count instead of being a smoke-and-mirrors random number. */}
         <div className="cc-rstat">
           <div className="cc-rs-l">Trabajos IA / h</div>
           <div className="cc-rs-v cy">{rail?.jobsPerHour ?? '—'}</div>
         </div>
         <div className="cc-rstat">
-          <div className="cc-rs-l">Cola</div>
+          <div className="cc-rs-l">Suscripciones</div>
           <div className="cc-rs-v">{rail?.queue ?? '—'}</div>
         </div>
         <div className="cc-rstat">
@@ -78,7 +82,7 @@ export function ActivityFeedLive() {
         </div>
         <div className="cc-rstat">
           <div className="cc-rs-l">Ingresos hoy</div>
-          <div className="cc-rs-v gr">{rail ? '$' + rail.revenueToday.toLocaleString() : '$0'}</div>
+          <div className="cc-rs-v gr">{rail ? '$' + rail.revenueToday.toLocaleString('es-MX') : '$0'}</div>
         </div>
       </div>
     </>

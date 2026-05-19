@@ -3,18 +3,38 @@
 import { useEffect, useState } from 'react';
 import type { StripValue } from '@/lib/data/types';
 
+// Six tiles in the top metric strip. IDs still match the StripMetricId
+// union for back-compat; what they REPRESENT has changed from the previous
+// mock random-walk values to real Supabase queries — see telemetry.ts for
+// the exact semantics behind each id. Labels updated to match what's
+// actually being measured instead of the original aspirational copy
+// ("Streams en vivo", "GPU util", etc.) that we don't have backing data
+// for yet.
+function formatTokensCompact(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return `${n}`;
+}
+
 const META: Array<{
   id: StripValue['id'];
   label: string;
   led?: boolean;
   format: (v: number, total?: number) => string;
 }> = [
+  // Real: engines.status='active'
   { id: 'active', label: 'Engines activos', led: true, format: (v) => `${v}` },
+  // Real: usage_events with kind='llm.tokens' in the last 60s
   { id: 'aicalls', label: 'AI calls / min', format: (v) => `${v}` },
-  { id: 'rev', label: 'Ingresos hoy', format: (v) => `$${v.toLocaleString()}` },
-  { id: 'streams', label: 'Streams en vivo', led: true, format: (v) => `${v}` },
-  { id: 'queue', label: 'Carga de cola', format: (v) => `${v}%` },
-  { id: 'gpu', label: 'GPU util', format: (v) => `${v}%` },
+  // Real: SUM(payments.amount_cents)/100 today
+  { id: 'rev', label: 'Ingresos hoy', format: (v) => `$${v.toLocaleString('es-MX')}` },
+  // Real: COUNT(DISTINCT user_id) in usage_events today
+  { id: 'streams', label: 'Usuarios hoy', led: true, format: (v) => `${v}` },
+  // Real: SUM(usage_events.amount) today
+  { id: 'queue', label: 'Tokens hoy', format: (v) => formatTokensCompact(v) },
+  // Real: COUNT(engine_subscriptions WHERE status='active')
+  { id: 'gpu', label: 'Suscripciones', format: (v) => `${v}` },
 ];
 
 function Sparkline({ hist }: { hist: number[] }) {

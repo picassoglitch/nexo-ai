@@ -63,14 +63,19 @@ export async function GET(request: Request) {
       // Client disconnect (tab close, navigation, dev reload) fires this.
       request.signal.addEventListener('abort', cleanup);
 
-      // Initial snapshot so the UI fills immediately.
-      sendJson({ kind: 'strip', strip: tickStrip() });
-      sendJson({ kind: 'rail', rail: tickRail() });
+      // Initial snapshot so the UI fills immediately. tickStrip + tickRail
+      // are now async (real Supabase queries) — wrap each push in a
+      // self-invoked async fn so we don't block the SSE start. The cache
+      // inside telemetry.ts dedups concurrent invocations.
+      void (async () => {
+        sendJson({ kind: 'strip', strip: await tickStrip() });
+        sendJson({ kind: 'rail', rail: await tickRail() });
+      })();
 
       timers.push(
-        setInterval(() => sendJson({ kind: 'strip', strip: tickStrip() }), 2200),
-        setInterval(() => sendJson({ kind: 'activity', event: nextActivityEvent() }), 3400),
-        setInterval(() => sendJson({ kind: 'rail', rail: tickRail() }), 4800),
+        setInterval(async () => sendJson({ kind: 'strip', strip: await tickStrip() }), 2200),
+        setInterval(async () => sendJson({ kind: 'activity', event: await nextActivityEvent() }), 3400),
+        setInterval(async () => sendJson({ kind: 'rail', rail: await tickRail() }), 4800),
         // Keepalive ping every 25s to defeat proxy idle timeouts.
         setInterval(() => safeEnqueue(`: ping\n\n`), 25000),
       );
