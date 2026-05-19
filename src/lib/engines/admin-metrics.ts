@@ -51,6 +51,14 @@ export interface EngineMetrics {
     email: string | null;
     fullName: string | null;
     tokens: number;
+    /** What THIS user cost the platform this month, derived from their
+     *  token consumption × engines.cost_per_million_tokens_cents. Cents
+     *  MXN. Always 0 when the engine has no cost rate configured. */
+    costCents: number;
+    /** Per-user share of the engine's royalty payable this month
+     *  (tokens × royalty_rate / 1M). Cents MXN. Useful for attribution
+     *  when one user generates the bulk of the partner payout. */
+    royaltyShareCents: number;
   }>;
   // Recent events (raw, for the activity feed)
   recentEvents: Array<{
@@ -216,12 +224,23 @@ export async function getEngineMetrics(opts: {
   for (const e of recentEvents) {
     e.userEmail = profilesById.get(e.userId)?.email ?? null;
   }
-  const topUsers = topUserIds.map((userId) => ({
-    userId,
-    email: profilesById.get(userId)?.email ?? null,
-    fullName: profilesById.get(userId)?.fullName ?? null,
-    tokens: perUser.get(userId) ?? 0,
-  }));
+  const topUsers = topUserIds.map((userId) => {
+    const tokens = perUser.get(userId) ?? 0;
+    return {
+      userId,
+      email: profilesById.get(userId)?.email ?? null,
+      fullName: profilesById.get(userId)?.fullName ?? null,
+      tokens,
+      // Floor at the integer-cent level — never claim a higher cost than
+      // the math actually produces.
+      costCents: Math.floor(
+        (tokens * opts.costPerMillionTokensCents) / 1_000_000,
+      ),
+      royaltyShareCents: Math.floor(
+        (tokens * opts.partnerRoyaltyPerMillionTokensCents) / 1_000_000,
+      ),
+    };
+  });
 
   // Revenue (coarse): SUM payments from active-sub users this month.
   const subUserIds = ((paymentsResult.data ?? []) as Array<{ user_id: string }>)

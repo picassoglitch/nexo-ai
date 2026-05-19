@@ -248,6 +248,84 @@ export async function changeEngineCostRate(
   return { ok: true };
 }
 
+/** Sync engines.cost_per_million_tokens_cents from Anthropic's real billing.
+ *  Pulls the last 30 days of cost + usage from the org-level admin API,
+ *  computes a blended rate, writes it into the engine row. Org-wide blend
+ *  for now (Anthropic billing isn't per-engine without separate workspaces). */
+export type AnthropicSyncActionResult =
+  | {
+      ok: true;
+      rate: number;
+      totalTokens: number;
+      totalCostCents: number;
+      daysCounted: number;
+    }
+  | { ok: false; error: string };
+
+export async function syncEngineCostFromAnthropic(
+  engineId: string,
+): Promise<AnthropicSyncActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  const { computeAnthropicBlendedRate } = await import('./anthropic-billing');
+  const result = await computeAnthropicBlendedRate(30);
+  if (!result.ok || typeof result.ratePerMillionCents !== 'number') {
+    return { ok: false, error: result.error ?? 'Anthropic sync falló' };
+  }
+  if (result.ratePerMillionCents > MAX_COST_CENTS) {
+    return {
+      ok: false,
+      error: `Rate calculada (${result.ratePerMillionCents}) excede el cap de seguridad`,
+    };
+  }
+
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from('engines')
+    .select('name, cost_per_million_tokens_cents')
+    .eq('id', engineId)
+    .maybeSingle();
+
+  const { error } = await admin
+    .from('engines')
+    .update({ cost_per_million_tokens_cents: result.ratePerMillionCents })
+    .eq('id', engineId);
+  if (error) return { ok: false, error: error.message };
+
+  await logAudit({
+    action: 'partner.engine_assign',
+    actorId: auth.session.user.id,
+    actorEmail: auth.session.user.email ?? null,
+    targetUserId: auth.session.user.id,
+    targetEmail: auth.session.user.email ?? null,
+    before: {
+      cost_per_million_cents:
+        (before?.cost_per_million_tokens_cents as number | null) ?? 0,
+    },
+    after: { cost_per_million_cents: result.ratePerMillionCents },
+    metadata: {
+      engine_id: engineId,
+      engine_name: (before?.name as string | null) ?? null,
+      kind: 'engine.cost_rate_synced_anthropic',
+      days_counted: result.daysCounted ?? null,
+      total_tokens: result.totalTokens ?? null,
+      total_cost_mxn_cents: result.totalCostMxnCents ?? null,
+      usd_to_mxn: result.usdToMxn ?? null,
+    },
+  });
+
+  revalidatePath('/[locale]', 'layout');
+
+  return {
+    ok: true,
+    rate: result.ratePerMillionCents,
+    totalTokens: result.totalTokens ?? 0,
+    totalCostCents: result.totalCostMxnCents ?? 0,
+    daysCounted: result.daysCounted ?? 30,
+  };
+}
+
 /** Monthly fixed infra cost for this engine (Modal baseline, allocated
  *  Vercel/Railway slice, dedicated nodes). Cents MXN. Doesn't scale with
  *  usage. Admin types the amortized number from the latest provider bill. */

@@ -23,6 +23,7 @@ import {
   EngineStatusSelect,
   EngineTierSelect,
 } from '@/components/dashboard/engine-admin-controls';
+import { AnthropicSyncButton } from '@/components/dashboard/anthropic-sync-button';
 
 export const metadata = { title: 'Engine · admin' };
 
@@ -276,6 +277,10 @@ export default async function EngineDetailPage({
               currentCents={engine.costPerMillionTokensCents}
               engineName={engine.name}
             />
+            {/* Anthropic sync — only worth showing for LLM-heavy engines.
+                Hits org admin API for last 30d cost+usage, computes
+                blended MXN rate, writes to this engine's row. */}
+            <AnthropicSyncButton engineId={engine.id} engineName={engine.name} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span
@@ -469,10 +474,45 @@ export default async function EngineDetailPage({
         </div>
       )}
 
-      {/* ── Top users this month ──────────────────────────────────────── */}
+      {/* ── Top users this month — with per-user cost attribution ─────── */}
       {metrics.topUsers.length > 0 && (
         <div className="cc-mod-section">
-          <div className="cc-mod-sl">Top usuarios · mes</div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              gap: 12,
+              marginBottom: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div className="cc-mod-sl" style={{ marginBottom: 0 }}>
+              Top usuarios · mes
+            </div>
+            {engine.costPerMillionTokensCents > 0 ? (
+              <small
+                style={{
+                  fontFamily: 'var(--cc-mono), monospace',
+                  fontSize: 10.5,
+                  color: 'var(--cc-txt-4)',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                COSTO = tokens × {formatCents(engine.costPerMillionTokensCents)} / 1M
+              </small>
+            ) : (
+              <small
+                style={{
+                  fontSize: 11,
+                  color: 'var(--cc-amber, #f5b13d)',
+                  fontFamily: 'var(--cc-mono), monospace',
+                }}
+              >
+                ▸ configura el costo arriba para ver $ por usuario
+              </small>
+            )}
+          </div>
           <div className="cc-mod-list">
             {metrics.topUsers.map((u, i) => {
               const display = u.fullName || u.email?.split('@')[0] || u.userId.slice(0, 8);
@@ -480,6 +520,10 @@ export default async function EngineDetailPage({
                 metrics.tokensThisMonth > 0
                   ? (u.tokens / metrics.tokensThisMonth) * 100
                   : 0;
+              // Highlight high-cost users in amber: a single user
+              // representing >40% of the engine's total tokens, OR >$500
+              // MXN/month, is a concentration risk worth flagging.
+              const concentrationFlag = pct >= 40 || u.costCents >= 50_000;
               return (
                 <div key={u.userId} className="cc-mod-row">
                   <div
@@ -487,18 +531,45 @@ export default async function EngineDetailPage({
                     style={{
                       fontFamily: 'var(--cc-mono), monospace',
                       fontSize: 11,
-                      color: 'var(--cc-txt-4)',
+                      color: concentrationFlag ? 'var(--cc-amber, #f5b13d)' : 'var(--cc-txt-4)',
                     }}
                   >
                     #{i + 1}
                   </div>
                   <div className="cc-mod-body">
-                    <div className="cc-mod-name">{display}</div>
-                    <div className="cc-mod-sub">{u.email ?? '—'}</div>
+                    <div className="cc-mod-name">
+                      {display}{' '}
+                      {concentrationFlag && (
+                        <span
+                          className="cc-mod-badge"
+                          style={{
+                            color: 'var(--cc-amber, #f5b13d)',
+                            borderColor: 'rgba(245,177,61,0.3)',
+                          }}
+                          title={
+                            pct >= 40
+                              ? 'Concentración: este usuario es >40% del consumo del engine'
+                              : 'Costo >$500 MXN/mes'
+                          }
+                        >
+                          concentración
+                        </span>
+                      )}
+                    </div>
+                    <div className="cc-mod-sub">
+                      {u.email ?? '—'} · {formatTokens(u.tokens)} tokens · {pct.toFixed(1)}%
+                      {u.royaltyShareCents > 0 && (
+                        <> · royalty {formatCents(u.royaltyShareCents)}</>
+                      )}
+                    </div>
                   </div>
                   <div className="cc-mod-right">
-                    <b>{formatTokens(u.tokens)}</b>
-                    <span>{pct.toFixed(1)}% del consumo</span>
+                    <b className={u.costCents > 0 ? 'am' : ''}>
+                      {engine.costPerMillionTokensCents > 0
+                        ? formatCents(u.costCents)
+                        : '—'}
+                    </b>
+                    <span>{engine.costPerMillionTokensCents > 0 ? 'costo mes' : 'sin rate'}</span>
                   </div>
                 </div>
               );
