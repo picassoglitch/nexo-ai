@@ -2,19 +2,24 @@
 
 // Cosmic field — painted in depths so it feels like volume, not a curtain:
 //   1) Nebula plane     (NDC quad, dark FBM haze, no color ribbons)   renderOrder -2
-//   2) Distant dust     (~3000 tiny static points, acid-tinted)       renderOrder -1
-//   3) Bright pinpoints (~120 standout stars with slow pulse)         renderOrder -1
-//   4) Star sphere      (the existing 900 morphing particles)         renderOrder  0
-//   5) Core wireframe   (faded as you scroll into the grid)           renderOrder  1
+//   2) Bright pinpoints (~120 standout stars with slow pulse)         renderOrder -1
+//   3) Star sphere      (the existing 900 morphing particles)         renderOrder  0
+//   4) Core wireframe   (faded as you scroll into the grid)           renderOrder  1
 //
 // Color policy: brand acid (#c6f24e) is the single accent. No per-path tinting,
 // no purple ribbons. Stars are mostly pure white with a small fraction picking
 // up the acid tint; the nebula stays dark and mostly monochromatic so the stars
 // and the brand color carry the cosmic feel without looking like a synth-wave poster.
 //
+// History note: there used to be a "distant dust" layer (~3000 near-white
+// speckles, ~12% acid tint, subtle twinkle). It read as static gray dust on
+// the dark background — the operator literally described it as looking
+// "dirty" — so it's removed. The bright pinpoint layer below carries the
+// cosmic feel on its own without the speckle haze.
+//
 // Performance budget on mobile: pixel ratio capped at 1.5, antialias off,
-// dust count halved, nebula shader skips one FBM octave. Reduced-motion users
-// get zero rotation and a fully static field (twinkle off).
+// nebula shader skips one FBM octave. Reduced-motion users get zero rotation
+// and a fully static field (twinkle off).
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -166,66 +171,12 @@ export function WebGLField() {
     nebula.renderOrder = -2;
     scene.add(nebula);
 
-    // ── 2. DISTANT DUST (heavy spray-paint star speckle) ──────────────────
-    const DUST_COUNT = isMobile ? 1600 : 3000;
-    const dustGeo = new THREE.BufferGeometry();
-    const dustPos = new Float32Array(DUST_COUNT * 3);
-    const dustRand = new Float32Array(DUST_COUNT);
-    for (let i = 0; i < DUST_COUNT; i++) {
-      const r = 18 + Math.random() * 24;
-      const th = Math.random() * Math.PI * 2;
-      const ph = Math.acos(2 * Math.random() - 1);
-      dustPos[i * 3] = r * Math.sin(ph) * Math.cos(th);
-      dustPos[i * 3 + 1] = r * Math.sin(ph) * Math.sin(th);
-      dustPos[i * 3 + 2] = r * Math.cos(ph) - 10;
-      dustRand[i] = Math.random();
-    }
-    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-    dustGeo.setAttribute('aRand', new THREE.BufferAttribute(dustRand, 1));
-    const dustMat = new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: false,
-      uniforms: { uTime, uAcid },
-      vertexShader: /* glsl */ `
-        uniform float uTime;
-        attribute float aRand;
-        varying float vTwk;
-        varying float vR;
-        void main() {
-          vec3 p = position;
-          p.z += sin(uTime * 0.08 + aRand * 20.0) * 0.6;
-          vec4 mv = modelViewMatrix * vec4(p, 1.0);
-          gl_Position = projectionMatrix * mv;
-          // Tight size variance — most stars are pin-pricks, a few are bigger.
-          gl_PointSize = (0.6 + pow(aRand, 4.0) * 4.0) * (5.5 / -mv.z);
-          vTwk = 0.5 + 0.5 * sin(uTime * (0.6 + aRand * 1.4) + aRand * 28.0);
-          vR = aRand;
-        }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform vec3 uAcid;
-        varying float vTwk;
-        varying float vR;
-        void main() {
-          vec2 c = gl_PointCoord - 0.5;
-          float d = length(c);
-          if (d > 0.5) discard;
-          // Sharper falloff → crisper "spray paint speckle" look.
-          float core = smoothstep(0.5, 0.15, d);
-          // ~80% near-white with a faint acid tint, ~20% lean fully acid.
-          // No second color — keeps the brand cohesion the user asked for.
-          vec3 nearWhite = mix(vec3(0.95, 0.97, 0.92), uAcid, 0.12);
-          vec3 base = mix(nearWhite, uAcid, step(0.80, vR) * 0.85);
-          float a = core * (0.45 + vTwk * 0.5);
-          gl_FragColor = vec4(base, a);
-        }
-      `,
-    });
-    const dust = new THREE.Points(dustGeo, dustMat);
-    dust.renderOrder = -1;
-    scene.add(dust);
+    // [removed] DISTANT DUST layer — 3000 near-white speckles with subtle
+    // acid tint + faint twinkle. On the dark cosmic background they read as
+    // static gray dust and made the page look "dirty". The brand-acid
+    // pinpoint layer below provides enough cosmic depth on its own.
 
-    // ── 2b. BRIGHT PINPOINT STARS (standout reference stars) ──────────────
+    // ── 2. BRIGHT PINPOINT STARS (standout reference stars) ──────────────
     const BRIGHT_COUNT = isMobile ? 60 : 120;
     const brightGeo = new THREE.BufferGeometry();
     const brightPos = new Float32Array(BRIGHT_COUNT * 3);
@@ -401,7 +352,6 @@ export function WebGLField() {
       if (!reduceMotion) {
         points.rotation.y = tm * 0.04 + cScroll * (isMobile ? 2.0 : 1.2);
         points.rotation.x = cScroll * (isMobile ? 0.9 : 0.5);
-        dust.rotation.y = tm * 0.005;
         brightStars.rotation.y = tm * 0.003;
         core.rotation.y = tm * 0.08;
         core.rotation.x = tm * 0.05;
@@ -431,8 +381,6 @@ export function WebGLField() {
       window.removeEventListener('resize', onResize);
       nebGeo.dispose();
       nebMat.dispose();
-      dustGeo.dispose();
-      dustMat.dispose();
       brightGeo.dispose();
       brightMat.dispose();
       geo.dispose();
