@@ -125,6 +125,15 @@ export async function changeEngineTierRequired(
 // a missing decimal point.
 const MAX_ROYALTY_CENTS = 500_000;
 
+// Same logic for the LLM cost rate. We pay providers per 1M tokens; current
+// real-world rate for Claude Sonnet 4.5 is ~$180 MXN/1M (18,000 cents).
+// Cap at 500k = $5,000 MXN/1M to catch a missing decimal.
+const MAX_COST_CENTS = 500_000;
+
+// Cap on the monthly fixed infra cost. $100,000 MXN/month = 10M cents.
+// At our scale anything above is a typo.
+const MAX_FIXED_MONTHLY_CENTS = 10_000_000;
+
 /** Update partner_royalty_per_million_tokens_cents for an engine. Admin-only.
  *  Negative values rejected, large values capped. Stored as integer cents. */
 export async function changeEngineRoyaltyRate(
@@ -175,6 +184,121 @@ export async function changeEngineRoyaltyRate(
       engine_id: engineId,
       engine_name: (before?.name as string | null) ?? null,
       kind: 'engine.royalty_rate',
+    },
+  });
+
+  revalidatePath('/[locale]', 'layout');
+  return { ok: true };
+}
+
+/** What the platform pays providers per 1M tokens consumed in this engine.
+ *  Cents MXN. Drives the LLM variable cost row on the per-engine detail page. */
+export async function changeEngineCostRate(
+  engineId: string,
+  nextCents: number,
+): Promise<Result> {
+  if (!Number.isFinite(nextCents) || nextCents < 0) {
+    return { ok: false, error: 'Cantidad inválida (debe ser ≥ 0)' };
+  }
+  if (nextCents > MAX_COST_CENTS) {
+    return {
+      ok: false,
+      error: `Máximo ${MAX_COST_CENTS.toLocaleString('es-MX')} centavos por 1M tokens`,
+    };
+  }
+  const cents = Math.round(nextCents);
+
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from('engines')
+    .select('name, cost_per_million_tokens_cents')
+    .eq('id', engineId)
+    .maybeSingle();
+
+  const { data, error } = await admin
+    .from('engines')
+    .update({ cost_per_million_tokens_cents: cents })
+    .eq('id', engineId)
+    .select('id');
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0) return { ok: false, error: 'Engine no encontrado' };
+
+  await logAudit({
+    action: 'partner.engine_assign', // reusing the closest verb; cost config
+    actorId: auth.session.user.id,
+    actorEmail: auth.session.user.email ?? null,
+    targetUserId: auth.session.user.id,
+    targetEmail: auth.session.user.email ?? null,
+    before: {
+      cost_per_million_cents:
+        (before?.cost_per_million_tokens_cents as number | null) ?? 0,
+    },
+    after: { cost_per_million_cents: cents },
+    metadata: {
+      engine_id: engineId,
+      engine_name: (before?.name as string | null) ?? null,
+      kind: 'engine.cost_rate',
+    },
+  });
+
+  revalidatePath('/[locale]', 'layout');
+  return { ok: true };
+}
+
+/** Monthly fixed infra cost for this engine (Modal baseline, allocated
+ *  Vercel/Railway slice, dedicated nodes). Cents MXN. Doesn't scale with
+ *  usage. Admin types the amortized number from the latest provider bill. */
+export async function changeEngineFixedMonthlyCost(
+  engineId: string,
+  nextCents: number,
+): Promise<Result> {
+  if (!Number.isFinite(nextCents) || nextCents < 0) {
+    return { ok: false, error: 'Cantidad inválida (debe ser ≥ 0)' };
+  }
+  if (nextCents > MAX_FIXED_MONTHLY_CENTS) {
+    return {
+      ok: false,
+      error: `Máximo $${(MAX_FIXED_MONTHLY_CENTS / 100).toLocaleString('es-MX')} MXN/mes`,
+    };
+  }
+  const cents = Math.round(nextCents);
+
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  const admin = createAdminClient();
+  const { data: before } = await admin
+    .from('engines')
+    .select('name, fixed_monthly_cost_cents')
+    .eq('id', engineId)
+    .maybeSingle();
+
+  const { data, error } = await admin
+    .from('engines')
+    .update({ fixed_monthly_cost_cents: cents })
+    .eq('id', engineId)
+    .select('id');
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0) return { ok: false, error: 'Engine no encontrado' };
+
+  await logAudit({
+    action: 'partner.engine_assign',
+    actorId: auth.session.user.id,
+    actorEmail: auth.session.user.email ?? null,
+    targetUserId: auth.session.user.id,
+    targetEmail: auth.session.user.email ?? null,
+    before: {
+      fixed_monthly_cost_cents:
+        (before?.fixed_monthly_cost_cents as number | null) ?? 0,
+    },
+    after: { fixed_monthly_cost_cents: cents },
+    metadata: {
+      engine_id: engineId,
+      engine_name: (before?.name as string | null) ?? null,
+      kind: 'engine.fixed_monthly_cost',
     },
   });
 

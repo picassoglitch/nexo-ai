@@ -37,6 +37,8 @@ interface EngineRow {
   requires_provisioning: boolean;
   owner_user_id: string | null;
   partner_royalty_per_million_tokens_cents: number | null;
+  cost_per_million_tokens_cents: number | null;
+  fixed_monthly_cost_cents: number | null;
   engine_health: Array<{
     state: EngineState;
     health: number;
@@ -89,6 +91,8 @@ function rowToEngine(
     ownerDisplayName: owner?.full_name ?? null,
     ownerEmail: owner?.email ?? null,
     partnerRoyaltyPerMillionTokensCents: row.partner_royalty_per_million_tokens_cents ?? 0,
+    costPerMillionTokensCents: row.cost_per_million_tokens_cents ?? 0,
+    fixedMonthlyCostCents: row.fixed_monthly_cost_cents ?? 0,
     state,
     stateCode: STATE_TO_CODE[state],
     health: health?.health ?? 0,
@@ -122,7 +126,7 @@ export async function listEngines(): Promise<Engine[]> {
   const { data, error } = await supabase
     .from('engines')
     .select(
-      'id, slug, name, icon, category, type, env, region, node, description, featured, status, tier_required, external_url, integration_mode, admin_api_base, requires_provisioning, owner_user_id, partner_royalty_per_million_tokens_cents, engine_health(state, health, latency_ms, revenue_cents), engine_personas(persona, tone, goals, focus, learning_state, engagement_score)',
+      'id, slug, name, icon, category, type, env, region, node, description, featured, status, tier_required, external_url, integration_mode, admin_api_base, requires_provisioning, owner_user_id, partner_royalty_per_million_tokens_cents, cost_per_million_tokens_cents, fixed_monthly_cost_cents, engine_health(state, health, latency_ms, revenue_cents), engine_personas(persona, tone, goals, focus, learning_state, engagement_score)',
     )
     .eq('org_id', DEMO_ORG_ID)
     // Active engines first, then coming-soon, then deprecated.

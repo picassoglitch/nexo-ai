@@ -109,6 +109,13 @@ export interface Engine {
    *  Integer cents. 0 = no royalty (default; platform-owned engines). Set
    *  inline from the admin /dashboard/engines table. */
   partnerRoyaltyPerMillionTokensCents: number;
+  /** What the platform pays providers (Claude API, etc.) per 1M tokens
+   *  consumed in this engine. Cents MXN. 0 = admin hasn't set yet. Used
+   *  by the per-engine detail page to compute LLM variable cost + margin. */
+  costPerMillionTokensCents: number;
+  /** Monthly fixed infra cost (Modal baseline, allocated Vercel/Railway
+   *  slice, dedicated nodes) — does not scale with usage. Cents MXN. */
+  fixedMonthlyCostCents: number;
   persona?: EnginePersona;
 }
 

@@ -179,11 +179,14 @@ export default async function AdminEnginesPage({
                       engineName={e.name}
                     />
                   </div>
-                  {/* Admin "use it" path — admins have effective ALL_ACCESS via role
-                      override, so the workspace page renders them the live panel. */}
+                  {/* "Abrir engine" goes to the admin operational detail
+                      page — subs count, cost vs revenue, top users, recent
+                      activity. The subscriber-view (/app/engines/[slug])
+                      is reachable from there via the "Probar como subscriber"
+                      button so the admin can still QA the user-facing UI. */}
                   {e.status !== 'deprecated' && (
                     <Link
-                      href={`/app/engines/${e.slug}` as Route}
+                      href={`/dashboard/engines/${e.slug}` as Route}
                       style={{
                         marginTop: 2,
                         color: 'var(--cc-green)',
