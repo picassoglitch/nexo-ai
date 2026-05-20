@@ -1,12 +1,27 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
 import { usePath } from './use-path';
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
+
+// Pricing-card destinations. Anon hits middleware first → sign-in (with
+// ?next=) → routed back. Logged-in users land directly. Each tier maps
+// to where the user needs to BE after auth to complete the action.
+const TIER_DESTINATIONS: Record<'free' | 'pro' | 'vip', string> = {
+  // Signup mode flips the tabs on the auth page to "Crear cuenta".
+  free: '/sign-in?mode=signup&next=/app',
+  // Pro upgrade — billing page handles MP checkout. Anon goes through
+  // /sign-in?next=/app/billing first (middleware bounces /app/billing).
+  pro: '/app/billing?upgrade=PRO',
+  // VIP = All-Access tier in our backend taxonomy.
+  vip: '/app/billing?upgrade=ALL_ACCESS',
+};
 
 export function EarnWorld() {
   const t = useTranslations('earn');
@@ -177,7 +192,13 @@ export function EarnWorld() {
                 );
               })}
             </ul>
-            <PrototypeButton className="price-btn" label={tPrice(`${tier.k}.btn`)} />
+            <Link
+              href={TIER_DESTINATIONS[tier.k] as Route}
+              className="price-btn"
+              prefetch={false}
+            >
+              {tPrice(`${tier.k}.btn`)}
+            </Link>
           </div>
         ))}
       </div>
@@ -192,31 +213,20 @@ export function EarnWorld() {
           <h4 dangerouslySetInnerHTML={{ __html: tAcademy.raw('title') as string }} />
           <p>{tAcademy('p')}</p>
         </div>
-        <PrototypeButton className="as-btn" label={tAcademy('btn')} />
+        {/* "Nexo Academy" CTA — anchors to the contact section. Academy
+            doesn't have its own product page yet, the contact form is the
+            qualified-lead entry point. */}
+        <a
+          href="#contact"
+          className="as-btn"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToId('contact');
+          }}
+        >
+          {tAcademy('btn')}
+        </a>
       </div>
     </section>
-  );
-}
-
-// TODO step 07-CONTACT: wire to Resend. For now flashes prototype text.
-function PrototypeButton({ className, label }: { className: string; label: string }) {
-  return (
-    <button
-      type="button"
-      className={className}
-      onClick={(e) => {
-        const btn = e.currentTarget;
-        const orig = btn.textContent;
-        btn.textContent =
-          document.documentElement.lang === 'es'
-            ? 'Prototipo — se conecta en desarrollo'
-            : 'Prototype — wires up in build phase';
-        setTimeout(() => {
-          btn.textContent = orig;
-        }, 1500);
-      }}
-    >
-      {label}
-    </button>
   );
 }

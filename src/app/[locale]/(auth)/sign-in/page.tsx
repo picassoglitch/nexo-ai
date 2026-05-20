@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import type { Route } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
@@ -20,7 +21,19 @@ export default async function SignInPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user) redirect('/account');
+  if (user) {
+    // Honor `?next=` so the landing-page pricing CTA flow works:
+    // anon clicks "Pasar a Pro" → /sign-in?next=/app/billing → user signs in →
+    // lands on /app/billing instead of the generic /account. Only accept
+    // same-origin relative paths so we don't get used as an open redirect.
+    const safeNext =
+      typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')
+        ? next
+        : '/account';
+    // typedRoutes can't statically know what `next` is — cast through
+    // Route since we've already validated it's a same-origin path.
+    redirect(safeNext as Route);
+  }
 
   const upstreamError =
     error === 'missing_code' ? t('errorMissingCode') : error ? t('errorGeneric') : null;

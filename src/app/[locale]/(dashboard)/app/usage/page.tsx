@@ -74,24 +74,55 @@ export default async function UsagePage({
   const tier = effectiveTier(role, storedTier);
   const isAdmin = isAdminRole(role);
 
-  const [balance, supabase, royaltyAccruals, royaltyPayouts] = await Promise.all([
-    getTokenBalance(session.user.id),
-    createClient(),
-    // Partner-scoped royalty data — empty array for non-partners, which makes
-    // the section render-or-hide condition trivial below.
-    getCurrentAccrualsForPartner(session.user.id),
-    getPayoutsForPartner(session.user.id),
-  ]);
+  // Defensive: every external read wrapped in its own try so a missing
+  // column (migration 0015 not applied) or a transient Supabase glitch
+  // can't 500 the whole page. The previous version of this page assumed
+  // royalty columns + the `operation` field on usage_events existed —
+  // when prod was behind on migrations, the page crashed at SSR time.
+  const balance = await getTokenBalance(session.user.id).catch(() => ({
+    remaining: 0,
+    unlimited: false,
+    monthlyAllocation: 0,
+    bonus: 0,
+    monthlyUsed: 0,
+    periodStart: new Date().toISOString(),
+  }));
+  const supabase = await createClient();
+  const royaltyAccruals = await getCurrentAccrualsForPartner(session.user.id).catch(
+    () => [],
+  );
+  const royaltyPayouts = await getPayoutsForPartner(session.user.id).catch(() => []);
 
   // Last 60 events. We over-fetch (vs. the prior 20) so the grouping has
   // enough source rows to surface meaningful runs even when a single
   // operation produces 5-10 individual LLM call events.
-  const { data: eventsRaw } = await supabase
-    .from('usage_events')
-    .select('id, engine_id, kind, amount, occurred_at, operation')
-    .eq('user_id', session.user.id)
-    .order('occurred_at', { ascending: false })
-    .limit(60);
+  //
+  // Two-step query: first try with `operation` (migration 0015). If the
+  // column doesn't exist yet on this deploy, fall back to the legacy
+  // column set so the page still renders the activity feed (just
+  // ungrouped). Detect via the response's `error` field — Postgres
+  // returns "column \"operation\" does not exist" with code 42703.
+  let eventsRaw: unknown[] | null = null;
+  {
+    const firstTry = await supabase
+      .from('usage_events')
+      .select('id, engine_id, kind, amount, occurred_at, operation')
+      .eq('user_id', session.user.id)
+      .order('occurred_at', { ascending: false })
+      .limit(60);
+    if (firstTry.error) {
+      // Most likely 42703 (column missing) — fall back to legacy columns.
+      const fallback = await supabase
+        .from('usage_events')
+        .select('id, engine_id, kind, amount, occurred_at')
+        .eq('user_id', session.user.id)
+        .order('occurred_at', { ascending: false })
+        .limit(60);
+      eventsRaw = fallback.data;
+    } else {
+      eventsRaw = firstTry.data;
+    }
+  }
   const events = (eventsRaw ?? []) as UsageEventRow[];
 
   // Collapse events into runs. Events with the same (engine, operation, date)
