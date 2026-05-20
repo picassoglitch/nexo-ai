@@ -78,11 +78,17 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
   const [tier, setTier] = useState<SubscriptionTier>(initialTier);
   const [pendingTier, setPendingTier] = useState<SubscriptionTier | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Sticky error banner for the checkout failure path. The toast only
+  // shows for ~2.5s and users miss it; this stays until they retry or
+  // refresh. Common reason in production: MP_ACCESS_TOKEN unset on the
+  // server, which returns reason='not_configured'.
+  const [stickyError, setStickyError] = useState<string | null>(null);
   const showToast = useWorkspace((s) => s.showToast);
 
   async function changeTier(next: SubscriptionTier) {
     if (next === tier || isPending) return;
     setPendingTier(next);
+    setStickyError(null);
 
     // Branch 1: Downgrades and admins go through direct tier-actions write.
     //  - Downgrade to FREE: no money changes hands, direct write.
@@ -95,7 +101,9 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
         setPendingTier(null);
         if (!res.ok) {
           setTier(prev);
-          showToast(`<b>Error</b> · ${res.error ?? 'no se pudo cambiar el plan'}`);
+          const msg = res.error ?? 'no se pudo cambiar el plan';
+          showToast(`<b>Error</b> · ${msg}`);
+          setStickyError(msg);
           return;
         }
         showToast(
@@ -115,7 +123,10 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
       const res = await createTierCheckout(next);
       if (!res.ok || !res.url) {
         setPendingTier(null);
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo iniciar el checkout'}`);
+        const msg = res.error ?? 'no se pudo iniciar el checkout';
+        showToast(`<b>Error</b> · ${msg}`);
+        setStickyError(msg);
+        console.error('[tier-checkout] failed', { targetTier: next, response: res });
         return;
       }
       // Don't reset pendingTier — the browser is about to navigate away.
@@ -171,6 +182,48 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
         >
           ▸ <b>Modo admin</b> — los cambios de plan se aplican inmediatamente sin pasar por el
           checkout.
+        </div>
+      )}
+
+      {stickyError && (
+        <div
+          style={{
+            padding: '12px 14px',
+            border: '1px solid var(--cc-red, #ff5d5d)',
+            background: 'rgba(255, 93, 93, 0.08)',
+            borderRadius: 9,
+            fontSize: 12.5,
+            color: 'var(--cc-red, #ff5d5d)',
+            marginBottom: 16,
+            lineHeight: 1.5,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 10,
+          }}
+        >
+          <span style={{ fontSize: 14, lineHeight: 1 }}>▸</span>
+          <div style={{ flex: 1 }}>
+            <b style={{ display: 'block', marginBottom: 3 }}>
+              No se pudo iniciar el checkout
+            </b>
+            <span>{stickyError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setStickyError(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--cc-red, #ff5d5d)',
+              fontSize: 14,
+              cursor: 'pointer',
+              padding: 0,
+              opacity: 0.7,
+            }}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
         </div>
       )}
 
