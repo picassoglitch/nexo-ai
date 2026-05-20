@@ -27,23 +27,45 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
   function onClick() {
     setStickyError(null);
     startTransition(async () => {
-      const res = await createTokenPackCheckout(packId);
-      if (!res.ok || !res.url) {
-        const msg = res.error ?? 'No se pudo iniciar el checkout';
-        // Three signals so the user can't miss it:
-        // 1. Toast (familiar quick flash)
-        // 2. Sticky inline message below the button (won't disappear)
-        // 3. console.error with the raw response for devtools forensics
+      // Race the server action against a client-side timeout. The MP SDK
+      // has a 10s server-side timeout, but if MP hangs OR Vercel kills the
+      // function before it responds (10s on Hobby, 60s on Pro), the
+      // useTransition would stay pending forever and the button reads
+      // "Iniciando checkout…" with no recovery. The timeout below trips
+      // at 18s — long enough that a slow-but-working MP call still
+      // completes, short enough that the user knows something's wrong
+      // BEFORE Vercel's generic 500 page hijacks the tab.
+      const CLIENT_TIMEOUT_MS = 18_000;
+      let timedOut = false;
+      const timeoutPromise = new Promise<{ ok: false; error: string }>((resolve) => {
+        setTimeout(() => {
+          timedOut = true;
+          resolve({
+            ok: false,
+            error:
+              'El checkout de Mercado Pago no respondió en 18s. Probable causa: ' +
+              'MP_ACCESS_TOKEN inválido o MP_ACCESS_TOKEN missing en Vercel. ' +
+              'Revisa Settings → Environment Variables.',
+          });
+        }, CLIENT_TIMEOUT_MS);
+      });
+      const res = await Promise.race([
+        createTokenPackCheckout(packId),
+        timeoutPromise,
+      ]);
+      if (!res.ok || !('url' in res) || !res.url) {
+        const msg =
+          ('error' in res && res.error) || 'No se pudo iniciar el checkout';
         showToast(`<b>Error</b> · ${msg}`);
         setStickyError(msg);
         console.error('[token-pack-checkout] failed', {
           packId,
           response: res,
+          timedOut,
         });
         return;
       }
       showToast(`Redirigiendo a Mercado Pago para <b>${packLabel}</b>…`);
-      // Same-tab redirect — MP back_urls bring the user back to /app/usage.
       window.location.href = res.url;
     });
   }

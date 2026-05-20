@@ -120,13 +120,35 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
     //  webhook which writes profiles.tier asynchronously; this user lands on
     //  /app/billing?status=success.
     startTransition(async () => {
-      const res = await createTierCheckout(next);
-      if (!res.ok || !res.url) {
+      // Client-side timeout: if MP hangs and Vercel kills the function
+      // (10s Hobby, 60s Pro), the useTransition would stay pending forever.
+      // 18s = generous for a slow-but-working MP call, short enough that
+      // we report the failure before Vercel's generic 500 page appears.
+      const CLIENT_TIMEOUT_MS = 18_000;
+      let timedOut = false;
+      const timeoutPromise = new Promise<{ ok: false; error: string }>((resolve) => {
+        setTimeout(() => {
+          timedOut = true;
+          resolve({
+            ok: false,
+            error:
+              'El checkout de Mercado Pago no respondió en 18s. Probable causa: ' +
+              'MP_ACCESS_TOKEN inválido o no configurado en Vercel.',
+          });
+        }, CLIENT_TIMEOUT_MS);
+      });
+      const res = await Promise.race([createTierCheckout(next), timeoutPromise]);
+      if (!res.ok || !('url' in res) || !res.url) {
         setPendingTier(null);
-        const msg = res.error ?? 'no se pudo iniciar el checkout';
+        const msg =
+          ('error' in res && res.error) || 'no se pudo iniciar el checkout';
         showToast(`<b>Error</b> · ${msg}`);
         setStickyError(msg);
-        console.error('[tier-checkout] failed', { targetTier: next, response: res });
+        console.error('[tier-checkout] failed', {
+          targetTier: next,
+          response: res,
+          timedOut,
+        });
         return;
       }
       // Don't reset pendingTier — the browser is about to navigate away.

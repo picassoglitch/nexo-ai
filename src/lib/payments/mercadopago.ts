@@ -52,7 +52,14 @@ export function getMercadoPago() {
   const config = new MercadoPagoConfig({
     accessToken: token,
     // Idempotency key per-request is set by the SDK on each call.
-    options: { timeout: 10000 },
+    //
+    // Timeout note: 7s gives the SDK a clear cap that beats Vercel's
+    // 10s serverless function timeout (Hobby plan). When MP is slow or
+    // the token is invalid the SDK should error out cleanly inside our
+    // action's try/catch, so we return a useful { ok: false, error }
+    // to the client instead of letting Vercel kill the function and
+    // serve its generic "page couldn't load" 500.
+    options: { timeout: 7000 },
   });
   cached = {
     config,
