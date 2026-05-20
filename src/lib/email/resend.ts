@@ -3,8 +3,10 @@
 // CONFIGURATION:
 //   RESEND_API_KEY      — your Resend API key (re_...).
 //                         Get from https://resend.com/api-keys
-//   RESEND_FROM_EMAIL   — verified sender, e.g. "Nexo AI <hola@nexo.ai>".
-//                         Until you verify a domain, use "onboarding@resend.dev"
+//   RESEND_FROM_EMAIL   — verified sender, e.g. "Nexo AI <noreply@nexo-ai.world>".
+//                         The production default below assumes nexo-ai.world is
+//                         verified at Resend (DNS records green). If you're
+//                         still in sandbox, override with onboarding@resend.dev
 //                         (Resend's sandbox sender, limited to your own email).
 //   RESEND_CONTACT_TO   — where the public /contacto form lands.
 //                         Defaults to RESEND_FROM_EMAIL if unset.
@@ -13,6 +15,12 @@
 // { ok: false, reason: 'not_configured' } instead of throwing. The contact
 // form treats this as a "logged but not delivered" state so dev work isn't
 // blocked on having credentials.
+//
+// SUPABASE AUTH EMAILS: those (signup confirm, reset password, magic link,
+// invite, change email) go out via Supabase's custom-SMTP relay configured
+// to point at Resend's SMTP endpoint. See docs/email/supabase-auth-setup.md.
+// This wrapper handles ONLY emails sent from our own server code (contact
+// form, payment receipts, future engine notifications).
 
 import 'server-only';
 import { Resend } from 'resend';
@@ -31,8 +39,15 @@ function getResend(): Resend {
   return cached;
 }
 
+// Production default — nexo-ai.world is verified at Resend. Keep this in
+// sync with the sender set in Supabase Dashboard → Auth → SMTP so the
+// "From" header looks identical across server-sent + auth-sent emails.
+// Pre-domain-verification you can override via RESEND_FROM_EMAIL env var
+// (set to "onboarding@resend.dev" for the sandbox limited-to-you mode).
+const DEFAULT_FROM = 'Nexo AI <noreply@nexo-ai.world>';
+
 export function getFromAddress(): string {
-  return process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev';
+  return process.env.RESEND_FROM_EMAIL ?? DEFAULT_FROM;
 }
 
 export function getContactInbox(): string {
