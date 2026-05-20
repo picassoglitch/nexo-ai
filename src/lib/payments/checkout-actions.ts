@@ -32,33 +32,38 @@ export interface CheckoutResult {
 }
 
 export async function createTierCheckout(targetTier: SubscriptionTier): Promise<CheckoutResult> {
-  const session = await getSessionUser();
-  if (!session) {
-    return { ok: false, reason: 'unauth', error: 'Inicia sesión para cambiar de plan.' };
-  }
-
-  // Admins bypass MP entirely — their tier changes through tier-actions.ts.
-  if (isAdminRole(session.role)) {
-    return { ok: false, reason: 'admin_skip', error: 'Admin path uses direct tier write.' };
-  }
-
-  // Downgrading to FREE doesn't need MP — that's just a tier write handled
-  // by tier-actions.ts (no money changes hands).
-  const pricing = TIER_PRICING[targetTier];
-  if (!pricing) {
-    return { ok: false, reason: 'free_tier', error: 'Free no requiere checkout.' };
-  }
-
-  if (!isMercadoPagoConfigured()) {
-    return {
-      ok: false,
-      reason: 'not_configured',
-      error:
-        'Mercado Pago no está configurado todavía. Pide a un admin que active tu plan o configura MP_ACCESS_TOKEN.',
-    };
-  }
-
+  // Top-level try wraps the pre-flight checks too — getSessionUser or any
+  // import-time side effect could throw and bubble up as a 500 server
+  // action response, which the user sees as Next's generic "page couldn't
+  // load" page. Catching everything keeps the client's sticky-error path
+  // alive even when the failure isn't strictly MP.
   try {
+    const session = await getSessionUser();
+    if (!session) {
+      return { ok: false, reason: 'unauth', error: 'Inicia sesión para cambiar de plan.' };
+    }
+
+    // Admins bypass MP entirely — their tier changes through tier-actions.ts.
+    if (isAdminRole(session.role)) {
+      return { ok: false, reason: 'admin_skip', error: 'Admin path uses direct tier write.' };
+    }
+
+    // Downgrading to FREE doesn't need MP — that's just a tier write handled
+    // by tier-actions.ts (no money changes hands).
+    const pricing = TIER_PRICING[targetTier];
+    if (!pricing) {
+      return { ok: false, reason: 'free_tier', error: 'Free no requiere checkout.' };
+    }
+
+    if (!isMercadoPagoConfigured()) {
+      return {
+        ok: false,
+        reason: 'not_configured',
+        error:
+          'Mercado Pago no está configurado todavía. Pide a un admin que active tu plan o configura MP_ACCESS_TOKEN.',
+      };
+    }
+
     const { preference } = getMercadoPago();
     const appUrl = getAppUrl();
 

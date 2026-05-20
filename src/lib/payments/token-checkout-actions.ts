@@ -34,33 +34,40 @@ export interface PackCheckoutResult {
 export async function createTokenPackCheckout(
   packId: string,
 ): Promise<PackCheckoutResult> {
-  const session = await getSessionUser();
-  if (!session) {
-    return { ok: false, reason: 'unauth', error: 'Inicia sesión para comprar tokens.' };
-  }
-  // Admins don't need packs. If we let them buy anyway it'd be confusing.
-  if (isAdminRole(session.role)) {
-    return {
-      ok: false,
-      reason: 'admin_skip',
-      error: 'Como admin tienes tokens ilimitados — no necesitas comprar packs.',
-    };
-  }
-
-  const pack = getTokenPack(packId);
-  if (!pack) {
-    return { ok: false, reason: 'unknown_pack', error: `Pack desconocido: ${packId}` };
-  }
-
-  if (!isMercadoPagoConfigured()) {
-    return {
-      ok: false,
-      reason: 'not_configured',
-      error: 'Mercado Pago no está configurado. Pide a un admin que active tu pack.',
-    };
-  }
-
+  // Top-level try wraps EVERYTHING — including the pre-flight checks. The
+  // previous version had try/catch only around the MP call, so a thrown
+  // exception from getSessionUser / isMercadoPagoConfigured / config
+  // initialization would escape and Next.js would 500 the server action
+  // (visible to the user as "This page couldn't load"). Now any thrown
+  // value short-circuits to a structured PackCheckoutResult the client
+  // can render in its sticky-error panel.
   try {
+    const session = await getSessionUser();
+    if (!session) {
+      return { ok: false, reason: 'unauth', error: 'Inicia sesión para comprar tokens.' };
+    }
+    // Admins don't need packs. If we let them buy anyway it'd be confusing.
+    if (isAdminRole(session.role)) {
+      return {
+        ok: false,
+        reason: 'admin_skip',
+        error: 'Como admin tienes tokens ilimitados — no necesitas comprar packs.',
+      };
+    }
+
+    const pack = getTokenPack(packId);
+    if (!pack) {
+      return { ok: false, reason: 'unknown_pack', error: `Pack desconocido: ${packId}` };
+    }
+
+    if (!isMercadoPagoConfigured()) {
+      return {
+        ok: false,
+        reason: 'not_configured',
+        error: 'Mercado Pago no está configurado. Pide a un admin que active tu pack.',
+      };
+    }
+
     const { preference } = getMercadoPago();
     const appUrl = getAppUrl();
     const isHttps = appUrl.startsWith('https://');
@@ -106,12 +113,27 @@ export async function createTokenPackCheckout(
     }
     return { ok: true, url };
   } catch (err) {
-    const e = err as { message?: string; cause?: { error?: { message?: string } } };
-    return {
-      ok: false,
-      reason: 'mp_error',
-      error: e?.cause?.error?.message || e?.message || 'Error MP',
+    // Log to Vercel server logs with enough context to debug — we lose
+    // the raw stack in production builds but the structured fields survive.
+    const e = err as {
+      message?: string;
+      status?: number;
+      cause?: { error?: { message?: string }; status?: number };
+      name?: string;
     };
+    const detail =
+      e?.cause?.error?.message ||
+      e?.message ||
+      e?.name ||
+      'unknown server error in token-pack-checkout';
+    console.error('[token-pack-checkout] uncaught', {
+      packId,
+      errorName: e?.name,
+      errorMessage: e?.message,
+      causeStatus: e?.cause?.status,
+      causeMessage: e?.cause?.error?.message,
+    });
+    return { ok: false, reason: 'mp_error', error: detail };
   }
 }
 
