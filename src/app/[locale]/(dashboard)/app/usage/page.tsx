@@ -100,10 +100,13 @@ export default async function UsagePage({
   // Two-step query: first try with `operation` (migration 0015). If the
   // column doesn't exist yet on this deploy, fall back to the legacy
   // column set so the page still renders the activity feed (just
-  // ungrouped). Detect via the response's `error` field — Postgres
-  // returns "column \"operation\" does not exist" with code 42703.
+  // ungrouped). Wrapped in try/catch because Supabase-js can throw on
+  // network / auth / RLS failures rather than just returning an error
+  // object — and ANY unhandled throw inside a server component bubbles
+  // up to Vercel as the generic "page couldn't load" 500 we saw in
+  // the user's network tab.
   let eventsRaw: unknown[] | null = null;
-  {
+  try {
     const firstTry = await supabase
       .from('usage_events')
       .select('id, engine_id, kind, amount, occurred_at, operation')
@@ -112,16 +115,22 @@ export default async function UsagePage({
       .limit(60);
     if (firstTry.error) {
       // Most likely 42703 (column missing) — fall back to legacy columns.
-      const fallback = await supabase
-        .from('usage_events')
-        .select('id, engine_id, kind, amount, occurred_at')
-        .eq('user_id', session.user.id)
-        .order('occurred_at', { ascending: false })
-        .limit(60);
-      eventsRaw = fallback.data;
+      try {
+        const fallback = await supabase
+          .from('usage_events')
+          .select('id, engine_id, kind, amount, occurred_at')
+          .eq('user_id', session.user.id)
+          .order('occurred_at', { ascending: false })
+          .limit(60);
+        eventsRaw = fallback.data;
+      } catch {
+        eventsRaw = [];
+      }
     } else {
       eventsRaw = firstTry.data;
     }
+  } catch {
+    eventsRaw = [];
   }
   const events = (eventsRaw ?? []) as UsageEventRow[];
 
@@ -166,14 +175,22 @@ export default async function UsagePage({
   });
   const visibleRows = rows.slice(0, 25);
   const engineIds = Array.from(new Set(events.map((e) => e.engine_id)));
-  const { data: enginesRaw } =
-    engineIds.length > 0
-      ? await supabase.from('engines').select('id, name, icon').in('id', engineIds)
-      : { data: [] };
+  // Same defensive wrap pattern as the usage_events query above. If
+  // Supabase throws (network / auth / column missing), we render with an
+  // empty engineMap and the rows show fallback names. Beats a 500.
+  let enginesRaw: unknown[] | null = [];
+  if (engineIds.length > 0) {
+    try {
+      const result = await supabase.from('engines').select('id, name, icon').in('id', engineIds);
+      enginesRaw = result.data;
+    } catch {
+      enginesRaw = [];
+    }
+  }
   const engineMap = new Map<string, { name: string; icon: string }>(
-    (enginesRaw ?? []).map((e) => [
-      e.id as string,
-      { name: e.name as string, icon: (e.icon as string) ?? '◆' },
+    ((enginesRaw ?? []) as Array<{ id: string; name: string; icon: string | null }>).map((e) => [
+      e.id,
+      { name: e.name, icon: e.icon ?? '◆' },
     ]),
   );
 
