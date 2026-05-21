@@ -74,17 +74,36 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const initial = fullName.charAt(0).toUpperCase();
   const role = session?.role ?? 'VIEWER';
 
-  const engines = await listEngines();
+  // listEngines is the heaviest fetch on this layout — wrapped in try so
+  // a Supabase outage / missing engines table doesn't 500 the whole
+  // admin shell. The shell can render with an empty engine list; the
+  // /dashboard/* pages handle the empty case themselves.
+  let engines: Awaited<ReturnType<typeof listEngines>> = [];
+  try {
+    engines = await listEngines();
+  } catch (err) {
+    console.error('[dashboard-layout] listEngines failed:', err);
+  }
 
   // Sidebar badge — combine inbound subscriber messages + landing-form
   // partner inquiries into one number, since both surfaces live in the
   // same /dashboard/messages inbox. Two parallel COUNTs (HEAD requests
   // against the postgres count cache) — total round-trip stays sub-100 ms.
-  const [unreadMsgs, unreadInquiries] = await Promise.all([
-    countUnreadForAdmin(),
-    countUnreadInquiriesForAdmin(),
-  ]);
-  const unreadMessages = unreadMsgs + unreadInquiries;
+  //
+  // Both calls wrapped in catch because the messages + partner_inquiries
+  // tables are from migration 0014 and an unapplied migration on prod
+  // would 500 the whole admin shell on every action POST re-render
+  // (Next.js re-renders the layout too, not just the page).
+  let unreadMessages = 0;
+  try {
+    const [unreadMsgs, unreadInquiries] = await Promise.all([
+      countUnreadForAdmin().catch(() => 0),
+      countUnreadInquiriesForAdmin().catch(() => 0),
+    ]);
+    unreadMessages = unreadMsgs + unreadInquiries;
+  } catch {
+    unreadMessages = 0;
+  }
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>

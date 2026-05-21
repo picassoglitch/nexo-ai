@@ -49,9 +49,22 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   // Sidebar badge — admin-sent messages this user hasn't opened yet.
   // The /app/messages page auto-marks the thread read on render via
   // markThreadReadAsUser, so this drops to 0 as soon as they visit.
-  const unreadMessages = session?.user.id
-    ? await countUnreadForUser(session.user.id)
-    : 0;
+  //
+  // Wrapped in try/catch because this fn is called on EVERY layout
+  // render (including the re-render that fires after every server
+  // action POST). If the messages table is missing (migration 0014
+  // not applied) or the admin client can't initialize, an unhandled
+  // throw here would 500 the whole layout — meaning every action
+  // succeeds but the page can never re-render. That was the symptom
+  // the operator hit on /app/usage: action OK, RSC re-render dies.
+  let unreadMessages = 0;
+  if (session?.user.id) {
+    try {
+      unreadMessages = await countUnreadForUser(session.user.id);
+    } catch {
+      unreadMessages = 0;
+    }
+  }
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
