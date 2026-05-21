@@ -137,5 +137,8 @@ export async function createTokenPackCheckout(
   }
 }
 
-/** Exposed for the /app/usage page to render the pack tiles. */
-export { TOKEN_PACKS };
+// Note: TOKEN_PACKS used to be re-exported here for the /app/usage page,
+// but Next.js refuses to compile a "use server" file that exports anything
+// except async functions ("found object" — TOKEN_PACKS is an array). The
+// re-export was redundant anyway since the page can — and does — import
+// TOKEN_PACKS directly from '@/lib/payments/pricing'.
