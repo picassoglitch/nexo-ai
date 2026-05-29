@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { Analytics } from '@vercel/analytics/next';
 import { routing } from '@/i18n/routing';
 import './globals.css';
 
@@ -51,6 +52,9 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        {/* Vercel Analytics — only fires when deployed to Vercel (does nothing
+            in local dev, no extra config needed). Tracks page views per route. */}
+        <Analytics />
       </body>
     </html>
   );
