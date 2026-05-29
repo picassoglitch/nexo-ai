@@ -7,73 +7,79 @@
 --   usage_events row matching `kind=llm.tokens` (no time bound) over
 --   PostgREST and aggregated in Node. On nano this seq-scanned, transferred
 --   thousands of rows, hung past the edge timeout, and the connection died.
---   Concurrent RSC rendering of /dashboard/overview + /dashboard/royalties
---   piled all three queries into a single ~13ms window, exhausting the
---   tiny connection budget.
 --
 -- WHAT THIS MIGRATION DOES:
---   1. Two SECURITY DEFINER RPCs that aggregate server-side. The Node code
---      goes from "fetch N rows → sum in JS" to "rpc() → tiny summary back".
---   2. Two partial indexes scoped to the hot WHERE clauses (kind='llm.tokens'
---      and partner_royalty_per_million_tokens_cents > 0). Smaller index =
---      faster fits-in-RAM scans on nano.
---   3. Per-function statement_timeout so any single call still has a hard
---      ceiling even if a bad query plan slips through.
+--   1. Two SECURITY DEFINER RPCs that aggregate server-side.
+--   2. Four partial indexes scoped to the hot WHERE clauses.
+--   3. Per-function statement_timeout for safety.
 --
--- EXPLAIN PLAN EXPECTATIONS (run in Supabase SQL Editor after apply):
+-- HOW TO APPLY (IMPORTANT — read this first):
 --
---   EXPLAIN ANALYZE
---   SELECT * FROM public.compute_engine_royalties(
---     date_trunc('month', now())::timestamptz,
---     (date_trunc('month', now()) + interval '1 month')::timestamptz
---   );
---   → expect: HashAggregate → Hash Left Join → Index Scan on
---     usage_events_engine_kind_partial_idx (when active partner engines
---     exist) + Index Scan on engines_partner_royalty_partial_idx.
---     Should be <100ms on nano with ≤100k events.
+--   This file is split into 6 SECTIONS marked "── §N ──". Each section is a
+--   single statement that you should paste into the Supabase SQL Editor
+--   AND RUN ONE AT A TIME — not the whole file at once. Why:
 --
---   EXPLAIN ANALYZE
---   SELECT * FROM public.compute_platform_token_stats(
---     date_trunc('month', now())::timestamptz,
---     (now() - interval '7 days')::timestamptz
---   );
---   → expect: Append of 4 Aggregate nodes. The "all_time" branch is a full
---     scan of usage_events_kind_llm_partial_idx; the month + week branches
---     are bitmap index scans on the same partial; per_engine branch
---     HashAggregates with a join to engines. <200ms on nano with ≤100k events.
+--     - The four CREATE INDEX statements use CONCURRENTLY so they don't
+--       block writers on usage_events while engines are pushing events.
+--       CONCURRENTLY cannot be inside a transaction, so each must be its
+--       own top-level statement.
 --
--- Idempotent: re-runnable.
+--     - If you paste the whole file the SQL Editor wraps it in a tx and
+--       the CONCURRENTLY statements fail with: "CREATE INDEX CONCURRENTLY
+--       cannot run inside a transaction block".
+--
+--   IF YOU GET "connection terminated due to connection timeout" BEFORE THE
+--   SQL EVEN RUNS: the project is still saturated from prior 522s. Go to
+--   Project Settings → General → Restart project, wait 30s, try again.
+--
+--   IF A SINGLE INDEX HANGS PAST 60s: there's a long-running query holding
+--   a SHARE lock. Run this in another tab to find it:
+--     SELECT pid, query, state, age(now(), query_start) AS dur
+--     FROM pg_stat_activity
+--     WHERE state != 'idle' AND query NOT LIKE '%pg_stat_activity%'
+--     ORDER BY dur DESC LIMIT 10;
+--   Then `SELECT pg_cancel_backend(<pid>);` the worst offender.
 -- =====================================================================
 
--- ── 1. Indexes ──────────────────────────────────────────────────────────
 
--- Partial index on llm.tokens events alone. The existing 0013 index
--- usage_events_engine_idx (engine_id, occurred_at desc) covers all `kind`
--- values; this smaller partial fits more comfortably in RAM and the planner
--- prefers it when the WHERE clause matches.
-CREATE INDEX IF NOT EXISTS usage_events_kind_llm_partial_idx
+-- ── §1 ── Partial index: usage_events (occurred_at) WHERE kind='llm.tokens'
+-- Speeds up the all_time / month / week scans in compute_platform_token_stats.
+-- Smaller than the existing usage_events_engine_idx (0013) because it only
+-- includes rows with kind='llm.tokens', so it fits more comfortably in RAM on nano.
+CREATE INDEX CONCURRENTLY IF NOT EXISTS usage_events_kind_llm_partial_idx
   ON public.usage_events (occurred_at)
   WHERE kind = 'llm.tokens';
 
-CREATE INDEX IF NOT EXISTS usage_events_engine_kind_partial_idx
+
+-- ── §2 ── Partial index: usage_events (engine_id, occurred_at) WHERE kind='llm.tokens'
+-- Speeds up the per-engine aggregation in compute_engine_royalties.
+-- The leading engine_id column makes the join to engines a Nested Loop
+-- with index lookups instead of a Hash Join over a full scan.
+CREATE INDEX CONCURRENTLY IF NOT EXISTS usage_events_engine_kind_partial_idx
   ON public.usage_events (engine_id, occurred_at)
   WHERE kind = 'llm.tokens';
 
--- Filter index for the royalty engine pull. Existing engines schema has no
--- index on owner_user_id — the royalty fetch was doing a seq scan plus
--- runtime filter. Partial keeps the index tiny (one row per active partner).
-CREATE INDEX IF NOT EXISTS engines_partner_royalty_partial_idx
+
+-- ── §3 ── Partial index: engines (owner_user_id) WHERE royalty rate > 0
+-- The royalty engine filter was doing a seq scan + runtime filter on engines.
+-- This partial is tiny (one row per active partner-eligible engine) so the
+-- planner can use it to short-circuit the engines side of the LEFT JOIN.
+CREATE INDEX CONCURRENTLY IF NOT EXISTS engines_partner_royalty_partial_idx
   ON public.engines (owner_user_id)
   WHERE partner_royalty_per_million_tokens_cents > 0
     AND owner_user_id IS NOT NULL;
 
--- The (engine_id, period_start) index on engine_royalty_payouts already
--- exists from 0015 (engine_royalty_payouts_engine_idx). Adding IF NOT EXISTS
--- as a documented no-op so future readers see we considered it.
+
+-- ── §4 ── Documented no-op: (engine_id, period_start) on engine_royalty_payouts
+-- The 0015 migration already created engine_royalty_payouts_engine_idx covering
+-- this. Keeping the IF NOT EXISTS create so future readers see we considered it.
+-- This one CAN run inside a normal transaction (no CONCURRENTLY needed) — we keep
+-- the section break for consistency but you can paste it with §5/§6 if you want.
 CREATE INDEX IF NOT EXISTS engine_royalty_payouts_engine_period_idx
   ON public.engine_royalty_payouts (engine_id, period_start);
 
--- ── 2. compute_engine_royalties RPC ────────────────────────────────────
+
+-- ── §5 ── compute_engine_royalties RPC ──────────────────────────────────
 -- One round-trip replaces: 1 engines query + 1 usage_events fetch + JS sum.
 -- Returns one row per partner-owned royalty-eligible engine, with the
 -- attributed token count + computed amount in cents.
@@ -118,7 +124,14 @@ BEGIN
 END;
 $$;
 
--- ── 3. compute_platform_token_stats RPC ─────────────────────────────────
+REVOKE ALL ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) TO service_role;
+
+COMMENT ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) IS
+  'Aggregate per-engine royalty accruals server-side for a [start, end) period. Replaces JS-side aggregation in src/lib/usage/royalties.ts that was causing 522s on nano.';
+
+
+-- ── §6 ── compute_platform_token_stats RPC ─────────────────────────────
 -- Replaces the unbounded fetch in platform-stats.ts. Returns 3 scalar rows
 -- (all_time, month, week) plus N per_engine rows in a single round-trip.
 -- The "scope" discriminator column lets the Node side route rows without
@@ -195,19 +208,8 @@ BEGIN
 END;
 $$;
 
--- ── 4. Grants ───────────────────────────────────────────────────────────
--- Both RPCs are SECURITY DEFINER and run as the owner (postgres), so they
--- read past RLS. Anon callers have no business hitting these — only
--- authenticated admins should call them, and the application-layer admin
--- check stays in tier-actions.ts / royalty-actions.ts.
--- Service-role bypasses RLS and EXECUTE on any function it owns, so no
--- extra grant needed for the admin client.
-REVOKE ALL ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.compute_platform_token_stats(timestamptz, timestamptz) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) TO service_role;
 GRANT EXECUTE ON FUNCTION public.compute_platform_token_stats(timestamptz, timestamptz) TO service_role;
 
-COMMENT ON FUNCTION public.compute_engine_royalties(timestamptz, timestamptz) IS
-  'Aggregate per-engine royalty accruals server-side for a [start, end) period. Replaces the previous JS-side aggregation in src/lib/usage/royalties.ts that was causing 522s on nano.';
 COMMENT ON FUNCTION public.compute_platform_token_stats(timestamptz, timestamptz) IS
   'All-time + month + week + per-engine token totals in a single round-trip. Replaces the unbounded usage_events fetch in src/lib/usage/platform-stats.ts.';
