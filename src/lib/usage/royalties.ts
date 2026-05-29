@@ -63,77 +63,75 @@ function currentPeriodStartIso(): string {
   ).toISOString();
 }
 
-/** Aggregate every active royalty engine's accrual for the current period. */
+function nextMonthStartIso(periodStartIso: string): string {
+  const d = new Date(periodStartIso);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
+}
+
+/** Aggregate every active royalty engine's accrual for the current period.
+ *
+ *  REFACTORED (migration 0017): the heavy lifting now happens in the
+ *  Postgres RPC `compute_engine_royalties`. Previously this function pulled
+ *  every llm.tokens usage_events row for the month + every royalty engine
+ *  row, then summed in JS. On nano with thousands of events the round-trip
+ *  was hitting the 19s edge timeout → CF 522 → "unhealthy" project flips.
+ *
+ *  The RPC does the GROUP BY + amount math server-side and returns one row
+ *  per active partner-eligible engine. The remaining JS work (enriching
+ *  with engine name/slug + partner profile + already-finalized check) only
+ *  touches a handful of rows per call. */
 export async function getCurrentPeriodAccruals(): Promise<RoyaltySummary> {
   const admin = createAdminClient();
   const periodStart = currentPeriodStartIso();
+  const periodEnd = nextMonthStartIso(periodStart);
 
-  // Pull every engine with a non-zero rate + an owner. Engines without an
-  // owner or without a rate can't accrue royalties so we skip them.
-  const { data: enginesRaw, error: enginesErr } = await admin
-    .from('engines')
-    .select(
-      'id, slug, name, owner_user_id, partner_royalty_per_million_tokens_cents',
-    )
-    .gt('partner_royalty_per_million_tokens_cents', 0)
-    .not('owner_user_id', 'is', null);
-  if (enginesErr) {
-    console.error('[royalties] engines query failed:', enginesErr.message);
-    return {
-      periodStart,
-      accruals: [],
-      totalAccruedCents: 0,
-      partnersWithAccrual: 0,
-    };
-  }
-  const engines = (enginesRaw ?? []) as Array<{
-    id: string;
-    slug: string;
-    name: string;
-    owner_user_id: string;
-    partner_royalty_per_million_tokens_cents: number;
-  }>;
-  if (engines.length === 0) {
-    return {
-      periodStart,
-      accruals: [],
-      totalAccruedCents: 0,
-      partnersWithAccrual: 0,
-    };
-  }
+  const emptyResult: RoyaltySummary = {
+    periodStart,
+    accruals: [],
+    totalAccruedCents: 0,
+    partnersWithAccrual: 0,
+  };
 
-  // Token totals for the period, grouped by engine. Pulled via a single
-  // SELECT amount + engine_id + sum in JS — same pattern as
-  // platform-stats.ts. Cheap at our current scale.
-  const { data: usageRaw } = await admin
-    .from('usage_events')
-    .select('engine_id, amount')
-    .eq('kind', 'llm.tokens')
-    .gte('occurred_at', periodStart);
-  const tokensByEngine = new Map<string, number>();
-  for (const row of usageRaw ?? []) {
-    const engineId = row.engine_id as string | null;
-    const amount = (row.amount as number | null) ?? 0;
-    if (!engineId) continue;
-    tokensByEngine.set(engineId, (tokensByEngine.get(engineId) ?? 0) + amount);
-  }
-
-  // Already-finalized payouts for this period — engines in this set are
-  // skipped from the "accruable" surface so the admin can't double-pay.
-  const { data: finalizedRaw } = await admin
-    .from('engine_royalty_payouts')
-    .select('engine_id')
-    .eq('period_start', periodStart);
-  const finalizedEngineIds = new Set(
-    (finalizedRaw ?? []).map((r) => r.engine_id as string),
+  // ── 1. One RPC instead of: usage_events fetch + engines fetch + JS sum.
+  const { data: rpcRaw, error: rpcErr } = await admin.rpc(
+    'compute_engine_royalties',
+    { p_period_start: periodStart, p_period_end: periodEnd },
   );
+  if (rpcErr) {
+    console.error('[royalties] compute_engine_royalties RPC failed:', rpcErr.message);
+    return emptyResult;
+  }
+  const accrualRows = (rpcRaw ?? []) as Array<{
+    engine_id: string;
+    partner_user_id: string;
+    tokens_attributed: number;
+    amount_cents: number;
+    rate_per_million_cents: number;
+  }>;
+  if (accrualRows.length === 0) return emptyResult;
 
-  // Partner display info — join engines.owner_user_id → profiles.
-  const partnerIds = Array.from(new Set(engines.map((e) => e.owner_user_id)));
-  const { data: profilesRaw } = await admin
-    .from('profiles')
-    .select('id, email, full_name')
-    .in('id', partnerIds);
+  // ── 2. Tiny hydration — engine display info + partner profiles + finalized
+  //    payouts for THIS period. All bounded by the small `accrualRows` set.
+  const engineIds = accrualRows.map((r) => r.engine_id);
+  const partnerIds = Array.from(new Set(accrualRows.map((r) => r.partner_user_id)));
+
+  const [{ data: enginesRaw }, { data: profilesRaw }, { data: finalizedRaw }] =
+    await Promise.all([
+      admin.from('engines').select('id, slug, name').in('id', engineIds),
+      admin.from('profiles').select('id, email, full_name').in('id', partnerIds),
+      admin
+        .from('engine_royalty_payouts')
+        .select('engine_id')
+        .eq('period_start', periodStart)
+        .in('engine_id', engineIds),
+    ]);
+
+  const engineMeta = new Map<string, { slug: string; name: string }>(
+    (enginesRaw ?? []).map((e) => [
+      e.id as string,
+      { slug: e.slug as string, name: e.name as string },
+    ]),
+  );
   const profilesById = new Map<
     string,
     { email: string | null; name: string | null }
@@ -146,25 +144,24 @@ export async function getCurrentPeriodAccruals(): Promise<RoyaltySummary> {
       },
     ]),
   );
+  const finalizedEngineIds = new Set(
+    (finalizedRaw ?? []).map((r) => r.engine_id as string),
+  );
 
-  const accruals: RoyaltyAccrual[] = engines.map((engine) => {
-    const tokens = tokensByEngine.get(engine.id) ?? 0;
-    // Floor on integer division to never over-attribute.
-    const accrued = Math.floor(
-      (tokens * engine.partner_royalty_per_million_tokens_cents) / 1_000_000,
-    );
-    const profile = profilesById.get(engine.owner_user_id);
+  const accruals: RoyaltyAccrual[] = accrualRows.map((row) => {
+    const engine = engineMeta.get(row.engine_id);
+    const profile = profilesById.get(row.partner_user_id);
     return {
-      engineId: engine.id,
-      engineSlug: engine.slug,
-      engineName: engine.name,
-      partnerUserId: engine.owner_user_id,
+      engineId: row.engine_id,
+      engineSlug: engine?.slug ?? '?',
+      engineName: engine?.name ?? 'Engine eliminado',
+      partnerUserId: row.partner_user_id,
       partnerEmail: profile?.email ?? null,
       partnerName: profile?.name ?? null,
-      ratePerMillionCents: engine.partner_royalty_per_million_tokens_cents,
-      tokensThisPeriod: tokens,
-      alreadyFinalized: finalizedEngineIds.has(engine.id),
-      accruedCents: accrued,
+      ratePerMillionCents: row.rate_per_million_cents,
+      tokensThisPeriod: row.tokens_attributed,
+      alreadyFinalized: finalizedEngineIds.has(row.engine_id),
+      accruedCents: row.amount_cents,
     };
   });
 

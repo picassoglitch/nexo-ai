@@ -42,102 +42,84 @@ function sevenDaysAgoIso(): string {
 
 /** Aggregate token usage across every user + every engine.
  *
- *  We pull raw rows and aggregate in JS rather than using pg `sum` + `group by`
- *  because PostgREST doesn't expose aggregate queries directly without a
- *  view or RPC, and the data volume at our current scale (low thousands of
- *  events per user per month) is well within the "read everything and
- *  aggregate in Node" budget. If event count crosses ~1M rows we'll need a
- *  materialized view; until then this is the right trade-off. */
+ *  REFACTORED (migration 0017): previously this pulled EVERY llm.tokens
+ *  usage_events row (no time bound) over PostgREST and aggregated in Node.
+ *  On Supabase nano with thousands of events that round-trip was hitting
+ *  the 19s edge timeout → Cloudflare 522s → "project unhealthy" alerts.
+ *
+ *  The new path calls `compute_platform_token_stats` which returns:
+ *    - 3 scalar rows: scope = 'all_time' | 'month' | 'week'
+ *    - N per-engine rows: scope = 'per_engine', one per active engine
+ *  Total payload: ~ (3 + #engines) rows instead of N events. Aggregation
+ *  + DISTINCT user counts happen server-side in a single transaction with
+ *  an 8s statement_timeout safety net. */
 export async function getPlatformTokenStats(): Promise<PlatformTokenStats> {
   const admin = createAdminClient();
   const periodStart = currentPeriodStartIso();
   const weekStart = sevenDaysAgoIso();
 
-  // Pull every llm.tokens event with the columns we need. No date filter —
-  // we filter in JS so the same query feeds month + week + all-time totals.
-  const { data: events, error } = await admin
-    .from('usage_events')
-    .select('amount, engine_id, user_id, occurred_at')
-    .eq('kind', 'llm.tokens');
+  const emptyResult: PlatformTokenStats = {
+    monthTotal: 0,
+    weekTotal: 0,
+    allTimeTotal: 0,
+    byEngineThisMonth: [],
+    activeUsersThisMonth: 0,
+    periodStart,
+  };
 
-  if (error || !events) {
-    if (error) console.error('[platform-stats] events query failed:', error.message);
-    return {
-      monthTotal: 0,
-      weekTotal: 0,
-      allTimeTotal: 0,
-      byEngineThisMonth: [],
-      activeUsersThisMonth: 0,
-      periodStart,
-    };
+  const { data: rpcRaw, error } = await admin.rpc('compute_platform_token_stats', {
+    p_period_start: periodStart,
+    p_week_start: weekStart,
+  });
+  if (error) {
+    console.error('[platform-stats] RPC failed:', error.message);
+    return emptyResult;
   }
 
-  // Resolve engine_id → slug + display name in one round-trip.
-  const engineIds = Array.from(
-    new Set(events.map((e) => e.engine_id as string).filter(Boolean)),
-  );
-  const engineMeta = new Map<string, { slug: string; name: string }>();
-  if (engineIds.length > 0) {
-    const { data: engineRows } = await admin
-      .from('engines')
-      .select('id, slug, name')
-      .in('id', engineIds);
-    for (const r of engineRows ?? []) {
-      engineMeta.set(r.id as string, {
-        slug: (r.slug as string) ?? '?',
-        name: (r.name as string) ?? '?',
+  const rows = (rpcRaw ?? []) as Array<{
+    scope: 'all_time' | 'month' | 'week' | 'per_engine';
+    engine_id: string | null;
+    engine_slug: string | null;
+    engine_name: string | null;
+    tokens: number;
+    active_users: number;
+  }>;
+
+  // Split rows by discriminator. The 3 scalar rows are guaranteed to be
+  // present (the RPC SELECTs them unconditionally — sum returns 0 on empty).
+  let monthTotal = 0;
+  let weekTotal = 0;
+  let allTimeTotal = 0;
+  let activeUsersThisMonth = 0;
+  const byEngine: PlatformTokenStats['byEngineThisMonth'] = [];
+
+  for (const row of rows) {
+    if (row.scope === 'all_time') {
+      allTimeTotal = row.tokens;
+    } else if (row.scope === 'month') {
+      monthTotal = row.tokens;
+      activeUsersThisMonth = row.active_users;
+    } else if (row.scope === 'week') {
+      weekTotal = row.tokens;
+    } else if (row.scope === 'per_engine' && row.engine_id) {
+      byEngine.push({
+        engineId: row.engine_id,
+        engineSlug: row.engine_slug ?? 'unknown',
+        engineName: row.engine_name ?? 'Engine eliminado',
+        tokens: row.tokens,
+        activeUsers: row.active_users,
       });
     }
   }
 
-  // Walk events once, accumulate everything we need.
-  let monthTotal = 0;
-  let weekTotal = 0;
-  let allTimeTotal = 0;
-  const byEngine = new Map<
-    string,
-    { tokens: number; users: Set<string> }
-  >();
-  const activeUsersThisMonth = new Set<string>();
-
-  for (const e of events) {
-    const amount = (e.amount as number | null) ?? 0;
-    const engineId = (e.engine_id as string | null) ?? '';
-    const userId = (e.user_id as string | null) ?? '';
-    const occurred = (e.occurred_at as string | null) ?? '';
-    allTimeTotal += amount;
-    if (occurred >= weekStart) weekTotal += amount;
-    if (occurred >= periodStart) {
-      monthTotal += amount;
-      if (userId) activeUsersThisMonth.add(userId);
-      if (engineId) {
-        const bucket = byEngine.get(engineId) ?? { tokens: 0, users: new Set<string>() };
-        bucket.tokens += amount;
-        if (userId) bucket.users.add(userId);
-        byEngine.set(engineId, bucket);
-      }
-    }
-  }
-
-  const byEngineThisMonth = Array.from(byEngine.entries())
-    .map(([engineId, agg]) => {
-      const meta = engineMeta.get(engineId);
-      return {
-        engineId,
-        engineSlug: meta?.slug ?? 'unknown',
-        engineName: meta?.name ?? 'Engine eliminado',
-        tokens: agg.tokens,
-        activeUsers: agg.users.size,
-      };
-    })
-    .sort((a, b) => b.tokens - a.tokens);
+  byEngine.sort((a, b) => b.tokens - a.tokens);
 
   return {
     monthTotal,
     weekTotal,
     allTimeTotal,
-    byEngineThisMonth,
-    activeUsersThisMonth: activeUsersThisMonth.size,
+    byEngineThisMonth: byEngine,
+    activeUsersThisMonth,
     periodStart,
   };
 }
