@@ -2,7 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
-      "comment": "Legal pages must never be cached at the edge. The original 404 cache (from before these routes existed) survived a deploy and required manual purge. force-dynamic on the page covers Next.js layer; this header covers the Vercel CDN layer.",
       "source": "/:locale(es|en)/(terms|privacy)",
       "headers": [
         { "key": "Cache-Control", "value": "private, no-cache, no-store, max-age=0, must-revalidate" }
