@@ -532,6 +532,27 @@ footer { background: var(--bg); border-top: 1px solid var(--line); padding: 56px
 .auth-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px -10px var(--path-glow); filter: brightness(1.05); }
 .auth-submit:disabled { opacity: 0.55; cursor: wait; }
 
+/* ── Legal prose (Terms / Privacy / future legal pages) ──────────────────
+   Dark-theme typography for long-form documents. Scoped to .legal-prose
+   so we don't bleed these styles into the marketing landing or dashboard. */
+.legal-prose { color: var(--ink-dim); font-size: 15px; line-height: 1.7; }
+.legal-prose h2 { color: var(--ink); font-family: var(--font-display), sans-serif; font-size: clamp(20px, 2.5vw, 24px); font-weight: 600; letter-spacing: -0.015em; margin: 40px 0 12px; padding-top: 24px; border-top: 1px solid var(--line); }
+.legal-prose h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.legal-prose h3 { color: var(--ink); font-family: var(--font-display), sans-serif; font-size: 16px; font-weight: 600; margin: 24px 0 8px; }
+.legal-prose p { margin: 0 0 14px; }
+.legal-prose p + p { margin-top: 14px; }
+.legal-prose ul, .legal-prose ol { margin: 0 0 16px; padding-left: 22px; }
+.legal-prose ul li, .legal-prose ol li { margin-bottom: 6px; }
+.legal-prose strong, .legal-prose b { color: var(--ink); font-weight: 600; }
+.legal-prose a { color: var(--path); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.legal-prose a:hover { color: var(--path); text-decoration-thickness: 2px; }
+.legal-prose code { font-family: var(--font-mono), monospace; font-size: 13px; background: var(--bg-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; color: var(--ink); }
+.legal-prose .legal-callout { padding: 14px 18px; border: 1px solid var(--line-bright); background: rgba(255,255,255,0.02); border-radius: 10px; font-size: 13.5px; color: var(--ink-dim); margin: 18px 0; line-height: 1.6; }
+.legal-prose .legal-toc { padding: 18px 22px; border: 1px solid var(--line); background: rgba(16,19,32,0.55); border-radius: 14px; margin: 0 0 36px; font-size: 13.5px; }
+.legal-prose .legal-toc ol { padding-left: 22px; margin-bottom: 0; }
+.legal-prose .legal-toc a { color: var(--ink-dim); text-decoration: none; }
+.legal-prose .legal-toc a:hover { color: var(--path); }
+
 .auth-mode-switch { font-size: 12.5px; color: var(--ink-dim); text-align: center; margin-top: 6px; }
 .auth-mode-switch-link { background: none; border: none; color: var(--path); font-family: inherit; font-size: inherit; font-weight: 600; cursor: pointer; padding: 0; transition: opacity .2s; }
 .auth-mode-switch-link:hover { opacity: 0.8; }

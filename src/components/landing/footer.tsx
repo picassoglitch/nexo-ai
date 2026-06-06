@@ -47,8 +47,10 @@ export function LandingFooter() {
       <div className="footer-bottom">
         <p>© 2026 Nexo AI — nexo-ai.world</p>
         <div className="socials">
-          <a href="#">{tFooter('privacy')}</a>
-          <a href="#">{tFooter('terms')}</a>
+          {/* Real legal pages — required public URLs for OAuth provider apps
+              (Google, Mercado Pago, etc.) and consumer-law compliance in MX. */}
+          <Link href={'/privacy' as Route}>{tFooter('privacy')}</Link>
+          <Link href={'/terms' as Route}>{tFooter('terms')}</Link>
           <a href="#">{tFooter('status')}</a>
         </div>
       </div>
