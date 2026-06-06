@@ -10,6 +10,11 @@ export const metadata = {
     'Cómo Nexo AI recopila, usa y protege tus datos personales. Cumplimiento con LFPDPPP (México).',
 };
 
+// force-dynamic so Vercel's CDN never serves a stale 404 from before the
+// route existed. The page is cheap (no DB, just getCurrentUser for nav
+// state), so per-request rendering has no real cost.
+export const dynamic = 'force-dynamic';
+
 const LAST_UPDATED = '17 junio 2026';
 
 export default async function PrivacyPage({
