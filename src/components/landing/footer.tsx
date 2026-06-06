@@ -48,9 +48,13 @@ export function LandingFooter() {
         <p>© 2026 Nexo AI — nexo-ai.world</p>
         <div className="socials">
           {/* Real legal pages — required public URLs for OAuth provider apps
-              (Google, Mercado Pago, etc.) and consumer-law compliance in MX. */}
-          <Link href={'/privacy' as Route}>{tFooter('privacy')}</Link>
-          <Link href={'/terms' as Route}>{tFooter('terms')}</Link>
+              (Google, Mercado Pago, etc.) and consumer-law compliance in MX.
+              Routes live under /legal/ because the CDN-cached 404 on /terms
+              and /privacy from before the routes existed never cleared even
+              after manual purge — the /legal/ prefix gives them fresh cache
+              keys that Vercel's edge has never seen. */}
+          <Link href={'/legal/privacy' as Route}>{tFooter('privacy')}</Link>
+          <Link href={'/legal/terms' as Route}>{tFooter('terms')}</Link>
           <a href="#">{tFooter('status')}</a>
         </div>
       </div>
