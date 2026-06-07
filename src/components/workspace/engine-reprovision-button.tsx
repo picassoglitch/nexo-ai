@@ -52,7 +52,7 @@ export function EngineReprovisionButton({ engineId, engineName }: Props) {
         opacity: pending ? 0.7 : 1,
       }}
     >
-      {pending ? 'Provisionando…' : '↻ Re-provisionar en NexoClip'}
+      {pending ? 'Provisionando…' : `↻ Re-provisionar en ${engineName}`}
     </button>
   );
 }

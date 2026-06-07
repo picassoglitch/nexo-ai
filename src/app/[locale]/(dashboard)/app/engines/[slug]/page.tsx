@@ -611,12 +611,12 @@ function AccessPanel({
                     maxWidth: '60ch',
                   }}
                 >
-                  Si esto falla: (1) verifica que NexoClip esté corriendo en su URL;
-                  (2) que <code>NEXOCLIP_ADMIN_TOKEN</code> en .env.local coincida con{' '}
-                  <code>NEXO_AI_ADMIN_TOKEN</code> en NexoClip; (3) que la URL en{' '}
-                  <code>engines.admin_api_base</code> apunte al endpoint correcto.
-                  El log del dev server (busca <code>[engine_subs]</code>) muestra el error
-                  exacto.
+                  Si esto falla: (1) verifica que {engineName} esté corriendo en su URL;
+                  (2) que <code>{`${engine.slug.toUpperCase()}_ADMIN_TOKEN`}</code> en{' '}
+                  Vercel coincida con <code>NEXO_AI_ADMIN_TOKEN</code> en {engineName};{' '}
+                  (3) que la URL en <code>engines.admin_api_base</code> apunte al endpoint
+                  correcto. El log del dev server (busca <code>[engine_subs]</code>) muestra
+                  el error exacto.
                 </div>
               </div>
             ) : (
