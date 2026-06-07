@@ -29,7 +29,7 @@ export function EngineLaunchButton({ engineId, engineName, label, newTab = true 
         // placeholder is expected during development, not a failure.
         if (result.reason === 'not_configured') {
           showToast(
-            `<b>${engineName}</b> aún no está deployado. La interfaz real se conecta cuando NexoClip publique sus endpoints.`,
+            `<b>${engineName}</b> aún no está deployado. La interfaz real se conecta cuando ${engineName} publique sus endpoints.`,
           );
         } else {
           showToast(`<b>Error</b> · ${result.error ?? 'no se pudo abrir el engine'}`);

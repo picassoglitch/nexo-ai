@@ -3,10 +3,12 @@
 
 import 'server-only';
 import { nexoclipIntegration } from './nexoclip';
+import { nexocryptoIntegration } from './nexocrypto';
 import type { EngineIntegration } from './types';
 
 const REGISTRY: Record<string, EngineIntegration> = {
   [nexoclipIntegration.slug]: nexoclipIntegration,
+  [nexocryptoIntegration.slug]: nexocryptoIntegration,
   // NexoStreamManager goes here when its integration file lands:
   //   [nexostreamIntegration.slug]: nexostreamIntegration,
 };
