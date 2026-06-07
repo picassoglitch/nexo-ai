@@ -8,7 +8,7 @@
 --   external_url:
 --     Public URL where the engine's UI lives. NULL when the engine has no
 --     external surface (internal_placeholder mode). Example for NexoClip:
---     "https://nexoclip.app" (or wherever it ends up deployed).
+--     "https://nexoclip.nexo-ai.world" (or wherever it ends up deployed).
 --
 --   integration_mode:
 --     How "Abrir engine →" actually opens the thing.
@@ -50,8 +50,8 @@ alter table public.engines
 update public.engines
 set
   integration_mode = 'external_sso_redirect',
-  external_url = 'https://nexoclip.app',
-  admin_api_base = 'https://nexoclip.app/api/admin',
+  external_url = 'https://nexoclip.nexo-ai.world',
+  admin_api_base = 'https://nexoclip.nexo-ai.world/api/admin',
   requires_provisioning = true
 where slug = 'nexoclip';
 
