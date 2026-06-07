@@ -171,14 +171,15 @@ export default async function MyEnginesPage({
             meetsTier &&
             engineCanRunLive(tier, engine.id, selectedEngineId, isOwnedByMe);
           const isSelected = engine.id === selectedEngineId;
-          // Owner attribution: empty for platform-owned engines. For partner
-          // engines, prefer full_name, fall back to email local-part.
-          const ownerLabel =
-            engine.ownerUserId === null
-              ? null
-              : engine.ownerDisplayName ||
-                engine.ownerEmail?.split('@')[0] ||
-                'Partner';
+          // Owner attribution: every engine gets a chip. Platform-owned
+          // (no partner_id) → "by Nexo AI" in a muted style. Partner-owned
+          // → "by [name]" in the partner-purple style.
+          const isPlatformOwned = engine.ownerUserId === null;
+          const ownerLabel = isPlatformOwned
+            ? 'Nexo AI'
+            : engine.ownerDisplayName ||
+              engine.ownerEmail?.split('@')[0] ||
+              'Partner';
 
           return (
             <div
@@ -206,29 +207,30 @@ export default async function MyEnginesPage({
                   <div>
                     <h4 style={{ fontSize: 14 }}>
                       {engine.name}
-                      {ownerLabel && (
-                        // "by Partner X" chip — colored purple to match the
-                        // admin-tier banner aesthetic + visually distinguishes
-                        // partner-built engines from platform-owned defaults.
-                        <span
-                          style={{
-                            marginLeft: 8,
-                            fontFamily: 'var(--cc-mono), monospace',
-                            fontSize: 9.5,
-                            letterSpacing: '0.1em',
-                            color: 'var(--cc-purple)',
-                            background: 'var(--cc-purple-g)',
-                            border: '1px solid rgba(157,123,255,.3)',
-                            padding: '2px 7px',
-                            borderRadius: 4,
-                            textTransform: 'uppercase',
-                            verticalAlign: 'middle',
-                          }}
-                          title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
-                        >
-                          {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
-                        </span>
-                      )}
+                      {/* Attribution chip — purple for partner engines,
+                          muted gray for platform-owned (Nexo AI). */}
+                      <span
+                        style={{
+                          marginLeft: 8,
+                          fontFamily: 'var(--cc-mono), monospace',
+                          fontSize: 9.5,
+                          letterSpacing: '0.1em',
+                          color: isPlatformOwned ? 'var(--cc-txt-4)' : 'var(--cc-purple)',
+                          background: isPlatformOwned
+                            ? 'rgba(255,255,255,.03)'
+                            : 'var(--cc-purple-g)',
+                          border: isPlatformOwned
+                            ? '1px solid var(--cc-line-2)'
+                            : '1px solid rgba(157,123,255,.3)',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          textTransform: 'uppercase',
+                          verticalAlign: 'middle',
+                        }}
+                        title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
+                      >
+                        {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
+                      </span>
                     </h4>
                     <div
                       style={{

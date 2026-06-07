@@ -84,12 +84,14 @@ export default async function EngineWorkspacePage({
     meetsTier &&
     engineCanRunLive(tier, engine.id, session.selectedEngineId, isOwnedByMe);
   const isComingSoon = engine.status === 'coming_soon';
-  const ownerLabel =
-    engine.ownerUserId === null
-      ? null
-      : engine.ownerDisplayName ||
-        engine.ownerEmail?.split('@')[0] ||
-        'Partner';
+  // Every engine gets a chip. Platform-owned (no partner_id) → "by Nexo AI"
+  // muted; partner-owned → "by [name]" purple.
+  const isPlatformOwned = engine.ownerUserId === null;
+  const ownerLabel = isPlatformOwned
+    ? 'Nexo AI'
+    : engine.ownerDisplayName ||
+      engine.ownerEmail?.split('@')[0] ||
+      'Partner';
 
   // Lazy admin provisioning: admins have effective ALL_ACCESS via role
   // override, so they should auto-have engine access. If migration 0011's
@@ -159,25 +161,27 @@ export default async function EngineWorkspacePage({
             }}
           >
             {engine.name}
-            {ownerLabel && (
-              <span
-                style={{
-                  fontFamily: 'var(--cc-mono), monospace',
-                  fontSize: 11,
-                  letterSpacing: '0.1em',
-                  color: 'var(--cc-purple)',
-                  background: 'var(--cc-purple-g)',
-                  border: '1px solid rgba(157,123,255,.3)',
-                  padding: '4px 10px',
-                  borderRadius: 5,
-                  textTransform: 'uppercase',
-                  fontWeight: 600,
-                }}
-                title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
-              >
-                {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
-              </span>
-            )}
+            <span
+              style={{
+                fontFamily: 'var(--cc-mono), monospace',
+                fontSize: 11,
+                letterSpacing: '0.1em',
+                color: isPlatformOwned ? 'var(--cc-txt-4)' : 'var(--cc-purple)',
+                background: isPlatformOwned
+                  ? 'rgba(255,255,255,.03)'
+                  : 'var(--cc-purple-g)',
+                border: isPlatformOwned
+                  ? '1px solid var(--cc-line-2)'
+                  : '1px solid rgba(157,123,255,.3)',
+                padding: '4px 10px',
+                borderRadius: 5,
+                textTransform: 'uppercase',
+                fontWeight: 600,
+              }}
+              title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
+            >
+              {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
+            </span>
           </h2>
           <div
             style={{
