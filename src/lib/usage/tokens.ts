@@ -6,13 +6,15 @@
 // Where:
 //   monthly_allocation:  TIER_CAPS[effective_tier].tokensPerMonth
 //   bonus:               profiles.token_bonus_balance (top-up packs, persistent)
-//   monthlyUsed:         sum over THIS MONTH's usage_events of —
+//   monthlyUsed:         sum over THIS MONTH's usage_events of
+//                        max(1, per-event) where per-event is —
 //                          kind='llm.tokens'  → amount (native token count)
 //                          everything else    → ceil(cost_usd_micros / 4)
 //                        i.e. all non-LLM provider spend (transcription,
 //                        engine base charge, …) deducts its real USD cost
-//                        as token-equivalents (~$4/1M tokens), so the single
-//                        balance reflects TOTAL spend across every provider.
+//                        as token-equivalents (~$4/1M tokens), and EVERY
+//                        event floors at 1 token — any provider used costs
+//                        at least 1 token even if its raw cost rounds to 0.
 //
 // All reads use the user-scoped supabase client when called from RSC pages
 // (RLS allows self-select); writes use the admin client (RLS blocks anon
@@ -82,11 +84,15 @@ export async function getTokenBalance(userId: string): Promise<TokenBalance> {
   const MICROS_PER_TOKEN = 4;
   const monthlyUsed = (events ?? []).reduce<number>((sum, e) => {
     const kind = (e.kind as string | undefined) ?? '';
-    if (kind === 'llm.tokens') {
-      return sum + ((e.amount as number | undefined) ?? 0);
-    }
-    const costUm = (e.cost_usd_micros as number | undefined) ?? 0;
-    return sum + Math.ceil(costUm / MICROS_PER_TOKEN);
+    const raw =
+      kind === 'llm.tokens'
+        ? ((e.amount as number | undefined) ?? 0)
+        : Math.ceil(((e.cost_usd_micros as number | undefined) ?? 0) / MICROS_PER_TOKEN);
+    // Floor: every metered event costs at least 1 token. So any provider
+    // that was used draws down at least 1 token even if its real cost
+    // rounds to zero — covers the per-call overhead we don't otherwise
+    // capture.
+    return sum + Math.max(1, raw);
   }, 0);
 
   // Admins are exempt from token quotas — they need to run things on behalf
