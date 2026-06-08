@@ -8,12 +8,25 @@
 //   Body: {
 //     external_user_id: string,   // Nexo AI user id (matches profiles.id)
 //     events: [
-//       { kind: 'llm.tokens', amount: 1234, source_id: 'llm_call_xyz',
-//         occurred_at?: '2026-...' }
+//       {
+//         provider?: 'anthropic' | 'assemblyai' | ...,   // T4 contract
+//         kind: 'llm.tokens' | 'transcription.seconds' | ...,
+//         amount: 1234,                                  // native units
+//         cost_usd_micros?: 111000,                      // real cost ($0.111)
+//         source_id: 'llmc_xyz',                         // = engine row id
+//         occurred_at?: '2026-...',
+//         operation?: 'variants_generate',
+//         metadata?: { ... }
+//       }
 //     ]
 //   }
-//   Returns: { ok: true, balance: { remaining, monthlyAllocation, bonus,
-//             monthlyUsed, periodStart } }
+//   Returns: { ok: true, inserted, skipped, balance: { remaining,
+//             monthlyAllocation, bonus, monthlyUsed, periodStart } }
+//
+//   NOTE on validation: `kind` is free-text (loose regex check below) —
+//   the platform deliberately does NOT whitelist values. Engines can add
+//   new meters (transcription.seconds, vision.frames, embedding.tokens,
+//   ...) without a coordinated Nexo AI deploy. See migration 0020.
 //
 // Engines call this AFTER every LLM call (or batched every N seconds). The
 // returned balance lets the engine decide whether to keep spending or pause
@@ -78,10 +91,19 @@ interface PostBody {
     operation?: string;
     /** Optional engine context bag (stream_id, clip_id, est_tokens, etc). */
     metadata?: Record<string, unknown>;
+    /** T4 contract: underlying provider that incurred the cost. */
+    provider?: string;
+    /** T4 contract: real provider cost in USD micros. $0.111 → 111000. */
+    cost_usd_micros?: number;
   }>;
 }
 
-const VALID_KINDS = new Set(['llm.tokens', 'storage.mb', 'publish.count']);
+// Loose format check for kind + provider. Lowercase letters, digits, dots
+// and underscores; must start with a letter; capped length so callers can't
+// stuff arbitrary blobs into the column. Whitelisting values would mean
+// every new meter requires a Nexo AI deploy — see migration 0020.
+const KIND_RE = /^[a-z][a-z0-9_.]{0,63}$/;
+const PROVIDER_RE = /^[a-z][a-z0-9_.-]{0,63}$/;
 
 export async function POST(
   req: Request,
@@ -137,8 +159,10 @@ export async function POST(
   for (const e of events) {
     if (
       !e.kind ||
-      !VALID_KINDS.has(e.kind) ||
+      typeof e.kind !== 'string' ||
+      !KIND_RE.test(e.kind) ||
       typeof e.amount !== 'number' ||
+      !Number.isFinite(e.amount) ||
       e.amount < 0 ||
       !e.source_id
     ) {
@@ -147,10 +171,33 @@ export async function POST(
         { status: 400 },
       );
     }
+    // Optional T4 fields — present means they must parse cleanly, but
+    // missing is fine (legacy engines, or kinds without a provider cost).
+    if (
+      e.provider !== undefined &&
+      (typeof e.provider !== 'string' || !PROVIDER_RE.test(e.provider))
+    ) {
+      return NextResponse.json(
+        { error: 'invalid provider', event: e },
+        { status: 400 },
+      );
+    }
+    if (
+      e.cost_usd_micros !== undefined &&
+      (typeof e.cost_usd_micros !== 'number' ||
+        !Number.isFinite(e.cost_usd_micros) ||
+        !Number.isInteger(e.cost_usd_micros) ||
+        e.cost_usd_micros < 0)
+    ) {
+      return NextResponse.json(
+        { error: 'invalid cost_usd_micros', event: e },
+        { status: 400 },
+      );
+    }
     normalized.push({
       engineSlug: slug,
       userId,
-      kind: e.kind as 'llm.tokens' | 'storage.mb' | 'publish.count',
+      kind: e.kind,
       amount: e.amount,
       sourceId: e.source_id,
       occurredAt: e.occurred_at,
@@ -159,6 +206,9 @@ export async function POST(
         e.metadata && typeof e.metadata === 'object' && !Array.isArray(e.metadata)
           ? (e.metadata as Record<string, unknown>)
           : undefined,
+      provider: typeof e.provider === 'string' ? e.provider : undefined,
+      costUsdMicros:
+        typeof e.cost_usd_micros === 'number' ? e.cost_usd_micros : undefined,
     });
   }
 
