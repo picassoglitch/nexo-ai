@@ -1,13 +1,18 @@
 // Token balance + usage recording.
 //
-// Balance formula (per CLAUDE.md spec):
-//   balance = monthly_allocation + bonus − sum(usage_events this month)
+// Balance formula:
+//   balance = monthly_allocation + bonus − monthlyUsed
 //
 // Where:
 //   monthly_allocation:  TIER_CAPS[effective_tier].tokensPerMonth
 //   bonus:               profiles.token_bonus_balance (top-up packs, persistent)
-//   sum(usage_events):   sum(amount) WHERE user_id=X AND kind='llm.tokens'
-//                        AND occurred_at >= start_of_calendar_month
+//   monthlyUsed:         sum over THIS MONTH's usage_events of —
+//                          kind='llm.tokens'  → amount (native token count)
+//                          everything else    → ceil(cost_usd_micros / 4)
+//                        i.e. all non-LLM provider spend (transcription,
+//                        engine base charge, …) deducts its real USD cost
+//                        as token-equivalents (~$4/1M tokens), so the single
+//                        balance reflects TOTAL spend across every provider.
 //
 // All reads use the user-scoped supabase client when called from RSC pages
 // (RLS allows self-select); writes use the admin client (RLS blocks anon
@@ -54,11 +59,13 @@ export async function getTokenBalance(userId: string): Promise<TokenBalance> {
       .select('role, tier, token_bonus_balance')
       .eq('id', userId)
       .maybeSingle(),
+    // Pull EVERY metered event this month (not just llm.tokens) so the
+    // quota reflects ALL provider spend — transcription, the engine base
+    // charge, future meters — instead of only Claude tokens.
     admin
       .from('usage_events')
-      .select('amount')
+      .select('kind, amount, cost_usd_micros')
       .eq('user_id', userId)
-      .eq('kind', 'llm.tokens')
       .gte('occurred_at', currentPeriodStartIso()),
   ]);
 
@@ -67,10 +74,20 @@ export async function getTokenBalance(userId: string): Promise<TokenBalance> {
   const tier = effectiveTier(role, storedTier);
   const bonus = (profile?.token_bonus_balance as number | undefined) ?? 0;
 
-  const monthlyUsed = (events ?? []).reduce<number>(
-    (sum, e) => sum + ((e.amount as number | undefined) ?? 0),
-    0,
-  );
+  // Deduction model (T4 all-provider): llm.tokens deducts its native token
+  // COUNT (amount) — unchanged. Every OTHER meter (transcription.seconds,
+  // engine.base, …) deducts its real USD cost converted to token-equivalents
+  // at MICROS_PER_TOKEN, so a single 'tokens' balance reflects total spend.
+  // Rate = the standard model's blended ~$4 / 1M tokens → 4 micros/token.
+  const MICROS_PER_TOKEN = 4;
+  const monthlyUsed = (events ?? []).reduce<number>((sum, e) => {
+    const kind = (e.kind as string | undefined) ?? '';
+    if (kind === 'llm.tokens') {
+      return sum + ((e.amount as number | undefined) ?? 0);
+    }
+    const costUm = (e.cost_usd_micros as number | undefined) ?? 0;
+    return sum + Math.ceil(costUm / MICROS_PER_TOKEN);
+  }, 0);
 
   // Admins are exempt from token quotas — they need to run things on behalf
   // of users for support, demos, and engine bring-up. We use MAX_SAFE_INTEGER
