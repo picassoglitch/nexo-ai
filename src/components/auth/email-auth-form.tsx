@@ -64,6 +64,10 @@ export function EmailAuthForm({ initialMode = 'signin', next, showModeTabs = tru
           setError(mapError(err.code, err.message));
           return;
         }
+        // Signing in with a known password lifts any pending recovery gate —
+        // they've proven they hold the credentials, so the reset restriction
+        // no longer applies. No-op when there's no recovery cookie.
+        await fetch('/api/auth/clear-recovery', { method: 'POST' });
         router.push((next ?? ACCOUNT_ROUTE) as Route);
         router.refresh();
       } else {

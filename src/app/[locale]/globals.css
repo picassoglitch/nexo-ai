@@ -473,6 +473,7 @@ footer { background: var(--bg); border-top: 1px solid var(--line); padding: 56px
 .auth-kicker { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--path); transition: color .4s; }
 .auth-headline { font-size: clamp(22px, 2.4vw, 28px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.18; color: var(--ink); }
 .auth-error { border: 1px solid var(--ember); background: rgba(255, 107, 61, 0.1); color: var(--ember); padding: 12px 14px; border-radius: 10px; font-size: 13px; }
+.auth-success { border: 1px solid var(--acid); background: rgba(198, 242, 78, 0.1); color: var(--acid); padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
 
 .auth-benefits { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .auth-benefits li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--ink-dim); line-height: 1.5; }

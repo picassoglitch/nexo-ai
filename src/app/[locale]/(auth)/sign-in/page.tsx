@@ -10,11 +10,11 @@ export default async function SignInPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string; next?: string; mode?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; mode?: string; reset?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { error, next, mode } = await searchParams;
+  const { error, next, mode, reset } = await searchParams;
   const t = await getTranslations('auth.signIn');
 
   const supabase = await createClient();
@@ -47,6 +47,8 @@ export default async function SignInPage({
       </div>
 
       <div className="auth-card">
+        {reset === 'success' && <div className="auth-success">{t('resetSuccess')}</div>}
+
         <EmailAuthForm initialMode={initialMode} next={next} showModeTabs />
 
         {upstreamError && <div className="auth-error auth-error-upstream">{upstreamError}</div>}

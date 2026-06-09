@@ -1,7 +1,8 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { createServerClient } from '@supabase/ssr';
 import { routing } from '@/i18n/routing';
+import { PW_RECOVERY_COOKIE } from '@/lib/auth/recovery';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -47,6 +48,22 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   response.headers.set('Pragma', 'no-cache');
   response.headers.set('Expires', '0');
+
+  // Recovery gate: a session minted from a password-reset link may ONLY be used
+  // to set a new password. While the recovery cookie is present, bounce every
+  // protected route to /reset-password so the link can't be used as a silent
+  // login into the app. Cheap (cookie read, no Supabase round-trip). The cookie
+  // clears once the password is set or the user signs in with known creds.
+  if (request.cookies.get(PW_RECOVERY_COOKIE)) {
+    const localeMatch = request.nextUrl.pathname.match(/^\/(es|en)(?=\/|$)/);
+    const localePrefix = localeMatch ? localeMatch[0] : '';
+    const resetUrl = request.nextUrl.clone();
+    resetUrl.pathname = `${localePrefix}/reset-password`;
+    resetUrl.search = '';
+    const redirect = NextResponse.redirect(resetUrl);
+    redirect.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return redirect;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

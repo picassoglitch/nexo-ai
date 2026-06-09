@@ -45,7 +45,8 @@
       "errorRateLimit": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
       "checkInboxTitle": "Revisa tu bandeja.",
       "checkInboxBody": "Enviamos un enlace de confirmación a {email}. Haz clic para terminar de crear tu cuenta.",
-      "forgotPassword": "¿Olvidaste tu contraseña?"
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "resetSuccess": "Contraseña actualizada. Inicia sesión con tu nueva contraseña."
     },
     "forgotPassword": {
       "liveStatus": "Plataforma en vivo · sistemas en producción",
@@ -68,7 +69,7 @@
       "confirmLabel": "Confirmar contraseña",
       "submit": "Actualizar contraseña →",
       "successTitle": "Contraseña actualizada.",
-      "successBody": "Tu contraseña se cambió. Te llevamos a tu cuenta…",
+      "successBody": "Tu contraseña se cambió. Te redirigimos para iniciar sesión…",
       "invalidTitle": "Enlace expirado o inválido.",
       "invalidBody": "Este enlace para restablecer la contraseña ya no es válido. Solicita uno nuevo para continuar.",
       "requestNew": "Solicitar un nuevo enlace →",

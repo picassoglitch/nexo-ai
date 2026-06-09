@@ -7,8 +7,6 @@ import type { Route } from 'next';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
-const ACCOUNT_ROUTE = '/account' as Route;
-
 export function ResetPasswordForm() {
   const t = useTranslations('auth.resetPassword');
   const router = useRouter();
@@ -56,9 +54,14 @@ export function ResetPasswordForm() {
         setError(err.message || t('errorGeneric'));
         return;
       }
+      // Lift the recovery gate and end the recovery session, then make the
+      // user sign in fresh with their NEW password. A password reset must never
+      // leave a logged-in session behind — the link is for setting a password,
+      // not for getting into the app.
+      await fetch('/api/auth/clear-recovery', { method: 'POST' });
+      await supabase.auth.signOut();
       setDone(true);
-      // Brief success beat, then send them into the app.
-      router.push(ACCOUNT_ROUTE);
+      router.push('/sign-in?reset=success' as Route);
       router.refresh();
     });
   }
