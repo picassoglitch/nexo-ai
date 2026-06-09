@@ -29,8 +29,9 @@ function StatusBadge({ vm }: { vm: EngineVM }) {
     live: { label: t('statusLive'), dot: true, cls: 'text-[var(--cc-green)] border-[var(--cc-green)]/40 bg-[var(--cc-green-g)]' },
     trial: { label: t('statusTrial'), dot: true, cls: 'text-[var(--cc-cyan)] border-[var(--cc-cyan)]/40 bg-[var(--cc-cyan-g)]' },
     simulation: { label: t('statusSimulation'), dot: false, cls: 'text-[var(--cc-txt-3)] border-[var(--cc-line-2)] bg-white/[0.02]' },
-    locked: { label: t('statusLocked', { plan: vm.requiresPlanLabel ?? 'Pro' }), dot: false, cls: 'text-[var(--cc-amber)] border-[var(--cc-amber)]/40 bg-[var(--cc-amber-g)]' },
-    coming_soon: { label: t('statusSoon'), dot: false, cls: 'text-[var(--cc-amber)] border-[var(--cc-amber)]/30 bg-[var(--cc-amber-g)]' },
+    // Short label (plan only) so it never clips — the lock glyph already says "locked".
+    locked: { label: vm.requiresPlanLabel ?? 'Pro', dot: false, cls: 'text-[var(--cc-purple)] border-[var(--cc-purple)]/40 bg-[var(--cc-purple-g)]' },
+    coming_soon: { label: t('statusSoon'), dot: false, cls: 'text-[var(--cc-purple)] border-[var(--cc-purple)]/30 bg-[var(--cc-purple-g)]' },
   } as const;
   const s = map[vm.state];
   return (
@@ -74,12 +75,12 @@ function EngineIcon({
 }) {
   const tint =
     variant === 'locked'
-      ? 'border-[var(--cc-amber)]/30 bg-[var(--cc-amber-g)] text-[var(--cc-amber)]'
+      ? 'border-[var(--cc-purple)]/30 bg-[var(--cc-purple-g)] text-[var(--cc-purple)]'
       : variant === 'soon'
         ? 'border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] text-[var(--cc-txt-4)]'
         : 'border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] text-[var(--cc-green)]';
   return (
-    <span className={`grid shrink-0 place-items-center rounded-xl border ${tint} ${box}`}>
+    <span className={`grid shrink-0 place-items-center overflow-hidden rounded-xl border ${tint} ${box}`}>
       <EngineGlyph slug={vm.slug} size={glyph} />
     </span>
   );
@@ -91,7 +92,7 @@ function SoonRow({ vm }: { vm: EngineVM }) {
   const showToast = useWorkspace((s) => s.showToast);
   return (
     <div className="flex items-center gap-3.5 rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)]/60 px-4 py-3 opacity-70 transition-opacity hover:opacity-100">
-      <EngineIcon vm={vm} variant="soon" box="size-10" glyph={18} />
+      <EngineIcon vm={vm} variant="soon" box="size-11" glyph={22} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13px] font-semibold text-[var(--cc-txt-2)]">{vm.name}</div>
         <div className="text-[10.5px] uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
@@ -142,15 +143,15 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
             <EngineIcon
               vm={vm}
               variant={variant}
-              box={isFeatured ? 'size-16' : 'size-13'}
-              glyph={isFeatured ? 30 : 24}
+              box={isFeatured ? 'size-16' : 'size-14'}
+              glyph={isFeatured ? 34 : 28}
             />
             {isLocked && (
               <span
-                className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-[var(--cc-amber)]/40 bg-[var(--cc-bg-1)]"
+                className="absolute -bottom-1.5 -right-1.5 grid size-5 place-items-center rounded-full border border-[var(--cc-purple)]/40 bg-[var(--cc-bg-1)]"
                 aria-hidden
               >
-                <Lock size={11} className="text-[var(--cc-amber)]" strokeWidth={2.25} />
+                <Lock size={11} className="text-[var(--cc-purple)]" strokeWidth={2.25} />
               </span>
             )}
           </div>
@@ -199,7 +200,7 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
           {isLocked ? (
             <Link
               href={'/app/subscription' as Route}
-              className="rounded-lg border border-[var(--cc-amber)]/45 bg-[var(--cc-amber-g)] px-3 py-1.5 text-[12px] font-semibold text-[var(--cc-amber)] transition-colors hover:bg-[var(--cc-amber)]/20"
+              className="rounded-lg border border-[var(--cc-purple)]/45 bg-[var(--cc-purple-g)] px-3.5 py-2 text-[12.5px] font-semibold text-[var(--cc-purple)] transition-colors hover:bg-[var(--cc-purple)]/20"
             >
               {t('unlock')}
             </Link>

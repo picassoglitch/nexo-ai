@@ -35,16 +35,35 @@ function CardGrid({ items }: { items: EngineVM[] }) {
   );
 }
 
-function SectionHead({ title, sub }: { title: string; sub?: string }) {
+// Section header with a colored accent bar + a hairline divider underneath, so
+// the three actionability groups read as clearly separate bands. `right` is an
+// optional trailing control (used for the coming-soon toggle).
+function SectionHead({
+  title,
+  sub,
+  accent,
+  right,
+}: {
+  title: string;
+  sub?: string;
+  accent: string;
+  right?: React.ReactNode;
+}) {
   return (
-    <div>
-      <h2
-        className="text-[13px] font-bold uppercase tracking-wider text-[var(--cc-txt-2)]"
-        style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
-      >
-        {title}
-      </h2>
-      {sub && <p className="mt-0.5 text-[12px] text-[var(--cc-txt-4)]">{sub}</p>}
+    <div className="border-b border-[var(--cc-line)] pb-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className={`h-4 w-1.5 shrink-0 rounded-full ${accent}`} />
+          <h2
+            className="text-[15px] font-bold tracking-tight text-[var(--cc-txt)]"
+            style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
+          >
+            {title}
+          </h2>
+        </div>
+        {right}
+      </div>
+      {sub && <p className="mt-1.5 pl-4 text-[12.5px] text-[var(--cc-txt-3)]">{sub}</p>}
     </div>
   );
 }
@@ -122,14 +141,22 @@ export function EnginesExplorer({
           <div className="flex flex-col gap-9">
             {groups.available.length > 0 && (
               <section className="flex flex-col gap-4">
-                <SectionHead title={t('sections.available')} sub={t('sections.availableSub')} />
+                <SectionHead
+                  title={t('sections.available')}
+                  sub={t('sections.availableSub')}
+                  accent="bg-[var(--cc-green)]"
+                />
                 <CardGrid items={groups.available} />
               </section>
             )}
 
             {groups.pro.length > 0 && (
               <section className="flex flex-col gap-4">
-                <SectionHead title={t('sections.pro')} sub={t('sections.proSub')} />
+                <SectionHead
+                  title={t('sections.pro')}
+                  sub={t('sections.proSub')}
+                  accent="bg-[var(--cc-purple)]"
+                />
                 {showUpsell && <UpgradeBanner />}
                 <CardGrid items={groups.pro} />
               </section>
@@ -137,21 +164,25 @@ export function EnginesExplorer({
 
             {groups.soon.length > 0 && (
               <section className="flex flex-col gap-4">
-                <button
-                  type="button"
-                  onClick={() => setSoonOpen((v) => !v)}
-                  className="flex items-center justify-between gap-3 text-left"
-                  aria-expanded={soonOpen}
-                >
-                  <SectionHead title={t('sections.soon')} sub={t('sections.soonSub')} />
-                  <span className="shrink-0 rounded-lg border border-[var(--cc-line-2)] px-3 py-1.5 text-[12px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]">
-                    {soonOpen
-                      ? t('sections.soonHide')
-                      : t('sections.soonShow', { count: groups.soon.length })}
-                  </span>
-                </button>
+                <SectionHead
+                  title={t('sections.soon')}
+                  sub={t('sections.soonSub')}
+                  accent="bg-[var(--cc-txt-4)]"
+                  right={
+                    <button
+                      type="button"
+                      onClick={() => setSoonOpen((v) => !v)}
+                      aria-expanded={soonOpen}
+                      className="shrink-0 rounded-lg border border-[var(--cc-line-2)] px-3 py-1.5 text-[12px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]"
+                    >
+                      {soonOpen
+                        ? t('sections.soonHide')
+                        : t('sections.soonShow', { count: groups.soon.length })}
+                    </button>
+                  }
+                />
                 {soonOpen && (
-                  <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                     {groups.soon.map((vm) => (
                       <EngineCard key={vm.id} vm={vm} variant="soon" />
                     ))}
