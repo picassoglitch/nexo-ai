@@ -557,6 +557,10 @@ footer { background: var(--bg); border-top: 1px solid var(--line); padding: 56px
 .auth-mode-switch-link { background: none; border: none; color: var(--path); font-family: inherit; font-size: inherit; font-weight: 600; cursor: pointer; padding: 0; transition: opacity .2s; }
 .auth-mode-switch-link:hover { opacity: 0.8; }
 
+/* "Forgot password?" — right-aligned under the password field on sign-in. */
+.auth-forgot-link { align-self: flex-end; margin-top: 6px; font-size: 12px; color: var(--ink-dim); text-decoration: none; transition: color .2s; }
+.auth-forgot-link:hover { color: var(--path); }
+
 .auth-error-upstream { margin-top: 10px; }
 
 .auth-divider-compact { margin: 14px 0 10px; }

@@ -44,7 +44,38 @@
       "errorEmailNotConfirmed": "Por favor confirma tu correo primero — revisa tu bandeja por el enlace.",
       "errorRateLimit": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
       "checkInboxTitle": "Revisa tu bandeja.",
-      "checkInboxBody": "Enviamos un enlace de confirmación a {email}. Haz clic para terminar de crear tu cuenta."
+      "checkInboxBody": "Enviamos un enlace de confirmación a {email}. Haz clic para terminar de crear tu cuenta.",
+      "forgotPassword": "¿Olvidaste tu contraseña?"
+    },
+    "forgotPassword": {
+      "liveStatus": "Plataforma en vivo · sistemas en producción",
+      "title": "Restablecer contraseña",
+      "intro": "Ingresa el correo de tu cuenta y te enviaremos un enlace para crear una nueva contraseña.",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "tu@correo.com",
+      "submit": "Enviar enlace →",
+      "backToSignIn": "← Volver a iniciar sesión",
+      "checkInboxTitle": "Revisa tu bandeja.",
+      "checkInboxBody": "Si existe una cuenta para {email}, enviamos un enlace para restablecer tu contraseña.",
+      "errorRateLimit": "Demasiados intentos. Espera un minuto e inténtalo de nuevo."
+    },
+    "resetPassword": {
+      "liveStatus": "Plataforma en vivo · sistemas en producción",
+      "title": "Crear nueva contraseña",
+      "intro": "Elige una nueva contraseña para tu cuenta.",
+      "passwordLabel": "Nueva contraseña",
+      "passwordPlaceholder": "Mínimo 6 caracteres",
+      "confirmLabel": "Confirmar contraseña",
+      "submit": "Actualizar contraseña →",
+      "successTitle": "Contraseña actualizada.",
+      "successBody": "Tu contraseña se cambió. Te llevamos a tu cuenta…",
+      "invalidTitle": "Enlace expirado o inválido.",
+      "invalidBody": "Este enlace para restablecer la contraseña ya no es válido. Solicita uno nuevo para continuar.",
+      "requestNew": "Solicitar un nuevo enlace →",
+      "errorWeakPassword": "La contraseña debe tener al menos 6 caracteres.",
+      "errorMismatch": "Las contraseñas no coinciden.",
+      "errorSamePassword": "La nueva contraseña debe ser distinta a la actual.",
+      "errorGeneric": "Ocurrió un error. Inténtalo de nuevo."
     },
     "account": {
       "title": "Cuenta",

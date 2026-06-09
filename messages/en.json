@@ -44,7 +44,38 @@
       "errorEmailNotConfirmed": "Please confirm your email first — check your inbox for the link.",
       "errorRateLimit": "Too many attempts. Wait a minute and try again.",
       "checkInboxTitle": "Check your inbox.",
-      "checkInboxBody": "We sent a confirmation link to {email}. Click it to finish creating your account."
+      "checkInboxBody": "We sent a confirmation link to {email}. Click it to finish creating your account.",
+      "forgotPassword": "Forgot password?"
+    },
+    "forgotPassword": {
+      "liveStatus": "Platform live · systems in production",
+      "title": "Reset your password",
+      "intro": "Enter your account email and we'll send you a link to set a new password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "submit": "Send reset link →",
+      "backToSignIn": "← Back to sign in",
+      "checkInboxTitle": "Check your inbox.",
+      "checkInboxBody": "If an account exists for {email}, we sent a link to reset your password.",
+      "errorRateLimit": "Too many attempts. Wait a minute and try again."
+    },
+    "resetPassword": {
+      "liveStatus": "Platform live · systems in production",
+      "title": "Set a new password",
+      "intro": "Choose a new password for your account.",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmLabel": "Confirm password",
+      "submit": "Update password →",
+      "successTitle": "Password updated.",
+      "successBody": "Your password has been changed. Taking you to your account…",
+      "invalidTitle": "Link expired or invalid.",
+      "invalidBody": "This password reset link is no longer valid. Request a new one to continue.",
+      "requestNew": "Request a new link →",
+      "errorWeakPassword": "Password must be at least 6 characters.",
+      "errorMismatch": "Passwords don't match.",
+      "errorSamePassword": "New password must be different from your current one.",
+      "errorGeneric": "Something went wrong. Try again."
     },
     "account": {
       "title": "Account",

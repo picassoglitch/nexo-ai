@@ -75,6 +75,22 @@ The HTML files use Supabase's Go template variables (`{{ .ConfirmationURL }}`,
 `{{ .Email }}`, `{{ .Token }}`, `{{ .SiteURL }}`, etc.). Supabase substitutes
 them automatically at send time.
 
+## Step 3.5 — URL Configuration (required for the reset link to work)
+
+The password-reset email link sends the user to `/auth/callback`, which
+exchanges the recovery code for a session and then forwards to `/reset-password`.
+Supabase will only honor redirect targets on its allowlist.
+
+In **Authentication → URL Configuration**:
+
+- **Site URL**: `https://nexo-ai.world`
+- **Redirect URLs** (add both):
+  - `https://nexo-ai.world/auth/callback`
+  - `http://localhost:3000/auth/callback` (for local testing)
+
+If `/auth/callback` isn't allowlisted, the reset link bounces the user back to
+`/sign-in` with `error=missing_code` instead of letting them set a new password.
+
 ## Step 4 — Test
 
 1. Use an incognito browser → go to `/sign-in` → request a password reset on

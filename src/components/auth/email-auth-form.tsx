@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
 type Mode = 'signin' | 'signup';
@@ -152,6 +153,11 @@ export function EmailAuthForm({ initialMode = 'signin', next, showModeTabs = tru
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t('passwordPlaceholder')}
         />
+        {mode === 'signin' && (
+          <Link href="/forgot-password" className="auth-forgot-link">
+            {t('forgotPassword')}
+          </Link>
+        )}
       </div>
 
       {error && <div className="auth-error">{error}</div>}
