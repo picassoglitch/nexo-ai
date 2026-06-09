@@ -456,7 +456,10 @@ footer { background: var(--bg); border-top: 1px solid var(--line); padding: 56px
 .fdr-body p { font-size: 14.5px; color: var(--ink-dim); line-height: 1.65; max-width: 60ch; }
 
 /* ============ AUTH SHELL (sign-in page) ============ */
-.auth-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 88px 24px 48px; gap: 18px; }
+/* The custom <Cursor/> is only mounted on landing/contact/legal pages, but
+   `body { cursor: none }` is global — so on the auth pages the pointer would
+   be invisible. Restore the native cursor for the whole auth flow. */
+.auth-shell { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 88px 24px 48px; gap: 18px; cursor: auto; }
 @media (max-width: 720px) { .auth-shell { padding: 64px 16px 32px; } }
 
 .auth-status { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-dim); padding: 7px 14px; border: 1px solid var(--line); border-radius: 100px; background: rgba(16, 19, 32, 0.6); backdrop-filter: blur(6px); }
