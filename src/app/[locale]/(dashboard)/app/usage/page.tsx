@@ -177,7 +177,7 @@ async function loadUsagePageData(): Promise<PageData> {
   // ── Usage events ────────────────────────────────────────────────────
   // Defensive supabase client init.
   let events: UsageEventRow[] = [];
-  let engineMap = new Map<string, { name: string; icon: string }>();
+  const engineMap = new Map<string, { name: string; icon: string }>();
   try {
     const supabase = await createClient();
     // Try with `operation` column (migration 0015). On column-missing

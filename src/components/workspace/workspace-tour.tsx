@@ -81,7 +81,7 @@ export function WorkspaceTour() {
   // long sidebar still spotlights an item below the fold).
   const measure = useCallback(() => {
     if (!active) return;
-    const sel = STEPS[step].target;
+    const sel = STEPS[step]?.target ?? null;
     if (!sel) {
       setRect(null);
       return;
@@ -96,6 +96,9 @@ export function WorkspaceTour() {
   }, [active, step]);
 
   useLayoutEffect(() => {
+    // Measure-then-position: reading layout and setting the rect synchronously
+    // in a layout effect is the sanctioned pattern (avoids a flicker frame).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     measure();
   }, [measure]);
 
@@ -164,10 +167,11 @@ export function WorkspaceTour() {
     return () => window.removeEventListener('keydown', onKey);
   }, [active, step, finish]);
 
-  if (!active) return null;
+  const current = STEPS[step];
+  if (!active || !current) return null;
 
   const isLast = step === STEPS.length - 1;
-  const key = STEPS[step].key;
+  const key = current.key;
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 10000 }} aria-live="polite">
