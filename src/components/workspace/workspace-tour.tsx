@@ -131,7 +131,7 @@ export function WorkspaceTour() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const M = 12;
-    const width = Math.min(320, vw - 2 * M);
+    const width = Math.min(416, vw - 2 * M);
     const th = tip.offsetHeight;
 
     if (!rect) {
@@ -216,12 +216,12 @@ export function WorkspaceTour() {
           position: 'fixed',
           top: pos?.top ?? -9999,
           left: pos?.left ?? -9999,
-          width: pos?.width ?? 320,
+          width: pos?.width ?? 416,
           visibility: pos ? 'visible' : 'hidden',
         }}
-        className="rounded-2xl border border-[var(--cc-line-2)] bg-[var(--cc-panel)] p-5 shadow-[0_24px_70px_-15px_rgba(0,0,0,0.75)]"
+        className="rounded-2xl border border-[var(--cc-line-2)] bg-[var(--cc-panel)] p-7 shadow-[0_24px_70px_-15px_rgba(0,0,0,0.75)]"
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--cc-green)] [font-family:var(--cc-mono),monospace]">
             {t('step', { current: step + 1, total: STEPS.length })}
           </span>
@@ -238,17 +238,17 @@ export function WorkspaceTour() {
         </div>
 
         <h3
-          className="text-[16px] font-bold tracking-tight text-[var(--cc-txt)]"
+          className="text-[17px] font-bold tracking-tight text-[var(--cc-txt)]"
           style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
         >
           {t(`steps.${key}.title`)}
         </h3>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--cc-txt-2)]">
+        <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--cc-txt-2)]">
           {t(`steps.${key}.body`)}
         </p>
 
         {/* Progress dots */}
-        <div className="mt-4 flex items-center gap-1.5">
+        <div className="mt-5 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <span
               key={s.key}
@@ -259,7 +259,7 @@ export function WorkspaceTour() {
           ))}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-5 flex items-center justify-between gap-3">
           {/* See later — postpone; reappears on next login. */}
           <button
             type="button"
