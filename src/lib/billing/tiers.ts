@@ -128,13 +128,13 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     hasEarlyAccess: false,
     community: 'premium',
     // NexoClip Pro ("el streamer"): no watermark, ~12 streams/mo, HD-only
-    // export, auto-publish, one brand kit. Out of tokens before month end →
-    // prompted to buy a top-up pack (TOKEN_PACKS in lib/payments/pricing.ts).
+    // export, one brand kit. Auto-publish stays a VIP-only perk. Out of tokens
+    // before month end → prompted to buy a top-up pack (TOKEN_PACKS).
     clipWatermark: false,
     clipVodRetentionDays: 90,
     clipStreamsPerMonth: 12,
     clipExportMaxQuality: 'hd',
-    clipAutoPublish: true,
+    clipAutoPublish: false,
     clipBrandKits: 1,
     label: 'Pro',
     price: 'MXN $749',
@@ -161,7 +161,7 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     clipVodRetentionDays: 90,
     clipStreamsPerMonth: 12,
     clipExportMaxQuality: 'hd',
-    clipAutoPublish: true,
+    clipAutoPublish: false,
     clipBrandKits: 1,
     label: 'Partner',
     price: 'Programa',
@@ -261,24 +261,26 @@ export function nexoclipTrialDaysLeft(startedAtIso: string | null, nowMs: number
 }
 
 /**
- * Post-trial grace: the 7-day clock has run out, but the user still has tokens
- * left — so we keep NexoClip live until those tokens are gone ("we know your
- * time ran out, but we like you"). True only once the trial window has CLOSED
- * (an active trial isn't grace) and tokens remain. Drives both the live gate
- * and the grace banner on /app.
+ * Post-trial grace: the 7-day clock has run out, but the user still has
+ * PURCHASED/persistent tokens left — so we keep NexoClip live until those are
+ * gone ("we know your time ran out, but we like you"). True only once the trial
+ * window has CLOSED (an active trial isn't grace) and bonus tokens remain.
+ * Drives both the live gate and the grace banner on /app.
  *
- * `tokensRemaining` is the user's combined monthly + bonus balance
- * (TokenBalance.remaining). Admins/unlimited never hit this path — they meet
- * the tier outright.
+ * `bonusTokens` is the user's persistent top-up/gift balance
+ * (TokenBalance.bonus) — deliberately NOT the monthly allocation, which
+ * regenerates on the 1st. Keying off bonus means grace ends FOR GOOD once the
+ * non-renewing tokens are spent, rather than reopening every month. Admins/
+ * unlimited never hit this path — they meet the tier outright.
  */
 export function isNexoclipGraceActive(
   startedAtIso: string | null,
   nowMs: number,
-  tokensRemaining: number,
+  bonusTokens: number,
 ): boolean {
   if (!startedAtIso) return false;
   if (isNexoclipTrialActive(startedAtIso, nowMs)) return false; // still in the trial proper
-  return tokensRemaining > 0;
+  return bonusTokens > 0;
 }
 
 /**

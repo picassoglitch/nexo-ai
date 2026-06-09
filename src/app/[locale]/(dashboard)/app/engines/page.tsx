@@ -46,15 +46,15 @@ export default async function MyEnginesPage({
   // After it expires, FREE users keep NexoClip live in "grace" while tokens last.
   const nowMs = new Date().getTime();
   const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
-  const clipTokensRemaining =
+  const clipBonusTokens =
     session && tier === 'FREE'
       ? await getTokenBalance(session.user.id)
-          .then((b) => (b.unlimited ? 0 : b.remaining))
+          .then((b) => (b.unlimited ? 0 : b.bonus))
           .catch(() => 0)
       : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipTokensRemaining);
+    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
 
   // Tier-specific page intro copy. Admin gets its own copy noting role-overrides-tier.
   const intro = isAdmin

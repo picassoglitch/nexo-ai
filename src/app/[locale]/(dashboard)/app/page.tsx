@@ -55,13 +55,13 @@ export default async function WorkspaceHomePage({
   const nowMs = new Date().getTime();
   const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
   const trialDaysLeft = nexoclipTrialDaysLeft(session?.nexoclipTrialStartedAt ?? null, nowMs);
-  // Post-trial grace: trial clock ran out but the FREE user still has tokens —
-  // NexoClip stays live until they're spent. Only meaningful for FREE (PRO+ and
-  // admins already meet the tier, and their balance is unlimited).
-  const clipTokensRemaining = balance && !balance.unlimited ? balance.remaining : 0;
+  // Post-trial grace: trial clock ran out but the FREE user still has PURCHASED
+  // (bonus) tokens — NexoClip stays live until those are spent, then ends for
+  // good (bonus doesn't regenerate monthly). Only meaningful for FREE.
+  const clipBonusTokens = balance && !balance.unlimited ? balance.bonus : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipTokensRemaining);
+    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
 
   // Per-engine view models — single source for live status across the cards
   // and the "Engines en vivo" count.
@@ -150,7 +150,7 @@ export default async function WorkspaceHomePage({
 
       {/* Post-trial grace: NexoClip trial expired but tokens remain — keep them
           going (and nudge toward Pro). Server-gated on graceActive. */}
-      {graceActive && <NexoclipGraceBanner tokensRemaining={clipTokensRemaining} />}
+      {graceActive && <NexoclipGraceBanner tokensRemaining={clipBonusTokens} />}
 
       <div className="cc-mod-section">
         <h2

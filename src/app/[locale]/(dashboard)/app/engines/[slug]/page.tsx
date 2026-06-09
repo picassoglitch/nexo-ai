@@ -87,15 +87,15 @@ export default async function EngineWorkspacePage({
   // the trial, FREE users keep NexoClip live in "grace" while tokens remain.
   const nowMs = new Date().getTime();
   const trialActive = isNexoclipTrialActive(session.nexoclipTrialStartedAt, nowMs);
-  const clipTokensRemaining =
+  const clipBonusTokens =
     tier === 'FREE' && engine.slug === NEXOCLIP_TRIAL_SLUG
       ? await getTokenBalance(session.user.id)
-          .then((b) => (b.unlimited ? 0 : b.remaining))
+          .then((b) => (b.unlimited ? 0 : b.bonus))
           .catch(() => 0)
       : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session.nexoclipTrialStartedAt, nowMs, clipTokensRemaining);
+    isNexoclipGraceActive(session.nexoclipTrialStartedAt, nowMs, clipBonusTokens);
   // NexoClip is "unlocked" (live, bypassing tier/selection) under either the
   // trial or the post-trial grace window.
   const clipUnlocked = (trialActive || graceActive) && engine.slug === NEXOCLIP_TRIAL_SLUG;
