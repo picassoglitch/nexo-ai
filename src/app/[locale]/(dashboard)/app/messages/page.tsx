@@ -1,8 +1,8 @@
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth/session';
-import { listThreadMessages } from '@/lib/messages/messages-data';
-import { sendMessageFromUser, markThreadReadAsUser } from '@/lib/messages/messages-actions';
+import { listThreadMessages, markThreadReadForUser } from '@/lib/messages/messages-data';
+import { sendMessageFromUser } from '@/lib/messages/messages-actions';
 import { MessageThread } from '@/components/messages/message-thread';
 import { MessageComposer } from '@/components/messages/message-composer';
 
@@ -31,11 +31,11 @@ export default async function SubscriberMessagesPage({
   const session = await getSessionUser();
   if (!session) redirect('/sign-in?next=/app/messages');
 
-  // Best-effort: clear the unread badge. We don't await the result — if it
-  // fails (transient DB issue), the badge stays accurate and they retry on
-  // refresh. We DO want the read marker before the listThreadMessages query
-  // ideally, but Promise.all keeps the round-trip count down.
-  await Promise.all([markThreadReadAsUser(), Promise.resolve()]);
+  // Best-effort: clear the unread badge. Pure write (no revalidatePath) so it's
+  // safe to call during render — calling a revalidating server action here is
+  // what crashed this page ("revalidatePath cannot be called during render").
+  // The sidebar badge refreshes on the next navigation.
+  await markThreadReadForUser(session.user.id);
   const messages = await listThreadMessages(session.user.id);
 
   return (

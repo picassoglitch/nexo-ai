@@ -143,6 +143,23 @@ export async function listAdminThreads(): Promise<ThreadSummary[]> {
   return summaries;
 }
 
+/** Mark every ADMIN-sent message in this user's thread as read. Pure data
+ *  write — deliberately does NOT call revalidatePath, so it's safe to invoke
+ *  during an RSC render (the /app/messages page auto-marks on load). The
+ *  server-action variant in messages-actions.ts adds revalidation for
+ *  client-triggered calls. Best-effort: logs + swallows so a transient DB
+ *  hiccup never crashes the page. */
+export async function markThreadReadForUser(userId: string): Promise<void> {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from('messages')
+    .update({ read_at_user: new Date().toISOString() })
+    .eq('thread_user_id', userId)
+    .eq('sender_role', 'ADMIN')
+    .is('read_at_user', null);
+  if (error) console.error('[messages] markThreadReadForUser failed:', error.message);
+}
+
 /** Sidebar badge — quick total of unread messages for the signed-in user. */
 export async function countUnreadForUser(userId: string): Promise<number> {
   const admin = createAdminClient();
