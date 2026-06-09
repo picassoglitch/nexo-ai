@@ -245,7 +245,7 @@ export default async function WorkspaceHomePage({
                       {isTrial ? `● Prueba ${trialDaysLeft}d` : '● EN VIVO'}
                     </span>
                   ) : (
-                    <span className="cc-mod-badge cy">Simulación</span>
+                    <span className="cc-mod-badge cy">Disponible</span>
                   )}
                 </div>
                 <p>{engine.description}</p>

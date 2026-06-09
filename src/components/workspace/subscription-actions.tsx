@@ -23,16 +23,16 @@ const TIER_MARKETING: Record<
   { tagline: string; features: string[]; featured?: boolean }
 > = {
   FREE: {
-    tagline: 'Explora la plataforma sin compromiso.',
+    tagline: 'Crea una cuenta y explora toda la plataforma.',
     features: [
-      'NexoClip gratis 7 días — y sigue mientras te queden tokens',
-      'Cualquier sistema en simulación',
+      'NexoClip gratis 7 días',
+      '50,000 tokens IA de regalo',
       'Acceso a la comunidad',
       'Clips con marca de agua · descarga manual',
     ],
   },
   PRO: {
-    tagline: 'Un engine en vivo a tu elección + NexoClip Pro.',
+    tagline: 'Un engine en vivo a tu elección.',
     featured: true,
     features: [
       'Todo lo de Free',
@@ -62,8 +62,8 @@ const TIER_MARKETING: Record<
       'Todo lo de Pro',
       'Todos los engines en vivo',
       '5× los tokens de Pro (5,000,000 / mes)',
-      'Todas las funciones de NexoClip',
-      'El equipo Nexo te ayuda a construir tu idea · soporte prioritario',
+      'Paquete completo de streamer de NexoClip',
+      'Soporte prioritario · el equipo Nexo te ayuda a construir tu idea',
     ],
   },
 };

@@ -239,7 +239,7 @@ export default async function EngineWorkspacePage({
             </span>
           ) : meetsTier ? (
             <span className="cc-mod-badge cy" style={{ padding: '6px 12px', fontSize: 11 }}>
-              Simulación
+              Disponible
             </span>
           ) : (
             <span className="cc-mod-badge" style={{ padding: '6px 12px', fontSize: 11 }}>
