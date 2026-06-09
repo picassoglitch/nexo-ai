@@ -25,7 +25,7 @@ import { EngineCard } from './engine-card';
 
 function CardGrid({ items }: { items: EngineVM[] }) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((vm) => (
         <div key={vm.id} className={vm.featured ? 'sm:col-span-2' : ''}>
           <EngineCard vm={vm} variant={variantFor(vm.state, vm.featured)} />
