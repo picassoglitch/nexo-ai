@@ -162,7 +162,7 @@ export default async function MyEnginesPage({
 
   return (
     <div className="cc-scroll">
-      <div className="pt-2">
+      <div className="mx-auto max-w-6xl px-6 py-2 md:px-8">
         {vms.length === 0 ? (
           <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-14 text-center">
             <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">{t('empty.title')}</div>
@@ -182,13 +182,13 @@ export default async function MyEnginesPage({
 
         {/* Plan capabilities — compact reference strip */}
         {vms.length > 0 && (
-          <section className="mt-10">
-            <div className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
+          <section className="mt-12 border-t border-[var(--cc-line)] pt-6">
+            <div className="mb-5 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
               {isAdmin
                 ? t('caps.heading', { plan: caps.label })
                 : t('caps.headingPriced', { plan: caps.label, price: caps.price, per: caps.per })}
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="flex flex-wrap gap-x-10 gap-y-4">
               {[
                 {
                   // Real count live right now (includes the NexoClip trial/grace),
@@ -221,12 +221,9 @@ export default async function MyEnginesPage({
                       : t('caps.supportCommunity'),
                 },
               ].map((row) => (
-                <div
-                  key={row.k}
-                  className="rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)] px-4 py-3.5"
-                >
-                  <div className="text-[19px] font-bold text-[var(--cc-txt)]">{row.v}</div>
-                  <div className="mt-1 text-[11px] text-[var(--cc-txt-3)]">{row.k}</div>
+                <div key={row.k} className="space-y-1">
+                  <div className="text-2xl font-semibold text-[var(--cc-txt)]">{row.v}</div>
+                  <div className="text-xs text-[var(--cc-txt-4)]">{row.k}</div>
                 </div>
               ))}
             </div>

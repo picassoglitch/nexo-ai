@@ -25,7 +25,7 @@ import { EngineCard } from './engine-card';
 
 function CardGrid({ items }: { items: EngineVM[] }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((vm) => (
         <div key={vm.id} className={vm.featured ? 'sm:col-span-2' : ''}>
           <EngineCard vm={vm} variant={variantFor(vm.state, vm.featured)} />
@@ -52,7 +52,7 @@ function SectionHead({
   return (
     <div className="border-b border-[var(--cc-line)] pb-3">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <span className={`h-4 w-1.5 shrink-0 rounded-full ${accent}`} />
           <h2
             className="text-[15px] font-bold tracking-tight text-[var(--cc-txt)]"
@@ -63,7 +63,7 @@ function SectionHead({
         </div>
         {right}
       </div>
-      {sub && <p className="mt-1.5 pl-4 text-[12.5px] text-[var(--cc-txt-3)]">{sub}</p>}
+      {sub && <p className="mt-1 pl-[18px] text-[12.5px] leading-relaxed text-[var(--cc-txt-3)]">{sub}</p>}
     </div>
   );
 }
@@ -111,7 +111,7 @@ export function EnginesExplorer({
   );
 
   return (
-    <div className="flex flex-col gap-7 pb-2">
+    <div className="flex flex-col gap-10 pb-2 md:gap-12">
       {/* Slim page title + tier badge */}
       <div className="flex items-center justify-between gap-3">
         <span
@@ -126,7 +126,7 @@ export function EnginesExplorer({
 
       <EngineHero liveCount={liveCount} continueEngine={continueEngine} />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-10 md:gap-12">
         <EngineFilters active={filter} counts={counts} onChange={setFilter} />
 
         {filter !== 'all' ? (
@@ -138,9 +138,9 @@ export function EnginesExplorer({
           )
         ) : (
           // ── Default grouped view: three actionability sections ───────────
-          <div className="flex flex-col gap-9">
+          <div className="flex flex-col gap-10 md:gap-12">
             {groups.available.length > 0 && (
-              <section className="flex flex-col gap-4">
+              <section className="flex flex-col gap-5">
                 <SectionHead
                   title={t('sections.available')}
                   sub={t('sections.availableSub')}
@@ -151,7 +151,7 @@ export function EnginesExplorer({
             )}
 
             {groups.pro.length > 0 && (
-              <section className="flex flex-col gap-4">
+              <section className="flex flex-col gap-5">
                 <SectionHead
                   title={t('sections.pro')}
                   sub={t('sections.proSub')}
@@ -163,7 +163,7 @@ export function EnginesExplorer({
             )}
 
             {groups.soon.length > 0 && (
-              <section className="flex flex-col gap-4">
+              <section className="flex flex-col gap-5">
                 <SectionHead
                   title={t('sections.soon')}
                   sub={t('sections.soonSub')}
@@ -182,7 +182,7 @@ export function EnginesExplorer({
                   }
                 />
                 {soonOpen && (
-                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {groups.soon.map((vm) => (
                       <EngineCard key={vm.id} vm={vm} variant="soon" />
                     ))}
