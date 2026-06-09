@@ -73,6 +73,7 @@
       "invalidTitle": "Link expired or invalid.",
       "invalidBody": "This password reset link is no longer valid. Request a new one to continue.",
       "requestNew": "Request a new link →",
+      "cancel": "Not resetting? Cancel and sign in",
       "errorWeakPassword": "Password must be at least 6 characters.",
       "errorMismatch": "Passwords don't match.",
       "errorSamePassword": "New password must be different from your current one.",

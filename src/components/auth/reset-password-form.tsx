@@ -23,8 +23,27 @@ export function ResetPasswordForm() {
     // The /auth/callback exchange should have set a session before redirecting
     // here. If it didn't (expired or already-used link), there's nothing to
     // update — tell the user to request a fresh link.
-    supabase.auth.getUser().then(({ data }) => setHasSession(!!data.user));
+    supabase.auth.getUser().then(async ({ data }) => {
+      const ok = !!data.user;
+      setHasSession(ok);
+      // No recovery session to act on → there's nothing to gate. Drop the
+      // recovery cookie so a stale one can't keep bouncing the user here.
+      if (!ok) await fetch('/api/auth/clear-recovery', { method: 'POST' });
+    });
   }, []);
+
+  // Escape hatch: clicked the reset link but don't actually want to reset.
+  // Lift the gate and sign out so the user lands on a normal sign-in instead
+  // of being trapped on this page by the middleware redirect.
+  function handleCancel() {
+    startTransition(async () => {
+      const supabase = createClient();
+      await fetch('/api/auth/clear-recovery', { method: 'POST' });
+      await supabase.auth.signOut();
+      router.push('/sign-in' as Route);
+      router.refresh();
+    });
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -130,6 +149,17 @@ export function ResetPasswordForm() {
       <button type="submit" className="auth-submit" disabled={pending || hasSession === null}>
         {pending ? '...' : t('submit')}
       </button>
+
+      <p className="auth-mode-switch">
+        <button
+          type="button"
+          className="auth-mode-switch-link"
+          onClick={handleCancel}
+          disabled={pending}
+        >
+          {t('cancel')}
+        </button>
+      </p>
     </form>
   );
 }

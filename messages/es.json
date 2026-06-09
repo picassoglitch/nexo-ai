@@ -73,6 +73,7 @@
       "invalidTitle": "Enlace expirado o inválido.",
       "invalidBody": "Este enlace para restablecer la contraseña ya no es válido. Solicita uno nuevo para continuar.",
       "requestNew": "Solicitar un nuevo enlace →",
+      "cancel": "¿No quieres restablecer? Cancelar e iniciar sesión",
       "errorWeakPassword": "La contraseña debe tener al menos 6 caracteres.",
       "errorMismatch": "Las contraseñas no coinciden.",
       "errorSamePassword": "La nueva contraseña debe ser distinta a la actual.",
