@@ -322,43 +322,43 @@
       "amt": "$0",
       "per": " /forever",
       "tag": "Create an account and explore the whole platform.",
-      "f1": "Google sign-in & full account",
+      "f1": "NexoClip free for 7 days — then keep going while tokens last",
       "f2": "Run any system in simulation mode",
-      "f3": "Live dashboard, read-only",
-      "f4": "Limited usage & history",
-      "f5": "No live execution",
+      "f3": "Community access",
+      "f4": "Watermarked clips · manual download",
+      "f5": "No live execution on other engines",
       "btn": "Get started"
     },
     "pro": {
       "name": "Pro",
-      "amt": "USD $39",
+      "amt": "MXN $749",
       "per": " /month",
       "badge": "Most chosen",
-      "tag": "Full live access to one system (bot, agent, or automation) of your choice.",
+      "tag": "One engine live, your choice — plus NexoClip Pro.",
       "f1": "Everything in Free",
-      "f2": "One system, fully unlocked & live",
-      "f3": "Real execution & standard limits",
-      "f4": "Full history & analytics",
-      "f5": "Email support",
+      "f2": "1 engine live · you pick which",
+      "f3": "1,000,000 tokens / month (refilled monthly)",
+      "f4": "NexoClip Pro: no watermark · ~12 streams/mo · 1 brand kit",
+      "f5": "Premium community",
       "btn": "Go Pro"
     },
     "vip": {
-      "name": "All-Access",
-      "amt": "USD $129",
+      "name": "VIP",
+      "amt": "MXN $2,499",
       "per": " /month",
-      "tag": "Every system (bot, agent, automation), every capability, highest limits.",
+      "tag": "All of Nexo unlocked — AI + Clip, no limits.",
       "f1": "Everything in Pro",
-      "f2": "All systems unlocked, live",
-      "f3": "Highest usage limits",
-      "f4": "Early access to new tools",
-      "f5": "Priority support",
-      "btn": "Get All-Access"
+      "f2": "All engines live",
+      "f3": "5× Pro's tokens (5,000,000 / month)",
+      "f4": "Every NexoClip feature",
+      "f5": "Priority support · the Nexo team helps build your idea",
+      "btn": "Get VIP"
     },
-    "addon": "Not ready for All-Access? <b>Unlock any single system à la carte</b> — per-tool pricing at checkout."
+    "addon": "Not ready for VIP? <b>Unlock any single system à la carte</b> — per-tool pricing at checkout."
   },
   "academy": {
     "title": "The operator network — <em>Nexo Academy</em>",
-    "p": "The platform isn't just tools — it's an operator network. Nexo Academy is the community where builders and operators learn the systems, share what works, and run alongside each other. Free, Premium and All-Access tiers, hosted on Skool. Deeper integration into this platform is on the roadmap.",
+    "p": "The platform isn't just tools — it's an operator network. Nexo Academy is the community where builders and operators learn the systems, share what works, and run alongside each other. Free, Premium and VIP tiers, hosted on Skool. Deeper integration into this platform is on the roadmap.",
     "btn": "Visit Nexo Academy →"
   },
   "contact": {
