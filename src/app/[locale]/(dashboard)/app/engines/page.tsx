@@ -60,12 +60,13 @@ export default async function MyEnginesPage({
   // user run NexoClip live. Mirror of the home/detail surfaces.
   const nowMs = new Date().getTime();
   const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
-  const clipBonusTokens =
-    session && tier === 'FREE'
-      ? await getTokenBalance(session.user.id)
-          .then((b) => (b.unlimited ? 0 : b.bonus))
-          .catch(() => 0)
-      : 0;
+  // Real token balance for the user — drives the post-trial grace check AND the
+  // "Tokens IA" capability card (so it reflects allocation + any bonus, not a
+  // hardcoded plan figure).
+  const balance = session
+    ? await getTokenBalance(session.user.id).catch(() => null)
+    : null;
+  const clipBonusTokens = balance && !balance.unlimited ? balance.bonus : 0;
   const graceActive =
     tier === 'FREE' &&
     isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
@@ -190,10 +191,19 @@ export default async function MyEnginesPage({
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {[
                 {
+                  // Real count live right now (includes the NexoClip trial/grace),
+                  // not the static plan cap — matches the hero's "N en vivo ahora".
                   k: t('caps.liveEngines'),
-                  v: caps.liveEnginesCount === Infinity ? '∞' : String(caps.liveEnginesCount),
+                  v: caps.liveEnginesCount === Infinity ? '∞' : String(liveCount),
                 },
-                { k: t('caps.tokens'), v: nf(caps.tokensPerMonth) },
+                {
+                  k: t('caps.tokens'),
+                  v: balance
+                    ? balance.unlimited
+                      ? '∞'
+                      : nf(balance.monthlyAllocation + balance.bonus)
+                    : nf(caps.tokensPerMonth),
+                },
                 {
                   k: t('caps.storage'),
                   v: caps.storageMB >= 1000 ? `${caps.storageMB / 1000} GB` : `${caps.storageMB} MB`,
