@@ -36,6 +36,18 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Protected route (/app, /dashboard, /account). Forbid browser/proxy caching
+  // of the rendered HTML. Without this, the back/forward cache (bfcache) can
+  // restore an authenticated page from an in-memory snapshot AFTER the user has
+  // signed out — silently bypassing the server-side requireUser() guard in the
+  // layouts. no-store makes the page ineligible for bfcache in Firefox/Safari,
+  // and in Chrome the entry is evicted when the auth cookie changes on logout.
+  // (The <BfcacheGuard/> on the protected layouts is the belt-and-suspenders
+  // for any browser that still restores it.)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

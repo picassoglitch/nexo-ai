@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
+import { BfcacheGuard } from '@/components/auth/bfcache-guard';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { WorkspaceProfileSubscriber } from '@/components/workspace/workspace-profile-subscriber';
 import { effectiveTier, isAdminRole, tierLabelShort } from '@/lib/billing/tiers';
@@ -68,6 +69,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+      <BfcacheGuard />
       {session?.user.id && <WorkspaceProfileSubscriber userId={session.user.id} />}
       <WorkspaceShell
         userInitial={initial}

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
+import { BfcacheGuard } from '@/components/auth/bfcache-guard';
 import { listEngines } from '@/lib/data/engines';
 import { DashboardShell } from '@/components/dashboard/dashboard-shell';
 import { ProfileSubscriber } from '@/components/workspace/profile-subscriber';
@@ -107,6 +108,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+      <BfcacheGuard />
       {/* Auto-refresh the admin's view when their own profile changes (e.g.
           if another super-admin demotes them, the redirect to /app fires on
           the next render instead of waiting for a manual reload). */}
