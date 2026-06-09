@@ -2,10 +2,17 @@
 
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useWorkspace } from '@/lib/workspace/store';
 import { LiveEngineSelectButton } from '@/components/workspace/live-engine-selector';
+import { EngineGlyph } from './engine-glyph';
 import type { EngineVM, EngineCardVariant } from './engine-config';
+
+// Near-black ink for solid brand-green buttons — set inline so it always wins
+// over inherited light page text (that inheritance was the unreadable
+// "white text on green" button).
+const INK = '#0a0c0e';
 
 // One engine tile, rendered in one of four variants so the three actionability
 // states read differently at a glance:
@@ -52,15 +59,28 @@ function OwnerCaption({ vm }: { vm: EngineVM }) {
   );
 }
 
-function EngineIcon({ vm, size, dimmed }: { vm: EngineVM; size: string; dimmed?: boolean }) {
+// Icon tile — lucide glyph tinted per state (green available / amber locked /
+// muted soon), in a bordered tile that matches the brand panel surfaces.
+function EngineIcon({
+  vm,
+  variant,
+  box,
+  glyph,
+}: {
+  vm: EngineVM;
+  variant: EngineCardVariant;
+  box: string;
+  glyph: number;
+}) {
+  const tint =
+    variant === 'locked'
+      ? 'border-[var(--cc-amber)]/30 bg-[var(--cc-amber-g)] text-[var(--cc-amber)]'
+      : variant === 'soon'
+        ? 'border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] text-[var(--cc-txt-4)]'
+        : 'border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] text-[var(--cc-green)]';
   return (
-    <span
-      className={`grid shrink-0 place-items-center rounded-xl border border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] ${size} ${
-        dimmed ? 'opacity-60 grayscale' : ''
-      }`}
-      aria-hidden
-    >
-      {vm.icon}
+    <span className={`grid shrink-0 place-items-center rounded-xl border ${tint} ${box}`}>
+      <EngineGlyph slug={vm.slug} size={glyph} />
     </span>
   );
 }
@@ -70,8 +90,8 @@ function SoonRow({ vm }: { vm: EngineVM }) {
   const t = useTranslations('engines.card');
   const showToast = useWorkspace((s) => s.showToast);
   return (
-    <div className="flex items-center gap-3 rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)]/60 px-3.5 py-2.5 opacity-70 transition-opacity hover:opacity-100">
-      <EngineIcon vm={vm} size="size-9 text-lg" dimmed />
+    <div className="flex items-center gap-3.5 rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)]/60 px-4 py-3 opacity-70 transition-opacity hover:opacity-100">
+      <EngineIcon vm={vm} variant="soon" box="size-10" glyph={18} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13px] font-semibold text-[var(--cc-txt-2)]">{vm.name}</div>
         <div className="text-[10.5px] uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
@@ -102,7 +122,7 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
   return (
     <article
       className={[
-        'group relative flex h-full flex-col overflow-hidden rounded-[13px] border p-5 transition-all duration-200 hover:-translate-y-0.5',
+        'group relative flex h-full flex-col overflow-hidden rounded-[14px] border p-6 transition-all duration-200 hover:-translate-y-0.5',
         isFeatured
           ? 'border-[var(--cc-green)]/55 bg-[linear-gradient(150deg,var(--cc-green-g),transparent_55%)] shadow-[0_18px_50px_-22px_var(--cc-green-g)]'
           : isLocked
@@ -119,13 +139,18 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
       <header className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="relative">
-            <EngineIcon vm={vm} size={isFeatured ? 'size-14 text-3xl' : 'size-12 text-2xl'} dimmed={isLocked} />
+            <EngineIcon
+              vm={vm}
+              variant={variant}
+              box={isFeatured ? 'size-16' : 'size-13'}
+              glyph={isFeatured ? 30 : 24}
+            />
             {isLocked && (
               <span
-                className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-[var(--cc-amber)]/40 bg-[var(--cc-bg-1)] text-[10px]"
+                className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border border-[var(--cc-amber)]/40 bg-[var(--cc-bg-1)]"
                 aria-hidden
               >
-                🔒
+                <Lock size={11} className="text-[var(--cc-amber)]" strokeWidth={2.25} />
               </span>
             )}
           </div>
@@ -181,10 +206,11 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
           ) : (
             <Link
               href={href}
+              style={isFeatured ? { color: INK } : undefined}
               className={
                 isFeatured
-                  ? 'rounded-lg bg-[var(--cc-green)] px-3.5 py-1.5 text-[12px] font-bold text-[#070809] transition-[filter] hover:brightness-110'
-                  : 'rounded-lg border border-[var(--cc-green)]/40 px-3 py-1.5 text-[12px] font-semibold text-[var(--cc-green)] transition-colors hover:bg-[var(--cc-green-g)]'
+                  ? 'rounded-lg bg-[var(--cc-green)] px-4 py-2 text-[12.5px] font-bold transition-[filter] hover:brightness-110'
+                  : 'rounded-lg border border-[var(--cc-green)]/40 px-3.5 py-2 text-[12.5px] font-semibold text-[var(--cc-green)] transition-colors hover:bg-[var(--cc-green-g)]'
               }
             >
               {isFeatured ? t('openNamed', { name: vm.name }) : t('open')}

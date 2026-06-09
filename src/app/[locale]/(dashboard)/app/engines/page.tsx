@@ -181,13 +181,13 @@ export default async function MyEnginesPage({
 
         {/* Plan capabilities — compact reference strip */}
         {vms.length > 0 && (
-          <section className="mt-8">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
+          <section className="mt-10">
+            <div className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
               {isAdmin
                 ? t('caps.heading', { plan: caps.label })
                 : t('caps.headingPriced', { plan: caps.label, price: caps.price, per: caps.per })}
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {[
                 {
                   k: t('caps.liveEngines'),
@@ -213,10 +213,10 @@ export default async function MyEnginesPage({
               ].map((row) => (
                 <div
                   key={row.k}
-                  className="rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)] px-4 py-3"
+                  className="rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)] px-4 py-3.5"
                 >
-                  <div className="text-[18px] font-bold text-[var(--cc-txt)]">{row.v}</div>
-                  <div className="mt-0.5 text-[11px] text-[var(--cc-txt-3)]">{row.k}</div>
+                  <div className="text-[19px] font-bold text-[var(--cc-txt)]">{row.v}</div>
+                  <div className="mt-1 text-[11px] text-[var(--cc-txt-3)]">{row.k}</div>
                 </div>
               ))}
             </div>

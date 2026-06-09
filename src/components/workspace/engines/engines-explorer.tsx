@@ -25,7 +25,7 @@ import { EngineCard } from './engine-card';
 
 function CardGrid({ items }: { items: EngineVM[] }) {
   return (
-    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((vm) => (
         <div key={vm.id} className={vm.featured ? 'sm:col-span-2' : ''}>
           <EngineCard vm={vm} variant={variantFor(vm.state, vm.featured)} />
@@ -92,7 +92,7 @@ export function EnginesExplorer({
   );
 
   return (
-    <div className="flex flex-col gap-6 pb-2">
+    <div className="flex flex-col gap-7 pb-2">
       {/* Slim page title + tier badge */}
       <div className="flex items-center justify-between gap-3">
         <span
@@ -107,7 +107,7 @@ export function EnginesExplorer({
 
       <EngineHero liveCount={liveCount} continueEngine={continueEngine} />
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-6">
         <EngineFilters active={filter} counts={counts} onChange={setFilter} />
 
         {filter !== 'all' ? (
@@ -119,16 +119,16 @@ export function EnginesExplorer({
           )
         ) : (
           // ── Default grouped view: three actionability sections ───────────
-          <div className="flex flex-col gap-7">
+          <div className="flex flex-col gap-9">
             {groups.available.length > 0 && (
-              <section className="flex flex-col gap-3.5">
+              <section className="flex flex-col gap-4">
                 <SectionHead title={t('sections.available')} sub={t('sections.availableSub')} />
                 <CardGrid items={groups.available} />
               </section>
             )}
 
             {groups.pro.length > 0 && (
-              <section className="flex flex-col gap-3.5">
+              <section className="flex flex-col gap-4">
                 <SectionHead title={t('sections.pro')} sub={t('sections.proSub')} />
                 {showUpsell && <UpgradeBanner />}
                 <CardGrid items={groups.pro} />
@@ -136,7 +136,7 @@ export function EnginesExplorer({
             )}
 
             {groups.soon.length > 0 && (
-              <section className="flex flex-col gap-3.5">
+              <section className="flex flex-col gap-4">
                 <button
                   type="button"
                   onClick={() => setSoonOpen((v) => !v)}
