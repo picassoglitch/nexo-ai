@@ -1,19 +1,26 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import type { Route } from 'next';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
+// Hand off to the server route that ends the recovery session + lifts the gate
+// atomically. `reset` adds the success notice to the sign-in landing.
+function endRecoveryUrl(locale: string, reset: boolean): string {
+  const params = new URLSearchParams();
+  if (locale && locale !== 'en') params.set('l', locale);
+  if (reset) params.set('reset', '1');
+  const qs = params.toString();
+  return `/auth/end-recovery${qs ? `?${qs}` : ''}`;
+}
+
 export function ResetPasswordForm() {
   const t = useTranslations('auth.resetPassword');
-  const router = useRouter();
+  const locale = useLocale();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   // null = still checking, true/false = whether a recovery session exists.
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [pending, startTransition] = useTransition();
@@ -33,16 +40,10 @@ export function ResetPasswordForm() {
   }, []);
 
   // Escape hatch: clicked the reset link but don't actually want to reset.
-  // Lift the gate and sign out so the user lands on a normal sign-in instead
-  // of being trapped on this page by the middleware redirect.
+  // Full navigation to the server route so signOut + cookie-clear land before
+  // the next request — otherwise the middleware gate bounces the user back.
   function handleCancel() {
-    startTransition(async () => {
-      const supabase = createClient();
-      await fetch('/api/auth/clear-recovery', { method: 'POST' });
-      await supabase.auth.signOut();
-      router.push('/sign-in' as Route);
-      router.refresh();
-    });
+    window.location.href = endRecoveryUrl(locale, false);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -73,15 +74,11 @@ export function ResetPasswordForm() {
         setError(err.message || t('errorGeneric'));
         return;
       }
-      // Lift the recovery gate and end the recovery session, then make the
-      // user sign in fresh with their NEW password. A password reset must never
-      // leave a logged-in session behind — the link is for setting a password,
-      // not for getting into the app.
-      await fetch('/api/auth/clear-recovery', { method: 'POST' });
-      await supabase.auth.signOut();
-      setDone(true);
-      router.push('/sign-in?reset=success' as Route);
-      router.refresh();
+      // Password set. Hand off to the server route to end the recovery session
+      // and lift the gate, landing on sign-in with the success notice. A reset
+      // must never leave a logged-in session behind — the link is for setting a
+      // password, not for getting into the app.
+      window.location.href = endRecoveryUrl(locale, true);
     });
   }
 
@@ -96,16 +93,6 @@ export function ResetPasswordForm() {
         <Link href="/forgot-password" className="auth-mode-switch-link">
           {t('requestNew')}
         </Link>
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <div className="auth-inbox-success">
-        <div className="auth-inbox-icon">✓</div>
-        <h3 className="auth-inbox-title">{t('successTitle')}</h3>
-        <p className="auth-inbox-body">{t('successBody')}</p>
       </div>
     );
   }

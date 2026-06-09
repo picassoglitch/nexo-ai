@@ -50,18 +50,28 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Expires', '0');
 
   // Recovery gate: a session minted from a password-reset link may ONLY be used
-  // to set a new password. While the recovery cookie is present, bounce every
-  // protected route to /reset-password so the link can't be used as a silent
-  // login into the app. Cheap (cookie read, no Supabase round-trip). The cookie
-  // clears once the password is set or the user signs in with known creds.
+  // to set a new password (on /reset-password, which isn't a protected route).
+  // If such a session tries to reach the app WITHOUT completing the change, we
+  // don't trap them on the reset page — we simply log them out. They can finish
+  // a reset or request a new one to get back in. Cheap: cookie read, no Supabase
+  // round-trip. The cookie clears normally once the password is set or the user
+  // signs in with known creds.
   if (request.cookies.get(PW_RECOVERY_COOKIE)) {
     const localeMatch = request.nextUrl.pathname.match(/^\/(es|en)(?=\/|$)/);
     const localePrefix = localeMatch ? localeMatch[0] : '';
-    const resetUrl = request.nextUrl.clone();
-    resetUrl.pathname = `${localePrefix}/reset-password`;
-    resetUrl.search = '';
-    const redirect = NextResponse.redirect(resetUrl);
+    const signInUrl = request.nextUrl.clone();
+    signInUrl.pathname = `${localePrefix}/sign-in`;
+    signInUrl.search = 'reset=incomplete';
+    const redirect = NextResponse.redirect(signInUrl);
     redirect.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    // Drop the gate cookie and the Supabase session cookies — log this browser
+    // out. (sb-<ref>-auth-token, plus any .0/.1 chunks.)
+    redirect.cookies.set(PW_RECOVERY_COOKIE, '', { path: '/', maxAge: 0 });
+    for (const c of request.cookies.getAll()) {
+      if (c.name.startsWith('sb-')) {
+        redirect.cookies.set(c.name, '', { path: '/', maxAge: 0 });
+      }
+    }
     return redirect;
   }
 
