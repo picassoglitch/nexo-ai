@@ -120,29 +120,28 @@ function FeaturedCard({ vm, href }: { vm: EngineVM; href: Route }) {
   const t = useTranslations('engines.card');
   return (
     <article className="relative flex flex-col gap-8 rounded-[20px] border border-[var(--cc-green)]/45 bg-[linear-gradient(150deg,var(--cc-green-g),transparent_58%)] p-5 shadow-[0_18px_50px_-22px_var(--cc-green-g)] md:flex-row md:items-center md:justify-between md:gap-10 md:p-8">
-      {/* LEFT */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-4">
-          <EngineIcon vm={vm} variant="featured" box="size-20" glyph={40} />
-          <div className="min-w-0">
-            <CategoryLabel>{vm.categoryLabel}</CategoryLabel>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h3 className="text-[28px] font-bold leading-[1.15] tracking-normal text-[var(--cc-txt)]" style={{ fontFamily: 'var(--cc-disp), sans-serif' }}>
-                {vm.name}
-              </h3>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--cc-green)]/40 bg-[var(--cc-green-g)] px-3 py-1 text-[11.5px] font-bold uppercase tracking-wide text-[var(--cc-green)]">
-                <span className="size-1.5 rounded-full bg-[var(--cc-green)]" />
-                {t('ribbon')}
-              </span>
+      {/* LEFT — icon + a single text column so category, title, description and
+          checkmarks all share ONE left edge (no ragged flush-to-border text). */}
+      <div className="flex min-w-0 flex-1 items-start gap-5">
+        <EngineIcon vm={vm} variant="featured" box="size-16 md:size-20" glyph={40} />
+        <div className="min-w-0">
+          <CategoryLabel>{vm.categoryLabel}</CategoryLabel>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h3 className="text-[26px] font-bold leading-[1.15] tracking-normal text-[var(--cc-txt)]" style={{ fontFamily: 'var(--cc-disp), sans-serif' }}>
+              {vm.name}
+            </h3>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--cc-green)]/40 bg-[var(--cc-green-g)] px-3 py-1 text-[11.5px] font-bold uppercase tracking-wide text-[var(--cc-green)]">
+              <span className="size-1.5 rounded-full bg-[var(--cc-green)]" />
+              {t('ribbon')}
+            </span>
+          </div>
+          <p className="mt-3 max-w-[600px] text-[16px] leading-[1.7] text-[var(--cc-txt-2)]">{vm.tagline}</p>
+          {vm.bullets.length > 0 && (
+            <div className="mt-5">
+              <Checkmarks bullets={vm.bullets} />
             </div>
-          </div>
+          )}
         </div>
-        <p className="mt-3 max-w-[600px] text-[16px] leading-[1.7] text-[var(--cc-txt-2)]">{vm.tagline}</p>
-        {vm.bullets.length > 0 && (
-          <div className="mt-5">
-            <Checkmarks bullets={vm.bullets} />
-          </div>
-        )}
       </div>
 
       {/* RIGHT — vertically centered, ≥32px (md:pl-8) from the content */}
