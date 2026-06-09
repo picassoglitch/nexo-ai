@@ -323,10 +323,9 @@
       "per": " /forever",
       "tag": "Create an account and explore the whole platform.",
       "f1": "NexoClip free for 7 days — then keep going while tokens last",
-      "f2": "Run any system in simulation mode",
-      "f3": "Community access",
-      "f4": "Watermarked clips · manual download",
-      "f5": "No live execution on other engines",
+      "f2": "Community access",
+      "f3": "Watermarked clips · manual download",
+      "f4": "No live execution on other engines",
       "btn": "Get started"
     },
     "pro": {
@@ -349,12 +348,11 @@
       "tag": "All of Nexo unlocked — AI + Clip, no limits.",
       "f1": "Everything in Pro",
       "f2": "All engines live",
-      "f3": "5× Pro's tokens (5,000,000 / month)",
+      "f3": "5× Pro's tokens",
       "f4": "Every NexoClip feature",
       "f5": "Priority support · the Nexo team helps build your idea",
       "btn": "Get VIP"
-    },
-    "addon": "Not ready for VIP? <b>Unlock any single system à la carte</b> — per-tool pricing at checkout."
+    }
   },
   "academy": {
     "title": "The operator network — <em>Nexo Academy</em>",

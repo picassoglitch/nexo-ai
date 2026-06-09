@@ -23,6 +23,14 @@ const TIER_DESTINATIONS: Record<'free' | 'pro' | 'vip', string> = {
   vip: '/app/billing?upgrade=VIP',
 };
 
+// How many feature bullets each card renders (keys price.<tier>.f1..fN).
+// Free's last bullet is the muted "no live execution" limitation.
+const FEATURE_COUNT: Record<'free' | 'pro' | 'vip', number> = {
+  free: 4,
+  pro: 5,
+  vip: 5,
+};
+
 export function EarnWorld() {
   const t = useTranslations('earn');
   const tBots = useTranslations('bots');
@@ -182,8 +190,8 @@ export function EarnWorld() {
             </div>
             <div className="price-tagline">{tPrice(`${tier.k}.tag`)}</div>
             <ul className="price-feats">
-              {[1, 2, 3, 4, 5].map((f) => {
-                const muted = tier.k === 'free' && f === 5;
+              {Array.from({ length: FEATURE_COUNT[tier.k] }, (_, i) => i + 1).map((f) => {
+                const muted = tier.k === 'free' && f === FEATURE_COUNT.free;
                 return (
                   <li key={f} className={muted ? 'muted' : undefined}>
                     <span className="tick">{muted ? '○' : '✓'}</span>
@@ -202,11 +210,6 @@ export function EarnWorld() {
           </div>
         ))}
       </div>
-
-      <div
-        className="price-addon reveal"
-        dangerouslySetInnerHTML={{ __html: tPrice.raw('addon') as string }}
-      />
 
       <div className="academy-strip reveal">
         <div>
