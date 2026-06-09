@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
 export function ForgotPasswordForm() {
   const t = useTranslations('auth.forgotPassword');
-  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -19,15 +18,12 @@ export function ForgotPasswordForm() {
 
     startTransition(async () => {
       const supabase = createClient();
-      // After the user clicks the email link, Supabase hands the recovery
-      // `code` to /auth/callback, which exchanges it for a session and then
-      // redirects to `next` — our reset page, where updateUser() can run.
-      // Keep the user's locale on the reset page (en has no prefix).
-      const resetPath = locale === 'en' ? '/reset-password' : `/${locale}/reset-password`;
-      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-        resetPath,
-      )}`;
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      // The reset link itself is built by the Supabase email template
+      // ({{ .SiteURL }}/es/reset-password?token_hash=...&type=recovery), so it
+      // lands directly on our reset page and creates NO session on click — the
+      // token is only verified when the user submits a new password. No
+      // redirectTo needed here; it would only affect the unused ConfirmationURL.
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email);
       if (err) {
         // Don't leak whether the email exists — only surface rate limits.
         if (err.code === 'over_email_send_rate_limit' || err.code === 'over_request_rate_limit') {

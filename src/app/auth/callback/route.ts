@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { PW_RECOVERY_COOKIE, PW_RECOVERY_MAX_AGE } from '@/lib/auth/recovery';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const next = url.searchParams.get('next') ?? '/account';
-  // A reset-password link routes through here. The session we're about to mint
-  // is a recovery session — gate it so it can ONLY be used to set a new
-  // password, never to roam the app. See @/lib/auth/recovery.
-  const isRecovery = next.includes('reset-password');
 
   const oauthError = url.searchParams.get('error');
   const oauthErrorDescription = url.searchParams.get('error_description');
@@ -19,21 +14,22 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${url.origin}/sign-in?error=${encodeURIComponent(msg)}`);
   }
 
+  // Password recovery does NOT go through here anymore — the reset link lands
+  // directly on /reset-password and verifies its token only when the user
+  // submits a new password, so it never mints a roaming session. Refuse to
+  // exchange a recovery code here (e.g. an old-style link still in an inbox):
+  // bounce to the reset page WITHOUT creating a session, so a stale link can't
+  // be used as a silent login. No token in the URL → the page just offers to
+  // request a fresh link.
+  if (next.includes('reset-password')) {
+    return NextResponse.redirect(`${url.origin}${next.startsWith('/') ? next : `/${next}`}`);
+  }
+
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const res = NextResponse.redirect(`${url.origin}${next}`);
-      res.cookies.set(PW_RECOVERY_COOKIE, isRecovery ? '1' : '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        path: '/',
-        // Recovery → gate on for 30 min. Any other sign-in (OAuth, etc.) →
-        // clear a stale gate so it can't lock the user out.
-        maxAge: isRecovery ? PW_RECOVERY_MAX_AGE : 0,
-      });
-      return res;
+      return NextResponse.redirect(`${url.origin}${next}`);
     }
     console.error('Auth callback error:', error.message);
     return NextResponse.redirect(

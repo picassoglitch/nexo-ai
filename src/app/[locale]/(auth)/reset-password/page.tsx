@@ -3,11 +3,14 @@ import { ResetPasswordForm } from '@/components/auth/reset-password-form';
 
 export default async function ResetPasswordPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ token_hash?: string; type?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const { token_hash } = await searchParams;
   const t = await getTranslations('auth.resetPassword');
 
   return (
@@ -21,7 +24,7 @@ export default async function ResetPasswordPage({
         <h2 className="auth-inbox-title" style={{ marginBottom: 4 }}>
           {t('title')}
         </h2>
-        <ResetPasswordForm />
+        <ResetPasswordForm tokenHash={token_hash} />
       </div>
     </main>
   );

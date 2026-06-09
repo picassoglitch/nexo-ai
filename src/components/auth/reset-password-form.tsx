@@ -1,50 +1,27 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
-// Hand off to the server route that ends the recovery session + lifts the gate
-// atomically. `reset` adds the success notice to the sign-in landing.
-function endRecoveryUrl(locale: string, reset: boolean): string {
-  const params = new URLSearchParams();
-  if (locale && locale !== 'en') params.set('l', locale);
-  if (reset) params.set('reset', '1');
-  const qs = params.toString();
-  return `/auth/end-recovery${qs ? `?${qs}` : ''}`;
-}
-
-export function ResetPasswordForm() {
+/**
+ * Reset password. The email link lands here with a `token_hash` in the URL and
+ * creates NO session — clicking it never logs anyone in. The token is verified
+ * only when the user submits a new password; we use that momentary session for
+ * the single updateUser call and then sign out, so nobody ends up logged into
+ * the app without going through sign-in. If the user never submits, nothing
+ * happens at all.
+ */
+export function ResetPasswordForm({ tokenHash }: { tokenHash?: string }) {
   const t = useTranslations('auth.resetPassword');
   const locale = useLocale();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
-  // null = still checking, true/false = whether a recovery session exists.
-  const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const [done, setDone] = useState(false);
+  const [invalid, setInvalid] = useState(false);
   const [pending, startTransition] = useTransition();
-
-  useEffect(() => {
-    const supabase = createClient();
-    // The /auth/callback exchange should have set a session before redirecting
-    // here. If it didn't (expired or already-used link), there's nothing to
-    // update — tell the user to request a fresh link.
-    supabase.auth.getUser().then(async ({ data }) => {
-      const ok = !!data.user;
-      setHasSession(ok);
-      // No recovery session to act on → there's nothing to gate. Drop the
-      // recovery cookie so a stale one can't keep bouncing the user here.
-      if (!ok) await fetch('/api/auth/clear-recovery', { method: 'POST' });
-    });
-  }, []);
-
-  // Escape hatch: clicked the reset link but don't actually want to reset.
-  // Full navigation to the server route so signOut + cookie-clear land before
-  // the next request — otherwise the middleware gate bounces the user back.
-  function handleCancel() {
-    window.location.href = endRecoveryUrl(locale, false);
-  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,31 +38,46 @@ export function ResetPasswordForm() {
 
     startTransition(async () => {
       const supabase = createClient();
-      const { error: err } = await supabase.auth.updateUser({ password });
-      if (err) {
-        if (err.code === 'same_password') {
-          setError(t('errorSamePassword'));
-          return;
-        }
-        if (err.code === 'weak_password') {
-          setError(t('errorWeakPassword'));
-          return;
-        }
-        setError(err.message || t('errorGeneric'));
+      // Verify the recovery token ONLY now — this is the first moment a session
+      // exists, and it's gone again a few lines down.
+      const { error: verifyErr } = await supabase.auth.verifyOtp({
+        type: 'recovery',
+        token_hash: tokenHash as string,
+      });
+      if (verifyErr) {
+        setInvalid(true);
         return;
       }
-      // Password set. Hand off to the server route to end the recovery session
-      // and lift the gate, landing on sign-in with the success notice. A reset
-      // must never leave a logged-in session behind — the link is for setting a
-      // password, not for getting into the app.
-      window.location.href = endRecoveryUrl(locale, true);
+
+      const { error: updErr } = await supabase.auth.updateUser({ password });
+      if (updErr) {
+        // The token is consumed now; tear down the transient session so a failed
+        // update can't leave anyone logged in. They'll request a fresh link.
+        await supabase.auth.signOut();
+        if (updErr.code === 'same_password') setError(t('errorSamePassword'));
+        else if (updErr.code === 'weak_password') setError(t('errorWeakPassword'));
+        else setError(updErr.message || t('errorGeneric'));
+        return;
+      }
+
+      // Done. End the session — no auto-login — and send them to sign in with
+      // their NEW password. Full navigation so the cleared session is in effect.
+      await supabase.auth.signOut();
+      setDone(true);
+      const prefix = locale === 'en' ? '' : `/${locale}`;
+      window.location.assign(`${prefix}/sign-in?reset=success`);
     });
   }
 
-  if (hasSession === false) {
+  // No token in the link (or it was rejected) → there's nothing to do here and
+  // no session was ever created. Offer a fresh link.
+  if (!tokenHash || invalid) {
     return (
       <div className="auth-inbox-success">
-        <div className="auth-inbox-icon" style={{ borderColor: '#e0564f', color: '#e0564f', background: 'rgba(224, 86, 79, 0.12)' }}>
+        <div
+          className="auth-inbox-icon"
+          style={{ borderColor: '#e0564f', color: '#e0564f', background: 'rgba(224, 86, 79, 0.12)' }}
+        >
           !
         </div>
         <h3 className="auth-inbox-title">{t('invalidTitle')}</h3>
@@ -93,6 +85,16 @@ export function ResetPasswordForm() {
         <Link href="/forgot-password" className="auth-mode-switch-link">
           {t('requestNew')}
         </Link>
+      </div>
+    );
+  }
+
+  if (done) {
+    return (
+      <div className="auth-inbox-success">
+        <div className="auth-inbox-icon">✓</div>
+        <h3 className="auth-inbox-title">{t('successTitle')}</h3>
+        <p className="auth-inbox-body">{t('successBody')}</p>
       </div>
     );
   }
@@ -133,20 +135,9 @@ export function ResetPasswordForm() {
 
       {error && <div className="auth-error">{error}</div>}
 
-      <button type="submit" className="auth-submit" disabled={pending || hasSession === null}>
+      <button type="submit" className="auth-submit" disabled={pending}>
         {pending ? '...' : t('submit')}
       </button>
-
-      <p className="auth-mode-switch">
-        <button
-          type="button"
-          className="auth-mode-switch-link"
-          onClick={handleCancel}
-          disabled={pending}
-        >
-          {t('cancel')}
-        </button>
-      </p>
     </form>
   );
 }

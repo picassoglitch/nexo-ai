@@ -76,11 +76,7 @@ The HTML files use Supabase's Go template variables (`{{ .ConfirmationURL }}`,
 `{{ .Email }}`, `{{ .Token }}`, `{{ .SiteURL }}`, etc.). Supabase substitutes
 them automatically at send time.
 
-## Step 3.5 — URL Configuration (required for the reset link to work)
-
-The password-reset email link sends the user to `/auth/callback`, which
-exchanges the recovery code for a session and then forwards to `/reset-password`.
-Supabase will only honor redirect targets on its allowlist.
+## Step 3.5 — URL Configuration
 
 In **Authentication → URL Configuration**:
 
@@ -89,8 +85,25 @@ In **Authentication → URL Configuration**:
   - `https://nexo-ai.world/auth/callback`
   - `http://localhost:3000/auth/callback` (for local testing)
 
-If `/auth/callback` isn't allowlisted, the reset link bounces the user back to
-`/sign-in` with `error=missing_code` instead of letting them set a new password.
+These are used by **Google OAuth and signup confirmation**, which legitimately
+mint a session via `/auth/callback`.
+
+### Password reset does NOT use `/auth/callback`
+
+Important: the **Reset password** template links straight to our own page with
+the raw token:
+
+```
+{{ .SiteURL }}/es/reset-password?token_hash={{ .TokenHash }}&type=recovery
+```
+
+Clicking it creates **no session** — it just opens the form. The token is
+verified (`verifyOtp`) only when the user submits a new password, and we sign
+out immediately after. This is deliberate: a reset link must never double as a
+silent login into the app. So the reset link does NOT need a redirect-allowlist
+entry (it points at the Site URL itself), and it must NOT be left as the default
+`{{ .ConfirmationURL }}`, which would route through `/auth/callback` and create
+a roaming session.
 
 ## Step 4 — Test
 

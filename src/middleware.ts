@@ -1,8 +1,7 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { createServerClient } from '@supabase/ssr';
 import { routing } from '@/i18n/routing';
-import { PW_RECOVERY_COOKIE } from '@/lib/auth/recovery';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -48,32 +47,6 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   response.headers.set('Pragma', 'no-cache');
   response.headers.set('Expires', '0');
-
-  // Recovery gate: a session minted from a password-reset link may ONLY be used
-  // to set a new password (on /reset-password, which isn't a protected route).
-  // If such a session tries to reach the app WITHOUT completing the change, we
-  // don't trap them on the reset page — we simply log them out. They can finish
-  // a reset or request a new one to get back in. Cheap: cookie read, no Supabase
-  // round-trip. The cookie clears normally once the password is set or the user
-  // signs in with known creds.
-  if (request.cookies.get(PW_RECOVERY_COOKIE)) {
-    const localeMatch = request.nextUrl.pathname.match(/^\/(es|en)(?=\/|$)/);
-    const localePrefix = localeMatch ? localeMatch[0] : '';
-    const signInUrl = request.nextUrl.clone();
-    signInUrl.pathname = `${localePrefix}/sign-in`;
-    signInUrl.search = 'reset=incomplete';
-    const redirect = NextResponse.redirect(signInUrl);
-    redirect.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-    // Drop the gate cookie and the Supabase session cookies — log this browser
-    // out. (sb-<ref>-auth-token, plus any .0/.1 chunks.)
-    redirect.cookies.set(PW_RECOVERY_COOKIE, '', { path: '/', maxAge: 0 });
-    for (const c of request.cookies.getAll()) {
-      if (c.name.startsWith('sb-')) {
-        redirect.cookies.set(c.name, '', { path: '/', maxAge: 0 });
-      }
-    }
-    return redirect;
-  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
