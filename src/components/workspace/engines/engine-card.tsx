@@ -115,7 +115,7 @@ function SoonRow({ vm }: { vm: EngineVM }) {
 function FeaturedCard({ vm, href }: { vm: EngineVM; href: Route }) {
   const t = useTranslations('engines.card');
   return (
-    <article className="relative flex flex-col gap-6 overflow-hidden rounded-xl border border-[var(--cc-green)]/55 bg-[linear-gradient(150deg,var(--cc-green-g),transparent_55%)] p-8 shadow-[0_18px_50px_-22px_var(--cc-green-g)] md:flex-row md:items-center md:justify-between">
+    <article className="relative flex flex-col gap-6 rounded-xl border border-[var(--cc-green)]/55 bg-[linear-gradient(150deg,var(--cc-green-g),transparent_55%)] p-8 shadow-[0_18px_50px_-22px_var(--cc-green-g)] md:flex-row md:items-center md:justify-between">
       {/* LEFT */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-4">
@@ -170,13 +170,13 @@ export function EngineCard({ vm, variant }: { vm: EngineVM; variant: EngineCardV
   return (
     <article
       className={[
-        'group relative flex h-full flex-col overflow-hidden rounded-xl border p-6 transition-all duration-200 hover:-translate-y-0.5',
+        'group relative flex h-full flex-col rounded-xl border p-6 transition-all duration-200 hover:-translate-y-0.5',
         isLocked
           ? 'border-[var(--cc-line)] bg-[var(--cc-panel)]/70 opacity-90 hover:opacity-100'
           : 'border-[var(--cc-green)]/25 bg-[var(--cc-panel)] hover:border-[var(--cc-green)]/45',
       ].join(' ')}
     >
-      <header className="flex items-start justify-between gap-3">
+      <header className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
           <EngineIcon vm={vm} variant={variant} box="size-14" glyph={28} />
           <div className="min-w-0">
