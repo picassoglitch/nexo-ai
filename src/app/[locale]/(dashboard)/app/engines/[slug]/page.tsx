@@ -5,7 +5,6 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
 import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
-import { ENV_LABEL } from '@/lib/data/types';
 import { getTokenBalance } from '@/lib/usage/tokens';
 import {
   engineIsLiveForUser,
@@ -217,7 +216,7 @@ export default async function EngineWorkspacePage({
               fontFamily: 'var(--cc-mono), monospace',
             }}
           >
-            {engine.type} · {ENV_LABEL[engine.env]} · {engine.region}
+            {engine.type}
           </div>
         </div>
         <div>

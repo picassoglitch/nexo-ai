@@ -1,7 +1,7 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
-import { CATS, ENV_LABEL, type EngineCategory } from '@/lib/data/types';
+import { CATS, type EngineCategory } from '@/lib/data/types';
 import { getTokenBalance } from '@/lib/usage/tokens';
 import {
   engineIsLiveForUser,
@@ -14,7 +14,6 @@ import {
 import { EnginesExplorer } from '@/components/workspace/engines/engines-explorer';
 import {
   filterKeysFor,
-  marketingFor,
   type EngineLiveState,
   type EngineVM,
 } from '@/components/workspace/engines/engine-config';
@@ -30,8 +29,8 @@ const CAT_LABEL = Object.fromEntries(CATS.map((c) => [c.id, c.label])) as Record
   string
 >;
 
-// Spotlight ordering inside the grid: featured first, then live, sim, locked,
-// coming-soon — so the most actionable cards lead.
+// Spotlight ordering inside each section: featured first, then live, sim,
+// locked, coming-soon — so the most actionable cards lead.
 const STATE_RANK: Record<EngineLiveState, number> = {
   live: 1,
   trial: 1,
@@ -47,6 +46,7 @@ export default async function MyEnginesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('engines');
 
   const [engines, session] = await Promise.all([listEngines(), getSessionUser()]);
   const role = session?.role ?? 'VIEWER';
@@ -69,6 +69,23 @@ export default async function MyEnginesPage({
   const graceActive =
     tier === 'FREE' &&
     isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
+
+  // Marketing copy is localized in messages (engines.marketing*). Resolve it
+  // here so the EngineVM carries plain strings across the RSC boundary.
+  const marketingFor = (slug: string, category: EngineCategory, description: string) => {
+    if (t.has(`marketing.${slug}.tagline`)) {
+      const bullets = t.has(`marketing.${slug}.bullets`)
+        ? (t.raw(`marketing.${slug}.bullets`) as string[])
+        : [];
+      return { tagline: t(`marketing.${slug}.tagline`), bullets };
+    }
+    return {
+      tagline: t.has(`marketingCat.${category}`)
+        ? t(`marketingCat.${category}`)
+        : description.slice(0, 80),
+      bullets: [] as string[],
+    };
+  };
 
   // Build the serializable view-models the client explorer renders. Deprecated
   // engines are hidden from the hub (consistent with the home page).
@@ -123,8 +140,6 @@ export default async function MyEnginesPage({
         ownerLabel: isPlatformOwned
           ? 'Nexo AI'
           : engine.ownerDisplayName || engine.ownerEmail?.split('@')[0] || 'Partner',
-        envLabel: ENV_LABEL[engine.env],
-        region: engine.region,
         featured: engine.slug === 'nexoclip' && engine.status === 'active',
         canSelectLive: tier === 'PRO' && engine.status === 'active' && meetsTier,
         isSelectedLive: engine.id === selectedEngineId,
@@ -136,50 +151,64 @@ export default async function MyEnginesPage({
     });
 
   const liveCount = vms.filter((v) => v.state === 'live' || v.state === 'trial').length;
-  const showOnboarding =
-    tier === 'FREE' && vms.some((v) => v.slug === 'nexoclip' && v.state !== 'coming_soon');
+  // The engine to resume from the hero "Continuar" CTA — the first live/trial one.
+  const continueVm = vms.find((v) => v.state === 'live' || v.state === 'trial');
+  const continueEngine = continueVm ? { name: continueVm.name, slug: continueVm.slug } : null;
+  // Pro upsell shows in the Pro section head when a FREE user has gated engines.
+  const showUpsell = tier === 'FREE' && vms.some((v) => v.state === 'locked');
+
+  const nf = (n: number) => n.toLocaleString(locale === 'es' ? 'es-MX' : 'en-US');
 
   return (
     <div className="cc-scroll">
       <div className="pt-2">
         {vms.length === 0 ? (
           <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-14 text-center">
-            <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">
-              Sin engines disponibles
-            </div>
+            <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">{t('empty.title')}</div>
             <div className="mt-2 text-[12px] text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
-              Si eres admin: corre <b>0010_rename_bots_to_engines.sql</b> en Supabase y refresca.
+              {t('empty.hint')}
             </div>
           </div>
         ) : (
-          <EnginesExplorer engines={vms} liveCount={liveCount} showOnboarding={showOnboarding} />
+          <EnginesExplorer
+            engines={vms}
+            liveCount={liveCount}
+            continueEngine={continueEngine}
+            tierLabel={caps.label}
+            showUpsell={showUpsell}
+          />
         )}
 
         {/* Plan capabilities — compact reference strip */}
         {vms.length > 0 && (
           <section className="mt-8">
             <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
-              Capacidades de tu plan · {caps.label}
-              {!isAdmin && ` · ${caps.price}/${caps.per}`}
+              {isAdmin
+                ? t('caps.heading', { plan: caps.label })
+                : t('caps.headingPriced', { plan: caps.label, price: caps.price, per: caps.per })}
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {[
                 {
-                  k: 'Engines en vivo',
+                  k: t('caps.liveEngines'),
                   v: caps.liveEnginesCount === Infinity ? '∞' : String(caps.liveEnginesCount),
                 },
-                { k: 'Tokens IA / mes', v: caps.tokensPerMonth.toLocaleString('es-MX') },
+                { k: t('caps.tokens'), v: nf(caps.tokensPerMonth) },
                 {
-                  k: 'Almacenamiento',
-                  v:
-                    caps.storageMB >= 1000
-                      ? `${caps.storageMB / 1000} GB`
-                      : `${caps.storageMB} MB`,
+                  k: t('caps.storage'),
+                  v: caps.storageMB >= 1000 ? `${caps.storageMB / 1000} GB` : `${caps.storageMB} MB`,
                 },
-                { k: 'Historial', v: caps.historyDays >= 365 ? '1 año+' : `${caps.historyDays} días` },
                 {
-                  k: 'Soporte',
-                  v: caps.hasPrioritySupport ? 'Prioritario' : tier === 'PRO' ? 'Email' : 'Comunidad',
+                  k: t('caps.history'),
+                  v: caps.historyDays >= 365 ? t('caps.historyYear') : t('caps.historyDays', { days: caps.historyDays }),
+                },
+                {
+                  k: t('caps.support'),
+                  v: caps.hasPrioritySupport
+                    ? t('caps.supportPriority')
+                    : tier === 'PRO'
+                      ? t('caps.supportEmail')
+                      : t('caps.supportCommunity'),
                 },
               ].map((row) => (
                 <div

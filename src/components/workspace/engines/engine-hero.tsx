@@ -1,15 +1,30 @@
+'use client';
+
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
-// Top hero for the engines hub. Glassy panel, lime primary CTA. The secondary
-// CTA jumps straight into NexoClip (the ready-now engine) so a new user always
-// has a one-click path to value. Presentational only — rendered inside the
-// client explorer but holds no state itself.
+// Single focused continuation hero. ONE primary action only:
+//   - has a live/in-progress engine  → "Continuar →" resumes it (by name)
+//   - otherwise                      → "Abrir NexoClip →" (the ready-now engine)
+// Plus one low-emphasis "Ver demo" text link. The "Actualizar a Pro" upsell
+// lives down in the Pro section now — it no longer competes with the primary
+// action up here.
 
-export function EngineHero({ liveCount }: { liveCount: number }) {
+export function EngineHero({
+  liveCount,
+  continueEngine,
+}: {
+  liveCount: number;
+  continueEngine: { name: string; slug: string } | null;
+}) {
+  const t = useTranslations('engines');
+  const primaryHref = (
+    continueEngine ? `/app/engines/${continueEngine.slug}` : '/app/engines/nexoclip'
+  ) as Route;
+
   return (
     <section className="relative overflow-hidden rounded-[16px] border border-[var(--cc-line)] bg-[var(--cc-panel)]/70 p-6 backdrop-blur-xl sm:p-8">
-      {/* subtle brand glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[var(--cc-green-g)] blur-3xl"
@@ -18,32 +33,33 @@ export function EngineHero({ liveCount }: { liveCount: number }) {
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-green)]">
             <span className="size-1.5 rounded-full bg-[var(--cc-green)]" />
-            {liveCount > 0 ? `${liveCount} en vivo ahora` : 'Tu hub de engines'}
+            {liveCount > 0 ? t('hero.badgeLive', { count: liveCount }) : t('hero.badgeIdle')}
           </span>
           <h1
-            className="mt-3 text-[clamp(26px,4vw,40px)] font-bold leading-[1.05] tracking-tight text-[var(--cc-txt)]"
+            className="mt-3 text-[clamp(24px,3.6vw,36px)] font-bold leading-[1.06] tracking-tight text-[var(--cc-txt)]"
             style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
           >
-            Elige tu engine
+            {continueEngine ? t('hero.headingContinue') : t('hero.headingStart')}
           </h1>
           <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-[var(--cc-txt-2)]">
-            Cada engine automatiza un flujo de trabajo distinto — clips, streaming, trading y más.
-            Pruébalos en simulación y actívalos en vivo cuando estés listo.
+            {continueEngine
+              ? t('hero.subContinue', { name: continueEngine.name })
+              : t('hero.subStart')}
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
+        <div className="flex shrink-0 flex-col items-start gap-2.5 sm:flex-row sm:items-center">
           <Link
-            href={'/app/subscription' as Route}
+            href={primaryHref}
             className="rounded-xl bg-[var(--cc-green)] px-5 py-2.5 text-[13.5px] font-bold text-[#070809] transition-[filter] hover:brightness-110"
           >
-            Actualizar a Pro
+            {continueEngine ? t('hero.ctaContinue') : t('hero.ctaOpen')}
           </Link>
           <Link
             href={'/app/engines/nexoclip' as Route}
-            className="rounded-xl border border-[var(--cc-line-2)] bg-white/[0.02] px-5 py-2.5 text-[13.5px] font-semibold text-[var(--cc-txt)] backdrop-blur transition-colors hover:border-[var(--cc-green)]/40 hover:text-[var(--cc-green)]"
+            className="px-1 text-[13px] font-medium text-[var(--cc-txt-3)] underline-offset-4 transition-colors hover:text-[var(--cc-txt)] hover:underline"
           >
-            Ver demo de NexoClip
+            {t('hero.ctaDemo')}
           </Link>
         </div>
       </div>

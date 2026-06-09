@@ -1,30 +1,73 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ENGINE_FILTERS, type EngineFilterKey, type EngineVM } from './engine-config';
+import { useTranslations } from 'next-intl';
+import {
+  ENGINE_FILTER_KEYS,
+  sectionFor,
+  variantFor,
+  type EngineFilterKey,
+  type EngineVM,
+} from './engine-config';
 import { EngineHero } from './engine-hero';
 import { UpgradeBanner } from './upgrade-banner';
 import { EngineFilters } from './engine-filters';
 import { EngineCard } from './engine-card';
 
-// Client island for the engines hub. Owns only the filter-tab state; all auth,
-// tier, and live-gating decisions already happened on the server and arrive
-// baked into each EngineVM. Featured (NexoClip) spans two columns so it reads
-// as the headline, ready-now engine.
+// Client island for the engines hub. Owns the filter-tab + coming-soon-toggle
+// state; all auth/tier/live-gating already happened on the server and arrives
+// baked into each EngineVM.
+//
+// Default view ('all' filter) = the GROUPED layout: three actionability
+// sections (Disponibles ahora / Desbloueá con Pro / Próximamente) so the one
+// thing a user can do right now leads, and everything else is demoted. Picking
+// a specific filter tab flattens to a plain grid for power users.
+
+function CardGrid({ items }: { items: EngineVM[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((vm) => (
+        <div key={vm.id} className={vm.featured ? 'sm:col-span-2' : ''}>
+          <EngineCard vm={vm} variant={variantFor(vm.state, vm.featured)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SectionHead({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <div>
+      <h2
+        className="text-[13px] font-bold uppercase tracking-wider text-[var(--cc-txt-2)]"
+        style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
+      >
+        {title}
+      </h2>
+      {sub && <p className="mt-0.5 text-[12px] text-[var(--cc-txt-4)]">{sub}</p>}
+    </div>
+  );
+}
 
 export function EnginesExplorer({
   engines,
   liveCount,
-  showOnboarding,
+  continueEngine,
+  tierLabel,
+  showUpsell,
 }: {
   engines: EngineVM[];
   liveCount: number;
-  showOnboarding: boolean;
+  continueEngine: { name: string; slug: string } | null;
+  tierLabel: string;
+  showUpsell: boolean;
 }) {
+  const t = useTranslations('engines');
   const [filter, setFilter] = useState<EngineFilterKey>('all');
+  const [soonOpen, setSoonOpen] = useState(false);
 
   const counts = useMemo(() => {
-    const c = Object.fromEntries(ENGINE_FILTERS.map((f) => [f.key, 0])) as Record<
+    const c = Object.fromEntries(ENGINE_FILTER_KEYS.map((k) => [k, 0])) as Record<
       EngineFilterKey,
       number
     >;
@@ -32,43 +75,109 @@ export function EnginesExplorer({
     return c;
   }, [engines]);
 
-  const visible = useMemo(
+  const groups = useMemo(() => {
+    const available: EngineVM[] = [];
+    const pro: EngineVM[] = [];
+    const soon: EngineVM[] = [];
+    for (const e of engines) {
+      const s = sectionFor(e.state);
+      (s === 'available' ? available : s === 'pro' ? pro : soon).push(e);
+    }
+    return { available, pro, soon };
+  }, [engines]);
+
+  const filtered = useMemo(
     () => engines.filter((e) => e.filterKeys.includes(filter)),
     [engines, filter],
   );
 
   return (
     <div className="flex flex-col gap-6 pb-2">
-      <EngineHero liveCount={liveCount} />
+      {/* Slim page title + tier badge */}
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className="text-[13px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]"
+        >
+          {t('title')}
+        </span>
+        <span className="rounded-full border border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-[var(--cc-green)]">
+          {tierLabel}
+        </span>
+      </div>
 
-      {showOnboarding && <UpgradeBanner />}
+      <EngineHero liveCount={liveCount} continueEngine={continueEngine} />
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         <EngineFilters active={filter} counts={counts} onChange={setFilter} />
 
-        {visible.length === 0 ? (
-          <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-12 text-center">
-            <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">
-              No hay engines en este filtro
-            </div>
-            <button
-              type="button"
-              onClick={() => setFilter('all')}
-              className="mt-3 rounded-lg border border-[var(--cc-line-2)] px-4 py-1.5 text-[12.5px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]"
-            >
-              Ver todos
-            </button>
-          </div>
+        {filter !== 'all' ? (
+          // ── Power-user filtered view: flat grid ──────────────────────────
+          filtered.length === 0 ? (
+            <EmptyFilter onReset={() => setFilter('all')} />
+          ) : (
+            <CardGrid items={filtered} />
+          )
         ) : (
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-            {visible.map((vm) => (
-              <div key={vm.id} className={vm.featured ? 'sm:col-span-2' : ''}>
-                <EngineCard vm={vm} />
-              </div>
-            ))}
+          // ── Default grouped view: three actionability sections ───────────
+          <div className="flex flex-col gap-7">
+            {groups.available.length > 0 && (
+              <section className="flex flex-col gap-3.5">
+                <SectionHead title={t('sections.available')} sub={t('sections.availableSub')} />
+                <CardGrid items={groups.available} />
+              </section>
+            )}
+
+            {groups.pro.length > 0 && (
+              <section className="flex flex-col gap-3.5">
+                <SectionHead title={t('sections.pro')} sub={t('sections.proSub')} />
+                {showUpsell && <UpgradeBanner />}
+                <CardGrid items={groups.pro} />
+              </section>
+            )}
+
+            {groups.soon.length > 0 && (
+              <section className="flex flex-col gap-3.5">
+                <button
+                  type="button"
+                  onClick={() => setSoonOpen((v) => !v)}
+                  className="flex items-center justify-between gap-3 text-left"
+                  aria-expanded={soonOpen}
+                >
+                  <SectionHead title={t('sections.soon')} sub={t('sections.soonSub')} />
+                  <span className="shrink-0 rounded-lg border border-[var(--cc-line-2)] px-3 py-1.5 text-[12px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]">
+                    {soonOpen
+                      ? t('sections.soonHide')
+                      : t('sections.soonShow', { count: groups.soon.length })}
+                  </span>
+                </button>
+                {soonOpen && (
+                  <div className="flex flex-col gap-2">
+                    {groups.soon.map((vm) => (
+                      <EngineCard key={vm.id} vm={vm} variant="soon" />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function EmptyFilter({ onReset }: { onReset: () => void }) {
+  const t = useTranslations('engines.filters');
+  return (
+    <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-12 text-center">
+      <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">{t('emptyTitle')}</div>
+      <button
+        type="button"
+        onClick={onReset}
+        className="mt-3 rounded-lg border border-[var(--cc-line-2)] px-4 py-1.5 text-[12.5px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]"
+      >
+        {t('emptyCta')}
+      </button>
     </div>
   );
 }
