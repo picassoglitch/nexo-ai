@@ -15,8 +15,11 @@
 //     Returns:  { tenant_id, api_token }      (200)
 //               { error: 'duplicate', tenant_id, api_token }  (409 — already exists)
 //
-//   GET {external_url}/auth/sso?token=<signed>
-//     Engine validates HMAC, sets session cookie, redirects to its dashboard.
+//   GET {external_url}/auth/sso?token=<signed>&next=<path>
+//     Engine validates HMAC, sets session cookie, then redirects to `next`
+//     (a relative, same-origin path — NexoClip must reject absolute/off-origin
+//     values). We always send next=/dashboard/start so a fresh SSO login lands
+//     on NexoClip's start screen rather than its generic root.
 //
 // IDEMPOTENCY:
 //   The 409-duplicate response is treated as success — we re-store the
@@ -36,6 +39,9 @@ import type {
 } from './types';
 
 const NEXOCLIP_SSO_TTL_SECONDS = 300; // 5 min — long enough to redirect, short enough to be safe if intercepted
+// Where a fresh SSO login lands inside NexoClip. Passed as the `next` query
+// param on /auth/sso; NexoClip redirects here after validating the token.
+const NEXOCLIP_POST_SSO_PATH = '/dashboard/start';
 
 function getAdminToken(): string | null {
   return process.env.NEXOCLIP_ADMIN_TOKEN ?? null;
@@ -184,7 +190,9 @@ export const nexoclipIntegration: EngineIntegration = {
       };
     }
 
-    const url = `${engine.externalUrl}/auth/sso?token=${encodeURIComponent(token)}`;
+    const url =
+      `${engine.externalUrl}/auth/sso?token=${encodeURIComponent(token)}` +
+      `&next=${encodeURIComponent(NEXOCLIP_POST_SSO_PATH)}`;
     return { ok: true, url };
   },
 
