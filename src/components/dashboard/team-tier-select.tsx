@@ -9,11 +9,11 @@ import type { SubscriptionTier } from '@/lib/auth/session';
 const TIERS: Array<{ value: SubscriptionTier; label: string }> = [
   { value: 'FREE', label: 'Free' },
   { value: 'PRO', label: 'Pro' },
-  // Partner sits between Pro and All-Access in this dropdown — it's PRO-level
+  // Partner sits between Pro and VIP in this dropdown — it's PRO-level
   // access plus an owned engine. Admin-grant only; tier-actions.ts blocks
   // non-admins from picking it server-side regardless of UI state.
   { value: 'PARTNER', label: 'Partner' },
-  { value: 'ALL_ACCESS', label: 'All-Access' },
+  { value: 'VIP', label: 'VIP' },
 ];
 
 interface Props {

@@ -20,7 +20,11 @@ export type AuditAction =
   | 'selected_bot.change' // PRO subscriber swapped their live bot
   | 'partner.engine_assign' // admin set / cleared which engine a partner owns
   | 'tokens.grant' // admin manually granted bonus tokens (vs. MP payment / promo)
-  | 'tokens.revoke'; // admin removed bonus tokens (subtracted from balance)
+  | 'tokens.revoke' // admin removed bonus tokens (subtracted from balance)
+  | 'promo.welcome_claim' // user accepted the first-time welcome banner
+  | 'promo.welcome_reset' // admin reset a user's welcome banner so it shows again
+  | 'promo.trial_grant' // trial started/extended (self-claim or admin grant)
+  | 'promo.trial_revoke'; // admin ended a user's NexoClip trial early
 
 export interface AuditPayload {
   action: AuditAction;

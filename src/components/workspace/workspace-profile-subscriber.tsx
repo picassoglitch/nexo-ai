@@ -19,7 +19,7 @@ import { ProfileSubscriber, type ProfileChangePayload } from './profile-subscrib
 const TIER_LABEL: Record<string, string> = {
   FREE: 'Free',
   PRO: 'Pro',
-  ALL_ACCESS: 'All-Access',
+  VIP: 'VIP',
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -60,7 +60,7 @@ export function WorkspaceProfileSubscriber({ userId }: { userId: string }) {
       } else if (tierChanged) {
         // Differentiate upgrade vs downgrade visually with the verb.
         const isDowngrade =
-          (prev.tier === 'ALL_ACCESS' && next.tier !== 'ALL_ACCESS') ||
+          (prev.tier === 'VIP' && next.tier !== 'VIP') ||
           (prev.tier === 'PRO' && next.tier === 'FREE');
         const verb = isDowngrade ? 'cambió a' : 'activado:';
         showToast(`Tu plan ${verb} <b>${prettyTier(next.tier)}</b>`);

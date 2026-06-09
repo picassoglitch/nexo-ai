@@ -80,7 +80,7 @@ export async function provisionEngineAccess(
   // Step 2: fetch engine + user details for external provisioning.
   // Also pull role + tier so we can compute the effective tier (admin override
   // applied) and ship it to the engine — the engine writes that to its own
-  // tier column so the user lands as Pro/All-Access from the first login.
+  // tier column so the user lands as Pro/VIP from the first login.
   const [{ data: engineRow }, { data: profile }] = await Promise.all([
     admin
       .from('engines')
@@ -117,7 +117,7 @@ export async function provisionEngineAccess(
     return { ok: false, reason: 'missing_profile_email' };
   }
 
-  // Effective tier — admin override applied. Admins land as ALL_ACCESS on the
+  // Effective tier — admin override applied. Admins land as VIP on the
   // engine even if their stored profiles.tier is FREE (which it usually is for
   // env-locked admins: we never billed them).
   const role = (profile.role as UserRole | undefined) ?? 'VIEWER';
@@ -201,7 +201,7 @@ export type ProvisionEngineAccessResult =
     };
 
 /** Seed subscriptions for ALL currently-active engines in the user's org.
- *  Called when a user reaches ALL_ACCESS (admin grant, MP payment for top tier,
+ *  Called when a user reaches VIP (admin grant, MP payment for top tier,
  *  or env-locked admin promotion). */
 export async function provisionAllAccessEngines(
   userId: string,
@@ -266,7 +266,7 @@ export async function getEngineAccess(userId: string, engineId: string) {
     | null;
 }
 
-/** Lazy provisioning for admins — when an admin (effective ALL_ACCESS via role
+/** Lazy provisioning for admins — when an admin (effective VIP via role
  *  override) hits /app/engines/[slug], we ensure they have a fully-provisioned
  *  access record. "Fully provisioned" = row exists AND (if the engine requires
  *  external provisioning) external_user_id is populated.

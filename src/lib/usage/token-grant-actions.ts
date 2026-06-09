@@ -34,7 +34,7 @@ interface ActionResult {
 }
 
 // Hard cap so a typo can't accidentally grant a billion tokens. 50M is
-// 25× the All-Access monthly allocation — generous enough for any real
+// 25× the VIP monthly allocation — generous enough for any real
 // customer-support refund, low enough to avoid disaster.
 const MAX_GRANT_PER_CALL = 50_000_000;
 

@@ -17,12 +17,12 @@ const FAQ: FaqGroup[] = [
     title: 'Suscripción y planes',
     items: [
       {
-        q: '¿Cuál es la diferencia entre Free, Pro y All-Access?',
+        q: '¿Cuál es la diferencia entre Free, Pro y VIP?',
         a: (
           <>
             <b>Free</b> te deja explorar todos los sistemas en modo simulación, sin tarjeta de
             crédito. <b>Pro</b> activa <b>UN</b> sistema en ejecución real — tú eliges cuál
-            desde tu lista de bots. <b>All-Access</b> activa los 16 sistemas en vivo y te da los
+            desde tu lista de bots. <b>VIP</b> activa los 16 sistemas en vivo y te da los
             límites más altos de uso. El admin puede cambiar tu tier desde su panel sin pasar
             por checkout.
           </>
@@ -33,7 +33,7 @@ const FAQ: FaqGroup[] = [
         a: (
           <>
             Desde <b>/app/subscription</b>, haz clic en el botón del plan al que quieres
-            cambiar. Si subes (Free → Pro o Pro → All-Access), te redirigimos a Mercado Pago
+            cambiar. Si subes (Free → Pro o Pro → VIP), te redirigimos a Mercado Pago
             para procesar el pago. Si bajas a Free, el cambio se aplica inmediato sin cargo. Tu
             plan anterior sigue activo hasta el final del período facturado.
           </>
@@ -94,7 +94,7 @@ const FAQ: FaqGroup[] = [
             En simulación, el sistema corre con datos de prueba y no toca tus cuentas externas
             (Stripe, exchanges, redes sociales, etc.). Sirve para evaluar comportamiento y
             límites sin riesgo. <b>Ejecución real</b> conecta al sistema con tus credenciales y
-            actúa sobre data tuya — solo disponible en Pro y All-Access.
+            actúa sobre data tuya — solo disponible en Pro y VIP.
           </>
         ),
       },
@@ -145,7 +145,7 @@ const FAQ: FaqGroup[] = [
         a: (
           <>
             Sí, para clientes en México emitimos CFDI 4.0. Después de tu primer pago en Pro o
-            All-Access, escríbenos vía <b>/contacto</b> con tu RFC + razón social y la generamos
+            VIP, escríbenos vía <b>/contacto</b> con tu RFC + razón social y la generamos
             dentro de los siguientes 3 días hábiles. Para otros países, emitimos invoice
             estándar en PDF.
           </>

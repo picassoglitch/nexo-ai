@@ -13,17 +13,17 @@ export async function setSelectedLiveEngine(
   const session = await getSessionUser();
   if (!session) return { ok: false, error: 'No autenticado' };
 
-  // FREE has no live engines; ALL_ACCESS doesn't need a selection.
+  // FREE has no live engines; VIP doesn't need a selection.
   // We block the action for those tiers so callers can't accidentally write a
   // selection that does nothing — keeps profiles.selected_engine_id meaningful.
   const caps = TIER_CAPS[session.tier];
   if (caps.liveEnginesCount === 0) {
-    return { ok: false, error: 'Tu plan no incluye ejecución en vivo. Pasa a Pro o All-Access.' };
+    return { ok: false, error: 'Tu plan no incluye ejecución en vivo. Pasa a Pro o VIP.' };
   }
   if (caps.liveEnginesCount === Infinity) {
     return {
       ok: false,
-      error: 'En All-Access todos los engines ya están en vivo — no hay selección que hacer.',
+      error: 'En VIP todos los engines ya están en vivo — no hay selección que hacer.',
     };
   }
 
@@ -43,7 +43,7 @@ export async function setSelectedLiveEngine(
     // Mutual exclusion: PRO subscribers can have ONLY ONE engine running at
     // a time. Pause every other active engine_subscription for this user so
     // they can't cross-use multiple engines and abuse the single-slot tier.
-    // ALL_ACCESS is not subject to this — they pay for parallel.
+    // VIP is not subject to this — they pay for parallel.
     await pauseOtherActiveEngines(session.user.id, engineId);
   }
 

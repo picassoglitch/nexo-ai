@@ -29,11 +29,11 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPrice | null> = {
   // MP preference builder skips it and any /subscription page knows there's
   // no public price tag to show.
   PARTNER: null,
-  ALL_ACCESS: {
+  VIP: {
     // MXN $2,499.00 = 249,900 centavos.
     amountCents: 249900,
     currency: 'MXN',
-    description: 'Nexo AI · Plan All-Access · todos los sistemas en vivo',
+    description: 'Nexo AI · Plan VIP · todos los sistemas en vivo',
   },
 };
 

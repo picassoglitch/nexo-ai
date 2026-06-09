@@ -38,7 +38,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     'Operator';
   const initial = fullName.charAt(0).toUpperCase();
   // Stored tier from profiles.tier — only matters for non-admin users.
-  // Admins get effective ALL_ACCESS no matter what, via effectiveTier().
+  // Admins get effective VIP no matter what, via effectiveTier().
   // The sidebar pill shows the EFFECTIVE tier so the experience matches what
   // they can actually do — admins see "ALL-ACCESS" regardless of billing row.
   const role = session?.role ?? 'VIEWER';

@@ -26,7 +26,7 @@ const STATUS_OPTS: Array<{ value: EngineStatus; label: string }> = [
 const TIER_OPTS: Array<{ value: SubscriptionTier; label: string }> = [
   { value: 'FREE', label: 'Free' },
   { value: 'PRO', label: 'Pro' },
-  { value: 'ALL_ACCESS', label: 'All-Access' },
+  { value: 'VIP', label: 'VIP' },
 ];
 
 const selectStyle = (pending: boolean): React.CSSProperties => ({

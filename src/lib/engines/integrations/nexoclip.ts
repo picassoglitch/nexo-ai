@@ -47,8 +47,13 @@ function getSsoSecret(): string | null {
 
 /** Sign the launch payload with HMAC-SHA256. NexoClip's /auth/sso endpoint
  *  verifies this signature with the shared secret before creating a session.
- *  `tier` is lowercase-snake-case ('free' | 'pro' | 'all_access') — NexoClip's
- *  tenants.tier column uses that format. */
+ *  `tier` is lowercase ('free' | 'pro' | 'vip') — NexoClip's tenants.tier
+ *  column must accept these.
+ *
+ *  ⚠️ CONTRACT CHANGE — the top tier was renamed ALL_ACCESS → VIP, so this now
+ *  sends 'vip' where it previously sent 'all_access'. NexoClip's tier enum must
+ *  add 'vip' (migration 013) BEFORE this ships, or VIP/admin SSO logins fail.
+ *  See supabase/migrations/0026_rename_all_access_to_vip.sql. */
 function signLaunchToken(payload: {
   user_id: string;
   email: string;
@@ -95,8 +100,8 @@ export const nexoclipIntegration: EngineIntegration = {
           external_user_id: userId,
           email,
           display_name: fullName ?? email.split('@')[0],
-          // Lowercase format ('free' / 'pro' / 'all_access') — what NexoClip's
-          // tenants.tier column expects per their migration 013.
+          // Lowercase format ('free' / 'pro' / 'vip') — what NexoClip's
+          // tenants.tier column expects per their migration 013 (must add 'vip').
           tier: effectiveTier.toLowerCase(),
         }),
       });

@@ -4,8 +4,11 @@ import { Link } from '@/i18n/routing';
 import { listEngines } from '@/lib/data/engines';
 import { ENV_LABEL } from '@/lib/data/types';
 import { getSessionUser } from '@/lib/auth/session';
+import { getTokenBalance } from '@/lib/usage/tokens';
 import {
-  engineCanRunLive,
+  engineIsLiveForUser,
+  isNexoclipTrialActive,
+  isNexoclipGraceActive,
   TIER_CAPS,
   effectiveTier,
   isAdminRole,
@@ -21,7 +24,7 @@ const TIER_LABEL_SHORT = {
   FREE: 'Free',
   PRO: 'Pro',
   PARTNER: 'Partner',
-  ALL_ACCESS: 'All-Access',
+  VIP: 'VIP',
 } as const;
 
 export default async function MyEnginesPage({
@@ -39,15 +42,28 @@ export default async function MyEnginesPage({
   const isAdmin = isAdminRole(role);
   const selectedEngineId = session?.selectedEngineId ?? null;
   const caps = TIER_CAPS[tier];
+  // NexoClip 7-day trial: grants live access to NexoClip regardless of tier.
+  // After it expires, FREE users keep NexoClip live in "grace" while tokens last.
+  const nowMs = new Date().getTime();
+  const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
+  const clipTokensRemaining =
+    session && tier === 'FREE'
+      ? await getTokenBalance(session.user.id)
+          .then((b) => (b.unlimited ? 0 : b.remaining))
+          .catch(() => 0)
+      : 0;
+  const graceActive =
+    tier === 'FREE' &&
+    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipTokensRemaining);
 
   // Tier-specific page intro copy. Admin gets its own copy noting role-overrides-tier.
   const intro = isAdmin
     ? `Como ${role.replace('_', ' ')}, tienes acceso completo a todos los engines — tu rol pasa por encima del tier almacenado (${storedTier.replace('_', '-')}).`
     : tier === 'FREE'
-      ? 'Estás en el plan Free — todos los engines están disponibles en modo simulación. Pasa a Pro para ejecutar uno en vivo, o All-Access para todos.'
+      ? 'Estás en el plan Free — todos los engines están disponibles en modo simulación. Pasa a Pro para ejecutar uno en vivo, o VIP para todos.'
       : tier === 'PRO'
         ? 'Estás en Pro — elige UN engine para correr en vivo. El resto sigue disponible en simulación. Cambia tu selección cuando quieras.'
-        : 'Estás en All-Access — todos los engines disponibles corren en vivo, con los límites más altos de uso.';
+        : 'Estás en VIP — todos los engines disponibles corren en vivo, con los límites más altos de uso.';
 
   return (
     <div className="cc-scroll">
@@ -159,17 +175,24 @@ export default async function MyEnginesPage({
           const isComingSoon = engine.status === 'coming_soon';
           const isDeprecated = engine.status === 'deprecated';
           // Available = engine is active AND user's tier qualifies for its tier_required.
-          const tierOrder = { FREE: 0, PRO: 1, PARTNER: 1, ALL_ACCESS: 2 } as const;
+          const tierOrder = { FREE: 0, PRO: 1, PARTNER: 1, VIP: 2 } as const;
           const meetsTier = tierOrder[tier] >= tierOrder[engine.tierRequired];
           // Partner-owned override: the engine's owner sees it as always-live,
           // regardless of selected_engine_id. Marketplace viewers (other users)
           // see the same badge metadata but the live flag uses the standard rule.
           const isOwnedByMe =
             engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
-          const isLive =
-            engine.status === 'active' &&
-            meetsTier &&
-            engineCanRunLive(tier, engine.id, selectedEngineId, isOwnedByMe);
+          const isLive = engineIsLiveForUser({
+            tier,
+            engineId: engine.id,
+            engineSlug: engine.slug,
+            engineStatus: engine.status,
+            meetsTier,
+            selectedEngineId,
+            isOwnedByUser: isOwnedByMe,
+            trialActive,
+            graceActive,
+          });
           const isSelected = engine.id === selectedEngineId;
           // Owner attribution: every engine gets a chip. Platform-owned
           // (no partner_id) → "by Nexo AI" in a muted style. Partner-owned
@@ -272,8 +295,9 @@ export default async function MyEnginesPage({
               <div className="cc-mod-meta">
                 <span>{ENV_LABEL[engine.env]}</span>
                 <span>{engine.region}</span>
-                {/* Tier-required hint, only when relevant */}
-                {engine.tierRequired !== 'FREE' && (
+                {/* Tier-required hint, only when relevant (suppressed when the
+                    engine is already live for the user, e.g. NexoClip trial). */}
+                {engine.tierRequired !== 'FREE' && !isLive && (
                   <span
                     style={{
                       color: meetsTier ? 'var(--cc-txt-4)' : 'var(--cc-amber)',
@@ -307,7 +331,7 @@ export default async function MyEnginesPage({
                   <Link
                     href={`/app/engines/${engine.slug}` as Route}
                     style={{
-                      color: meetsTier ? 'var(--cc-green)' : 'var(--cc-txt-2)',
+                      color: meetsTier || isLive ? 'var(--cc-green)' : 'var(--cc-txt-2)',
                       fontSize: 12.5,
                       fontWeight: 600,
                       fontFamily: 'inherit',
@@ -337,7 +361,7 @@ export default async function MyEnginesPage({
                     isCurrentlySelected={isSelected}
                   />
                 )}
-                {tier === 'FREE' && engine.status === 'active' && (
+                {tier === 'FREE' && engine.status === 'active' && !isLive && (
                   <span
                     style={{
                       fontSize: 11,
@@ -348,6 +372,17 @@ export default async function MyEnginesPage({
                     🔒 Live → Pro
                   </span>
                 )}
+                {tier === 'FREE' && engine.status === 'active' && isLive && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--cc-cyan)',
+                      fontFamily: 'var(--cc-mono), monospace',
+                    }}
+                  >
+                    ✦ Prueba en vivo
+                  </span>
+                )}
                 {tier === 'PRO' && engine.status === 'active' && !meetsTier && (
                   <span
                     style={{
@@ -356,7 +391,7 @@ export default async function MyEnginesPage({
                       fontFamily: 'var(--cc-mono), monospace',
                     }}
                   >
-                    🔒 All-Access
+                    🔒 VIP
                   </span>
                 )}
               </div>

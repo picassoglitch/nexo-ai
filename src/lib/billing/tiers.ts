@@ -6,7 +6,7 @@ import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
 /**
  * ROLE OVERRIDES TIER.
- * SUPER_ADMIN and ADMIN bypass all tier restrictions — they get ALL_ACCESS
+ * SUPER_ADMIN and ADMIN bypass all tier restrictions — they get VIP
  * capabilities regardless of what's stored in profiles.tier. The stored tier
  * is still shown on /app/subscription for billing transparency, but every
  * other surface (quotas, live-bot badges, paywalls) reads effectiveTier().
@@ -16,7 +16,7 @@ export function isAdminRole(role: UserRole): boolean {
 }
 
 export function effectiveTier(role: UserRole, storedTier: SubscriptionTier): SubscriptionTier {
-  if (isAdminRole(role)) return 'ALL_ACCESS';
+  if (isAdminRole(role)) return 'VIP';
   return storedTier;
 }
 
@@ -29,11 +29,25 @@ export function isPartnerTier(tier: SubscriptionTier): boolean {
   return tier === 'PARTNER';
 }
 
+/** NexoClip's max export resolution per tier. Ordered ascending so callers
+ *  can compare with EXPORT_QUALITY_RANK below. */
+export type ClipExportQuality = 'sd' | 'hd' | '4k';
+
+export const EXPORT_QUALITY_RANK: Record<ClipExportQuality, number> = {
+  sd: 0,
+  hd: 1,
+  '4k': 2,
+};
+
+/** Which community space the tier unlocks. */
+export type CommunityAccess = 'free' | 'premium';
+
 export interface TierCapabilities {
+  // ── Nexo AI ───────────────────────────────────────────────────────────
   /** How many engines the user can run in LIVE execution (not simulation).
    *  FREE = 0 (all simulation only).
    *  PRO = 1 (the engine they pick via profiles.selected_engine_id).
-   *  ALL_ACCESS = Infinity (every engine in their org is live). */
+   *  VIP = Infinity (every engine in their org is live). */
   liveEnginesCount: number;
   /** Monthly job execution cap. */
   jobsPerMonth: number;
@@ -51,7 +65,28 @@ export interface TierCapabilities {
   hasPrioritySupport: boolean;
   /** Whether the user sees alpha / preview features. */
   hasEarlyAccess: boolean;
-  /** Display labels. */
+  /** Which community space this tier unlocks (free vs premium). */
+  community: CommunityAccess;
+
+  // ── NexoClip ──────────────────────────────────────────────────────────
+  // These travel to NexoClip via the SSO tier string; NexoClip enforces them
+  // on its side keyed off the same tier. Modeling them here keeps ONE source
+  // of truth so the two products' plans stay in harmony — the /app paywalls,
+  // the marketing cards, and NexoClip's gates all read the same ladder.
+  /** Whether exported clips carry the "NexoClip" watermark. */
+  clipWatermark: boolean;
+  /** VOD retention window in days before clips are pruned. */
+  clipVodRetentionDays: number;
+  /** Live streams NexoClip allows per month (Infinity = uncapped). */
+  clipStreamsPerMonth: number;
+  /** Highest export resolution NexoClip will render. */
+  clipExportMaxQuality: ClipExportQuality;
+  /** Whether clips can auto-publish (false = manual download only). */
+  clipAutoPublish: boolean;
+  /** How many brand kits NexoClip stores (Infinity = uncapped). */
+  clipBrandKits: number;
+
+  // ── Display ───────────────────────────────────────────────────────────
   label: string;
   price: string;
   per: string;
@@ -68,20 +103,39 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     hasAdvancedAnalytics: false,
     hasPrioritySupport: false,
     hasEarlyAccess: false,
+    community: 'free',
+    // NexoClip Free: watermarked clips, short VOD window, manual download only.
+    clipWatermark: true,
+    clipVodRetentionDays: 7,
+    clipStreamsPerMonth: 0,
+    clipExportMaxQuality: 'sd',
+    clipAutoPublish: false,
+    clipBrandKits: 0,
     label: 'Free',
     price: '$0',
     per: 'siempre',
   },
   PRO: {
     liveEnginesCount: 1,
+    // 1,000,000 tokens/month, regenerated on the 1st (see lib/usage/tokens.ts).
     jobsPerMonth: 2_000,
-    tokensPerMonth: 2_000_000,
+    tokensPerMonth: 1_000_000,
     storageMB: 5_000,
     activeStreams: 1,
     historyDays: 90,
     hasAdvancedAnalytics: true,
     hasPrioritySupport: false,
     hasEarlyAccess: false,
+    community: 'premium',
+    // NexoClip Pro ("el streamer"): no watermark, ~12 streams/mo, HD-only
+    // export, auto-publish, one brand kit. Out of tokens before month end →
+    // prompted to buy a top-up pack (TOKEN_PACKS in lib/payments/pricing.ts).
+    clipWatermark: false,
+    clipVodRetentionDays: 90,
+    clipStreamsPerMonth: 12,
+    clipExportMaxQuality: 'hd',
+    clipAutoPublish: true,
+    clipBrandKits: 1,
     label: 'Pro',
     price: 'MXN $749',
     per: 'mes',
@@ -91,32 +145,48 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
   // effective live count is 2: their owned + the slot they pick. We keep
   // liveEnginesCount = 1 here because the value drives the *selectable* slot
   // count on /app surfaces — partners pick 1 like PRO does. The owned engine
-  // is bonus capacity outside the slot mechanic.
+  // is bonus capacity outside the slot mechanic. NexoClip caps mirror PRO.
   PARTNER: {
     liveEnginesCount: 1,
     jobsPerMonth: 2_000,
-    tokensPerMonth: 2_000_000,
+    tokensPerMonth: 1_000_000,
     storageMB: 5_000,
     activeStreams: 1,
     historyDays: 180,
     hasAdvancedAnalytics: true,
     hasPrioritySupport: true,
     hasEarlyAccess: true,
+    community: 'premium',
+    clipWatermark: false,
+    clipVodRetentionDays: 90,
+    clipStreamsPerMonth: 12,
+    clipExportMaxQuality: 'hd',
+    clipAutoPublish: true,
+    clipBrandKits: 1,
     label: 'Partner',
     price: 'Programa',
     per: '',
   },
-  ALL_ACCESS: {
+  // VIP (was "All-Access"): every engine live, 5× PRO tokens, and the full
+  // NexoClip feature set unlocked — no caps on streams, brand kits, or export.
+  VIP: {
     liveEnginesCount: Infinity,
     jobsPerMonth: 20_000,
-    tokensPerMonth: 20_000_000,
+    tokensPerMonth: 5_000_000,
     storageMB: 50_000,
     activeStreams: 5,
     historyDays: 365,
     hasAdvancedAnalytics: true,
     hasPrioritySupport: true,
     hasEarlyAccess: true,
-    label: 'All-Access',
+    community: 'premium',
+    clipWatermark: false,
+    clipVodRetentionDays: 365,
+    clipStreamsPerMonth: Infinity,
+    clipExportMaxQuality: '4k',
+    clipAutoPublish: true,
+    clipBrandKits: Infinity,
+    label: 'VIP',
     price: 'MXN $2,499',
     per: 'mes',
   },
@@ -130,10 +200,10 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
  *   is always live regardless of selection. Callers must pass `isOwnedByUser`
  *   so this function stays a pure predicate; the caller is responsible for
  *   joining engines.owner_user_id against the current user id.
- * - ALL_ACCESS: always live.
+ * - VIP: always live.
  *
- * Tier-required check is separate — even an ALL_ACCESS user can't activate
- * an engine marked tier_required = ALL_ACCESS if their effective tier is lower.
+ * Tier-required check is separate — even a VIP user can't activate
+ * an engine marked tier_required = VIP if their effective tier is lower.
  * Callers should combine: engineCanRunLive(...) && tier >= engine.tierRequired.
  */
 export function engineCanRunLive(
@@ -156,10 +226,99 @@ export function engineCanRunLive(
 // Back-compat alias — remove after all call sites migrated.
 export { engineCanRunLive as botCanRunLive };
 
+// ── NexoClip 7-day trial ───────────────────────────────────────────────────
+// First-time users get NexoClip running LIVE (Pro-level) for 7 days, even on
+// FREE. The trial grants live access to NexoClip ONLY — every other engine
+// stays gated by tier. Backed by profiles.nexoclip_trial_started_at (set when
+// the user accepts the welcome banner, or by an admin from /dashboard/team).
+//
+// These helpers are pure: callers pass `nowMs` (Date.now()) so the logic stays
+// testable and SSR-deterministic within a single render.
+
+/** The engine slug the trial unlocks. */
+export const NEXOCLIP_TRIAL_SLUG = 'nexoclip';
+/** Trial length in days. */
+export const NEXOCLIP_TRIAL_DAYS = 7;
+const TRIAL_MS = NEXOCLIP_TRIAL_DAYS * 24 * 60 * 60 * 1000;
+
+/** Is the NexoClip trial currently active for a profile with this start time? */
+export function isNexoclipTrialActive(startedAtIso: string | null, nowMs: number): boolean {
+  if (!startedAtIso) return false;
+  const startMs = Date.parse(startedAtIso);
+  if (Number.isNaN(startMs)) return false;
+  return nowMs < startMs + TRIAL_MS;
+}
+
+/** Whole days left on the trial (rounded up), clamped to 0..NEXOCLIP_TRIAL_DAYS.
+ *  0 when there's no active trial. */
+export function nexoclipTrialDaysLeft(startedAtIso: string | null, nowMs: number): number {
+  if (!startedAtIso) return 0;
+  const startMs = Date.parse(startedAtIso);
+  if (Number.isNaN(startMs)) return 0;
+  const remainingMs = startMs + TRIAL_MS - nowMs;
+  if (remainingMs <= 0) return 0;
+  return Math.min(NEXOCLIP_TRIAL_DAYS, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+}
+
+/**
+ * Post-trial grace: the 7-day clock has run out, but the user still has tokens
+ * left — so we keep NexoClip live until those tokens are gone ("we know your
+ * time ran out, but we like you"). True only once the trial window has CLOSED
+ * (an active trial isn't grace) and tokens remain. Drives both the live gate
+ * and the grace banner on /app.
+ *
+ * `tokensRemaining` is the user's combined monthly + bonus balance
+ * (TokenBalance.remaining). Admins/unlimited never hit this path — they meet
+ * the tier outright.
+ */
+export function isNexoclipGraceActive(
+  startedAtIso: string | null,
+  nowMs: number,
+  tokensRemaining: number,
+): boolean {
+  if (!startedAtIso) return false;
+  if (isNexoclipTrialActive(startedAtIso, nowMs)) return false; // still in the trial proper
+  return tokensRemaining > 0;
+}
+
+/**
+ * Whether `engineSlug` runs LIVE for a user, folding in the NexoClip trial on
+ * top of the normal tier/selection/ownership rules. Centralizes the formula so
+ * the home page, engines list, and engine detail page all agree.
+ *
+ * The trial short-circuits BOTH the tier-required gate and the selection gate —
+ * a FREE trial user sees NexoClip (tier_required = PRO) as live without a
+ * selection. Pass `meetsTier` (caller already computes tier_required vs tier),
+ * `trialActive` (isNexoclipTrialActive), and `graceActive` (isNexoclipGraceActive,
+ * the post-trial "still has tokens" window). Trial and grace behave identically
+ * for the live gate — both keep NexoClip running; they differ only in the banner
+ * the UI shows.
+ */
+export function engineIsLiveForUser(opts: {
+  tier: SubscriptionTier;
+  engineId: string;
+  engineSlug: string;
+  engineStatus: string;
+  meetsTier: boolean;
+  selectedEngineId: string | null;
+  isOwnedByUser?: boolean;
+  trialActive?: boolean;
+  graceActive?: boolean;
+}): boolean {
+  if (opts.engineStatus !== 'active') return false;
+  const clipUnlocked =
+    (!!opts.trialActive || !!opts.graceActive) && opts.engineSlug === NEXOCLIP_TRIAL_SLUG;
+  const meetsTierOrClip = opts.meetsTier || clipUnlocked;
+  if (!meetsTierOrClip) return false;
+  return (
+    clipUnlocked ||
+    engineCanRunLive(opts.tier, opts.engineId, opts.selectedEngineId, opts.isOwnedByUser ?? false)
+  );
+}
+
 /** Pretty tier name for sidebar pills + headings. */
 export function tierLabelShort(tier: SubscriptionTier): string {
-  if (tier === 'ALL_ACCESS') return 'ALL-ACCESS';
-  return tier; // 'FREE' | 'PRO' | 'PARTNER'
+  return tier; // 'FREE' | 'PRO' | 'PARTNER' | 'VIP'
 }
 
 /** Quotas formatted as the UI list expects them. */

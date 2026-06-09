@@ -19,8 +19,8 @@ const TIER_DESTINATIONS: Record<'free' | 'pro' | 'vip', string> = {
   // Pro upgrade — billing page handles MP checkout. Anon goes through
   // /sign-in?next=/app/billing first (middleware bounces /app/billing).
   pro: '/app/billing?upgrade=PRO',
-  // VIP = All-Access tier in our backend taxonomy.
-  vip: '/app/billing?upgrade=ALL_ACCESS',
+  // VIP = VIP tier in our backend taxonomy.
+  vip: '/app/billing?upgrade=VIP',
 };
 
 export function EarnWorld() {

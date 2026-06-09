@@ -15,7 +15,7 @@ export interface ProvisionInput {
   fullName: string | null;
   /** Effective tier (admin override applied). Engines that have their own
    *  tier concept (NexoClip's watermark, etc.) write this on the engine-side
-   *  tenant record. Always pass effective, never stored — admin = ALL_ACCESS
+   *  tenant record. Always pass effective, never stored — admin = VIP
    *  regardless of profiles.tier. */
   effectiveTier: SubscriptionTier;
   /** The Engine row (so the integration can read its own admin_api_base, etc.). */
@@ -42,7 +42,7 @@ export interface LaunchTokenInput {
   userId: string;
   email: string;
   /** Effective tier, signed into the SSO token so the engine can sync its
-   *  own tier column on login. Carries admin override (admin = ALL_ACCESS). */
+   *  own tier column on login. Carries admin override (admin = VIP). */
   effectiveTier: SubscriptionTier;
   /** The provisioned external user id from engine_subscriptions row. May be
    *  null if provisioning never ran — integration should bail in that case. */
@@ -77,7 +77,7 @@ export interface EngineIntegration {
   /** Matches the `slug` column in the engines table. */
   slug: string;
 
-  /** Called when a user activates the engine (Pro selection, ALL_ACCESS seed,
+  /** Called when a user activates the engine (Pro selection, VIP seed,
    *  admin grant, or paid MP upgrade). Should be idempotent — if the user is
    *  already provisioned in the external engine, return the existing identity
    *  rather than creating a duplicate. */
@@ -93,6 +93,6 @@ export interface EngineIntegration {
   pause(input: PauseInput): Promise<PauseResult>;
 
   /** Resume a previously-paused tenant. Called when the user activates this
-   *  engine again (PRO swap back, or ALL_ACCESS upgrade after pause). */
+   *  engine again (PRO swap back, or VIP upgrade after pause). */
   resume(input: PauseInput): Promise<PauseResult>;
 }

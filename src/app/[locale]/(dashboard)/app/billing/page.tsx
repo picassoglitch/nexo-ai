@@ -23,7 +23,7 @@ const TIER_LABEL: Record<SubscriptionTier, string> = {
   FREE: 'Free',
   PRO: 'Pro',
   PARTNER: 'Partner',
-  ALL_ACCESS: 'All-Access',
+  VIP: 'VIP',
 };
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -157,7 +157,7 @@ export default async function WorkspaceBillingPage({
                 display: 'inline-block',
               }}
             >
-              Al activar Pro o All-Access desde /app/subscription, tu pago aparece aquí.
+              Al activar Pro o VIP desde /app/subscription, tu pago aparece aquí.
             </span>
           </div>
         ) : (

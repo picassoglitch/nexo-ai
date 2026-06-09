@@ -7,7 +7,7 @@
 //   2. an outbound call to the engine's pause API so the engine itself stops
 //      running jobs / spending tokens / publishing for this tenant
 //
-// ALL_ACCESS subscribers are exempt — they pay for parallel execution and
+// VIP subscribers are exempt — they pay for parallel execution and
 // should never be paused by another engine becoming active.
 //
 // Failure mode: if the engine pause API fails, we still leave the DB in

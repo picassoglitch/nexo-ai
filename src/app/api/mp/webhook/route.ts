@@ -33,7 +33,7 @@ import type { SubscriptionTier } from '@/lib/auth/session';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'ALL_ACCESS'];
+const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'VIP'];
 
 /**
  * MP signs the webhook with HMAC-SHA256 over the string:
@@ -244,10 +244,10 @@ export async function POST(req: Request) {
       .from('profiles')
       .update({ tier })
       .eq('id', userId);
-    // Auto-provision engine access on ALL_ACCESS upgrades. PRO upgrades wait
+    // Auto-provision engine access on VIP upgrades. PRO upgrades wait
     // until the user picks their live engine (setSelectedLiveEngine handles
     // provisioning there).
-    if (!tierErr && tier === 'ALL_ACCESS') {
+    if (!tierErr && tier === 'VIP') {
       await provisionAllAccessEngines(userId, 'mp_payment');
     }
     if (tierErr) {

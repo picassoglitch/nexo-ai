@@ -15,7 +15,7 @@
 //
 // Revenue source for now: payments rows from this period filtered to users
 // who have an active engine_subscription on THIS engine. Coarse — a user
-// who pays for All-Access generates payment rows that get split N ways
+// who pays for VIP generates payment rows that get split N ways
 // across the engines they use — but matches the existing /dashboard/overview
 // approximation and is honest about scale (we have ~0 paying users today,
 // fancy attribution is premature).

@@ -6,7 +6,7 @@ export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'OPERATOR' | 'EDITOR' | 'VIEWER
 // PARTNER landed in migration 0014 as a 4th tier. Same access as PRO plus
 // one always-on owned engine — see TIER_CAPS.PARTNER in src/lib/billing/tiers.ts
 // and the engines.owner_user_id column for the ownership pointer.
-export type SubscriptionTier = 'FREE' | 'PRO' | 'PARTNER' | 'ALL_ACCESS';
+export type SubscriptionTier = 'FREE' | 'PRO' | 'PARTNER' | 'VIP';
 
 const ROLE_TIER: Record<UserRole, number> = {
   SUPER_ADMIN: 100,
@@ -35,6 +35,13 @@ export interface SessionUser {
   /** Which engine the user has chosen to run LIVE (PRO tier only).
    *  Backed by profiles.selected_engine_id (was selected_bot_id pre-migration 0010). */
   selectedEngineId: string | null;
+  /** Start of the NexoClip 7-day live trial, or null. Backed by
+   *  profiles.nexoclip_trial_started_at (migration 0025). Read by the
+   *  live-execution gating — see isNexoclipTrialActive in lib/billing/tiers. */
+  nexoclipTrialStartedAt: string | null;
+  /** When the user accepted the first-time welcome banner, or null (banner
+   *  still pending). Backed by profiles.welcome_gift_claimed_at (migration 0025). */
+  welcomeGiftClaimedAt: string | null;
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -56,7 +63,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, tier, org_id, selected_engine_id')
+    .select(
+      'role, tier, org_id, selected_engine_id, nexoclip_trial_started_at, welcome_gift_claimed_at',
+    )
     .eq('id', user.id)
     .maybeSingle();
   const storedRole = (profile?.role as UserRole | undefined) ?? 'VIEWER';
@@ -68,6 +77,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     tier,
     orgId: (profile?.org_id as string | null) ?? null,
     selectedEngineId: (profile?.selected_engine_id as string | null) ?? null,
+    nexoclipTrialStartedAt: (profile?.nexoclip_trial_started_at as string | null) ?? null,
+    welcomeGiftClaimedAt: (profile?.welcome_gift_claimed_at as string | null) ?? null,
   };
 }
 

@@ -202,7 +202,7 @@ Te respondemos en menos de 24 horas hábiles.
 // PAYMENT SUCCESS — sent from MP webhook when tier activates
 // ──────────────────────────────────────────────────────────────────────────
 export function paymentSuccessTemplate(opts: {
-  tier: string; // 'Pro' | 'All-Access' (pretty label)
+  tier: string; // 'Pro' | 'VIP' (pretty label)
   amountMajor: string; // e.g. '749.00'
   currency: string; // 'MXN'
   paymentId: string;

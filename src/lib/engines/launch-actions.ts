@@ -82,7 +82,7 @@ export async function getEngineLaunchUrl(engineId: string): Promise<LaunchResult
   } as Parameters<typeof integration.buildLaunchUrl>[0]['engine'];
 
   // Effective tier — admin override applied. Admins always present as
-  // ALL_ACCESS to the engine, even if profiles.tier says FREE.
+  // VIP to the engine, even if profiles.tier says FREE.
   const tier = computeEffectiveTier(session.role, session.tier);
 
   const result = await integration.buildLaunchUrl({

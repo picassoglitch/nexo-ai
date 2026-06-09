@@ -9,7 +9,7 @@ import { getSessionUser, type SubscriptionTier } from './session';
 // PARTNER is admin-grant only — there's no MP checkout for it, so the
 // VALID_TIERS allowlist DOES include it (admins can promote) while the
 // self-change branch below blocks non-admins from picking it.
-const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'PARTNER', 'ALL_ACCESS'];
+const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'PARTNER', 'VIP'];
 
 interface ChangeResult {
   ok: boolean;
@@ -89,14 +89,14 @@ export async function changeUserTier(
   });
 
   // Auto-provision engine subscriptions on tier upgrades:
-  //   - ALL_ACCESS: seed access to every currently-active engine in the org.
+  //   - VIP: seed access to every currently-active engine in the org.
   //   - PRO: nothing here — provisioning happens when the user picks their
   //     live engine via setSelectedLiveEngine. (Until they pick, they have
   //     no engine access — by design.)
   //   - FREE: no provisioning. We DON'T deactivate existing rows on a
   //     downgrade so re-upgrades are seamless; deactivation is a separate
   //     manual flow.
-  if (newTier === 'ALL_ACCESS') {
+  if (newTier === 'VIP') {
     await provisionAllAccessEngines(targetUserId, isAdmin ? 'admin_grant' : 'mp_payment');
   }
 

@@ -71,7 +71,7 @@ export const NAV: NavGroup[] = [
 ];
 
 // ============================================================
-// Subscriber workspace navigation — Free / Pro / All-Access tier UI.
+// Subscriber workspace navigation — Free / Pro / VIP tier UI.
 // Mounted at /app/*. Distinct from the admin /dashboard sidebar.
 // ============================================================
 export const SUBSCRIBER_NAV: NavGroup[] = [

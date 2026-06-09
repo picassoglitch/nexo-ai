@@ -8,7 +8,7 @@
 // Used by NexoClip's "Transmitir con NexoOBS" button (→ /auth/launch/nexoobs)
 // and NexoOBS's "Get Clips" button (→ /auth/launch/nexoclip).
 //
-// Gated to ALL_ACCESS: the cross-engine streaming↔clips feature is a
+// Gated to VIP: the cross-engine streaming↔clips feature is a
 // full-access perk. Lower tiers get redirected to the engine's upgrade page.
 //
 // Under /auth/* so it's excluded from the i18n middleware matcher (no locale
@@ -37,7 +37,7 @@ export async function GET(
 
   // Full-access gate.
   const tier = effectiveTier(session.role, session.tier);
-  if (tier !== 'ALL_ACCESS') {
+  if (tier !== 'VIP') {
     return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));
   }
 

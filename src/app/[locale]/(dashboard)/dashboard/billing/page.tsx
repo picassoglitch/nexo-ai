@@ -14,7 +14,7 @@ export const metadata = { title: 'Billing · P&L' };
 interface PaymentRow {
   id: string;
   user_id: string;
-  tier: 'FREE' | 'PRO' | 'ALL_ACCESS';
+  tier: 'FREE' | 'PRO' | 'VIP';
   amount_cents: number;
   currency: string;
   status: string;
@@ -73,12 +73,12 @@ export default async function AdminBillingPage({
 
   // ── Subscriber breakdown ─────────────────────────────────────────────
   // Count UNIQUE users with approved payments this month per tier.
-  const payingUsers = new Map<string, 'PRO' | 'ALL_ACCESS'>();
+  const payingUsers = new Map<string, 'PRO' | 'VIP'>();
   for (const p of approvedThisMonth) {
     if (p.tier !== 'FREE') payingUsers.set(p.user_id, p.tier);
   }
   const proCount = Array.from(payingUsers.values()).filter((t) => t === 'PRO').length;
-  const allAccessCount = Array.from(payingUsers.values()).filter((t) => t === 'ALL_ACCESS').length;
+  const allAccessCount = Array.from(payingUsers.values()).filter((t) => t === 'VIP').length;
 
   // ── Operating costs ──────────────────────────────────────────────────
   // Calculate dynamic MP fees row (replaces the seed 0 from the config file).
@@ -133,7 +133,7 @@ export default async function AdminBillingPage({
           <div className="cc-mod-stat-l">Subscribers pagantes</div>
           <div className="cc-mod-stat-v">{payingUsers.size}</div>
           <div className="cc-mod-stat-sub">
-            {proCount} Pro · {allAccessCount} All-Access
+            {proCount} Pro · {allAccessCount} VIP
           </div>
         </div>
       </div>

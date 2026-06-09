@@ -6,9 +6,12 @@ import { Link } from '@/i18n/routing';
 import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
 import { ENV_LABEL } from '@/lib/data/types';
+import { getTokenBalance } from '@/lib/usage/tokens';
 import {
-  engineCanRunLive,
-  TIER_CAPS,
+  engineIsLiveForUser,
+  isNexoclipTrialActive,
+  isNexoclipGraceActive,
+  NEXOCLIP_TRIAL_SLUG,
   effectiveTier,
   isAdminRole,
 } from '@/lib/billing/tiers';
@@ -51,9 +54,9 @@ const TIER_LABEL_SHORT = {
   FREE: 'Free',
   PRO: 'Pro',
   PARTNER: 'Partner',
-  ALL_ACCESS: 'All-Access',
+  VIP: 'VIP',
 } as const;
-const TIER_ORDER = { FREE: 0, PRO: 1, PARTNER: 1, ALL_ACCESS: 2 } as const;
+const TIER_ORDER = { FREE: 0, PRO: 1, PARTNER: 1, VIP: 2 } as const;
 
 export default async function EngineWorkspacePage({
   params,
@@ -79,10 +82,34 @@ export default async function EngineWorkspacePage({
   // always-live (additive to any selected_engine_id they may also have).
   const isOwnedByMe =
     engine.ownerUserId !== null && engine.ownerUserId === session.user.id;
-  const isLive =
-    engine.status === 'active' &&
-    meetsTier &&
-    engineCanRunLive(tier, engine.id, session.selectedEngineId, isOwnedByMe);
+  // NexoClip 7-day trial grants live access regardless of tier — it bypasses
+  // both the tier-required gate and the selection gate (NexoClip only). After
+  // the trial, FREE users keep NexoClip live in "grace" while tokens remain.
+  const nowMs = new Date().getTime();
+  const trialActive = isNexoclipTrialActive(session.nexoclipTrialStartedAt, nowMs);
+  const clipTokensRemaining =
+    tier === 'FREE' && engine.slug === NEXOCLIP_TRIAL_SLUG
+      ? await getTokenBalance(session.user.id)
+          .then((b) => (b.unlimited ? 0 : b.remaining))
+          .catch(() => 0)
+      : 0;
+  const graceActive =
+    tier === 'FREE' &&
+    isNexoclipGraceActive(session.nexoclipTrialStartedAt, nowMs, clipTokensRemaining);
+  // NexoClip is "unlocked" (live, bypassing tier/selection) under either the
+  // trial or the post-trial grace window.
+  const clipUnlocked = (trialActive || graceActive) && engine.slug === NEXOCLIP_TRIAL_SLUG;
+  const isLive = engineIsLiveForUser({
+    tier,
+    engineId: engine.id,
+    engineSlug: engine.slug,
+    engineStatus: engine.status,
+    meetsTier,
+    selectedEngineId: session.selectedEngineId,
+    isOwnedByUser: isOwnedByMe,
+    trialActive,
+    graceActive,
+  });
   const isComingSoon = engine.status === 'coming_soon';
   // Every engine gets a chip. Platform-owned (no partner_id) → "by Nexo AI"
   // muted; partner-owned → "by [name]" purple.
@@ -93,7 +120,7 @@ export default async function EngineWorkspacePage({
       engine.ownerEmail?.split('@')[0] ||
       'Partner';
 
-  // Lazy admin provisioning: admins have effective ALL_ACCESS via role
+  // Lazy admin provisioning: admins have effective VIP via role
   // override, so they should auto-have engine access. If migration 0011's
   // backfill missed them (or a new engine was added after), create the row now.
   if (isAdmin && engine.status === 'active') {
@@ -238,7 +265,7 @@ export default async function EngineWorkspacePage({
       {/* Tier-state CTA panel */}
       {isComingSoon ? (
         <ComingSoonPanel engineName={engine.name} />
-      ) : !meetsTier ? (
+      ) : !meetsTier && !clipUnlocked ? (
         <UpgradeGatePanel engineName={engine.name} tierRequired={engine.tierRequired} />
       ) : isLive ? (
         <LaunchPanel
@@ -259,7 +286,7 @@ export default async function EngineWorkspacePage({
       )}
 
       {/* "Tu acceso" — engine subscription record. Shows when the user has
-          a row in engine_subscriptions (PRO live selection, ALL_ACCESS seed,
+          a row in engine_subscriptions (PRO live selection, VIP seed,
           admin grant, or paid MP upgrade). Coming-soon engines never have access. */}
       {access && !isComingSoon && (
         <AccessPanel
@@ -379,7 +406,7 @@ function LaunchPanel({
           {isLive
             ? 'Tus trabajos cuentan contra tu cuota mensual y los resultados afectan tus integraciones externas.'
             : isAdmin
-              ? 'Como admin estás viendo lo que vería un subscriber Free. Para correr en vivo, usa la lógica normal de PRO/All-Access.'
+              ? 'Como admin estás viendo lo que vería un subscriber Free. Para correr en vivo, usa la lógica normal de PRO/VIP.'
               : tier === 'FREE'
                 ? 'En Free todos los engines corren con datos de prueba — sin riesgo, sin costo. Sube a Pro para ejecutar en vivo.'
                 : 'Este engine no es tu selección activa en vivo. Cámbiala desde /app/engines si quieres correrlo en vivo.'}
@@ -513,7 +540,7 @@ function AccessPanel({
   // Explain each `source` value in user-friendly language.
   const SOURCE_LABEL: Record<string, string> = {
     pro_selection: 'al seleccionar el engine como tu live bot',
-    all_access_seed: 'al activar tu plan All-Access',
+    all_access_seed: 'al activar tu plan VIP',
     admin_grant: 'concedido por admin',
     mp_payment: 'al confirmar tu pago en Mercado Pago',
     manual: 'manualmente',

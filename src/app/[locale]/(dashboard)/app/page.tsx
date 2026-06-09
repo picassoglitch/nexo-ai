@@ -3,9 +3,23 @@ import type { Route } from 'next';
 import { Link } from '@/i18n/routing';
 import { getSessionUser } from '@/lib/auth/session';
 import { listEngines } from '@/lib/data/engines';
-import { TIER_CAPS, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
+import { getTokenBalance } from '@/lib/usage/tokens';
+import {
+  TIER_CAPS,
+  effectiveTier,
+  isAdminRole,
+  engineIsLiveForUser,
+  isNexoclipTrialActive,
+  isNexoclipGraceActive,
+  nexoclipTrialDaysLeft,
+  NEXOCLIP_TRIAL_SLUG,
+} from '@/lib/billing/tiers';
+import { WelcomeGiftBanner } from '@/components/workspace/welcome-gift-banner';
+import { NexoclipGraceBanner } from '@/components/workspace/nexoclip-grace-banner';
 
 export const metadata = { title: 'Tu espacio' };
+
+const TIER_ORDER = { FREE: 0, PRO: 1, PARTNER: 1, VIP: 2 } as const;
 
 export default async function WorkspaceHomePage({
   params,
@@ -28,28 +42,116 @@ export default async function WorkspaceHomePage({
   const isAdmin = isAdminRole(role);
   const caps = TIER_CAPS[tier];
 
-  // Find their live engine (for PRO) so the landing can spotlight it.
-  let selectedEngineName: string | null = null;
-  if (tier === 'PRO' && session?.selectedEngineId) {
-    const engines = await listEngines();
-    selectedEngineName =
-      engines.find((e) => e.id === session.selectedEngineId)?.name ?? null;
-  }
+  // Real token balance + engine catalog. Both tolerate failure (balance falls
+  // back to a zeroed shape; engines to an empty list) so the home never 500s.
+  const [balance, engines] = await Promise.all([
+    session
+      ? getTokenBalance(session.user.id).catch(() => null)
+      : Promise.resolve(null),
+    listEngines().catch(() => []),
+  ]);
+
+  // NexoClip trial state (drives the live count + engine badges + spotlight).
+  const nowMs = new Date().getTime();
+  const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
+  const trialDaysLeft = nexoclipTrialDaysLeft(session?.nexoclipTrialStartedAt ?? null, nowMs);
+  // Post-trial grace: trial clock ran out but the FREE user still has tokens —
+  // NexoClip stays live until they're spent. Only meaningful for FREE (PRO+ and
+  // admins already meet the tier, and their balance is unlimited).
+  const clipTokensRemaining = balance && !balance.unlimited ? balance.remaining : 0;
+  const graceActive =
+    tier === 'FREE' &&
+    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipTokensRemaining);
+
+  // Per-engine view models — single source for live status across the cards
+  // and the "Engines en vivo" count.
+  const engineViews = engines
+    .filter((e) => e.status !== 'deprecated')
+    .map((engine) => {
+      const meetsTier = TIER_ORDER[tier] >= TIER_ORDER[engine.tierRequired];
+      const isOwnedByMe =
+        engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
+      const isTrial = trialActive && engine.slug === NEXOCLIP_TRIAL_SLUG;
+      const isLive = engineIsLiveForUser({
+        tier,
+        engineId: engine.id,
+        engineSlug: engine.slug,
+        engineStatus: engine.status,
+        meetsTier,
+        selectedEngineId: session?.selectedEngineId ?? null,
+        isOwnedByUser: isOwnedByMe,
+        trialActive,
+        graceActive,
+      });
+      const isSelected = engine.id === session?.selectedEngineId;
+      return { engine, isLive, isTrial, isSelected };
+    });
+
+  // Live count for the stat card. Unlimited tiers (admin / VIP) show ∞.
+  const liveCount = engineViews.filter((v) => v.isLive).length;
+  const unlimitedLive = caps.liveEnginesCount === Infinity;
+  const liveEngineNames = engineViews.filter((v) => v.isLive).map((v) => v.engine.name);
+  const liveSub = trialActive
+    ? `NexoClip · prueba ${trialDaysLeft}d`
+    : unlimitedLive
+      ? 'todos disponibles'
+      : liveEngineNames.length > 0
+        ? `activo: ${liveEngineNames.join(', ')}`
+        : tier === 'FREE'
+          ? 'solo simulación'
+          : 'todavía no elegido';
+
+  // Spotlight engine goes first: the live selection, else the active trial
+  // engine, else the first active engine. Then live ones, then active, then
+  // coming-soon — preserving the catalog's existing order within each bucket.
+  const spotlightId =
+    engineViews.find((v) => v.isSelected && v.isLive)?.engine.id ??
+    engineViews.find((v) => v.isTrial)?.engine.id ??
+    engineViews.find((v) => v.engine.status === 'active')?.engine.id ??
+    null;
+  const orderedViews = [...engineViews].sort((a, b) => {
+    const rank = (v: (typeof engineViews)[number]) =>
+      (v.engine.id === spotlightId ? 0 : 1) * 100 +
+      (v.isLive ? 0 : 1) * 10 +
+      (v.engine.status === 'active' ? 0 : 1);
+    return rank(a) - rank(b);
+  });
+
+  const tokensBig = balance
+    ? balance.unlimited
+      ? '∞'
+      : balance.remaining.toLocaleString('es-MX')
+    : '0';
+  const tokensSub = balance
+    ? balance.unlimited
+      ? 'admin · ilimitado'
+      : `de ${(balance.monthlyAllocation + balance.bonus).toLocaleString('es-MX')} disponibles este mes`
+    : `de ${caps.tokensPerMonth.toLocaleString('es-MX')} este mes`;
 
   const heroSub = isAdmin
     ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los engines, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
-    : tier === 'FREE'
-      ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Explora los engines en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
-      : tier === 'PRO'
-        ? `Estás en <b style="color:var(--cc-green)">Pro</b>${
-            selectedEngineName
-              ? ` — tu slot en vivo lo tiene <b>${selectedEngineName}</b>.`
-              : ' — todavía no elegiste tu engine en vivo. Pasa a Mis engines para activar uno.'
-          }`
-        : `Estás en <b style="color:var(--cc-green)">All-Access</b>. Todos los engines disponibles corren en vivo con los límites más altos.`;
+    : trialActive
+      ? `Tu <b style="color:var(--cc-cyan)">prueba de NexoClip Pro</b> está activa — ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} restantes corriendo en vivo. Explora el resto en simulación.`
+      : tier === 'FREE'
+        ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Explora los engines en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
+        : tier === 'PRO'
+          ? `Estás en <b style="color:var(--cc-green)">Pro</b>${
+              liveEngineNames.length > 0
+                ? ` — tu slot en vivo lo tiene <b>${liveEngineNames[0]}</b>.`
+                : ' — todavía no elegiste tu engine en vivo. Pasa a Mis engines para activar uno.'
+            }`
+          : `Estás en <b style="color:var(--cc-green)">VIP</b>. Todos los engines disponibles corren en vivo con los límites más altos.`;
 
   return (
     <div className="cc-scroll">
+      {/* First-time welcome gift — banner + confetti on accept. Renders nothing
+          once the user has claimed (server passes the claimed flag). */}
+      <WelcomeGiftBanner claimed={session?.welcomeGiftClaimedAt != null} />
+
+      {/* Post-trial grace: NexoClip trial expired but tokens remain — keep them
+          going (and nudge toward Pro). Server-gated on graceActive. */}
+      {graceActive && <NexoclipGraceBanner tokensRemaining={clipTokensRemaining} />}
+
       <div className="cc-mod-section">
         <h2
           style={{
@@ -71,18 +173,8 @@ export default async function WorkspaceHomePage({
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Engines en vivo</div>
-          <div className="cc-mod-stat-v gr">
-            {caps.liveEnginesCount === Infinity ? '∞' : caps.liveEnginesCount}
-          </div>
-          <div className="cc-mod-stat-sub">
-            {tier === 'FREE'
-              ? 'solo simulación'
-              : tier === 'PRO'
-                ? selectedEngineName
-                  ? `activo: ${selectedEngineName}`
-                  : 'todavía no elegido'
-                : 'todos disponibles'}
-          </div>
+          <div className="cc-mod-stat-v gr">{unlimitedLive ? '∞' : liveCount}</div>
+          <div className="cc-mod-stat-sub">{liveSub}</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Trabajos este mes</div>
@@ -91,123 +183,103 @@ export default async function WorkspaceHomePage({
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Tokens IA</div>
-          <div className="cc-mod-stat-v cy">0</div>
-          <div className="cc-mod-stat-sub">
-            de {caps.tokensPerMonth.toLocaleString()} este mes
-          </div>
-        </div>
-        <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Costo IA</div>
-          <div className="cc-mod-stat-v gr">$0.00</div>
-          <div className="cc-mod-stat-sub">incluido en tu plan</div>
+          <div className="cc-mod-stat-v cy">{tokensBig}</div>
+          <div className="cc-mod-stat-sub">{tokensSub}</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">
-          {tier === 'FREE' ? 'Próximos pasos' : 'Tu espacio'}
-        </div>
+        <div className="cc-mod-sl">Tus engines</div>
         <div className="cc-mod-grid cc-mod-grid-2">
-          <Link
-            href={'/app/engines' as Route}
-            className="cc-mod-card"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div className="cc-mod-card-head">
-              <span className="cc-mod-tag">01</span>
-              <span className="cc-mod-badge gr">
-                {tier === 'FREE'
-                  ? 'Empezar aquí'
-                  : tier === 'PRO'
-                    ? 'Tu engine en vivo'
-                    : 'Todo en vivo'}
-              </span>
-            </div>
-            <h4>
-              {tier === 'FREE'
-                ? 'Explora los engines disponibles'
-                : 'Administra tus engines'}
-            </h4>
-            <p>
-              {tier === 'FREE'
-                ? 'NexoClip y NexoStreamManager están en simulación. Pruébalos antes de subir a Pro.'
-                : tier === 'PRO'
-                  ? 'Elige tu engine en vivo, o cambia tu selección cuando quieras.'
-                  : 'Los engines activos corren en vivo. Monitorea desde aquí.'}
-            </p>
-            <div className="cc-mod-meta">
-              <span>→ Ir a mis engines</span>
-            </div>
-          </Link>
+          {orderedViews.map(({ engine, isLive, isTrial }) => {
+            const isComingSoon = engine.status === 'coming_soon';
+            return (
+              <Link
+                key={engine.id}
+                href={`/app/engines/${engine.slug}` as Route}
+                className="cc-mod-card"
+                style={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderColor: isLive ? 'var(--cc-green)' : undefined,
+                  background: isLive ? 'rgba(158,234,58,.04)' : undefined,
+                  opacity: isComingSoon ? 0.78 : 1,
+                }}
+              >
+                <div className="cc-mod-card-head">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 22 }}>{engine.icon}</span>
+                    <div>
+                      <h4 style={{ fontSize: 14 }}>{engine.name}</h4>
+                      <div
+                        style={{
+                          fontFamily: 'var(--cc-mono), monospace',
+                          fontSize: 10.5,
+                          color: 'var(--cc-txt-4)',
+                          marginTop: 2,
+                        }}
+                      >
+                        {engine.type}
+                      </div>
+                    </div>
+                  </div>
+                  {isComingSoon ? (
+                    <span
+                      className="cc-mod-badge"
+                      style={{
+                        color: 'var(--cc-amber)',
+                        borderColor: 'rgba(245,177,61,.3)',
+                        background: 'var(--cc-amber-g)',
+                      }}
+                    >
+                      Próximamente
+                    </span>
+                  ) : isLive ? (
+                    <span className="cc-mod-badge gr">
+                      {isTrial ? `● Prueba ${trialDaysLeft}d` : '● EN VIVO'}
+                    </span>
+                  ) : (
+                    <span className="cc-mod-badge cy">Simulación</span>
+                  )}
+                </div>
+                <p>{engine.description}</p>
+                <div className="cc-mod-meta" style={{ marginTop: 'auto' }}>
+                  <span>{isComingSoon ? '→ Ver detalles' : '→ Abrir engine'}</span>
+                </div>
+              </Link>
+            );
+          })}
 
-          <Link
-            href={'/app/subscription' as Route}
-            className="cc-mod-card"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div className="cc-mod-card-head">
-              <span className="cc-mod-tag">02</span>
-              <span className={`cc-mod-badge ${tier === 'ALL_ACCESS' ? 'gr' : 'cy'}`}>
-                {tier === 'FREE'
-                  ? 'Cuando estés listo'
-                  : tier === 'PRO'
-                    ? 'Tu plan'
-                    : 'Top tier'}
-              </span>
-            </div>
-            <h4>
-              {tier === 'FREE'
-                ? 'Activa ejecución en vivo'
-                : tier === 'PRO'
-                  ? 'Sube a All-Access'
-                  : 'Gestiona tu suscripción'}
-            </h4>
-            <p>
-              {tier === 'FREE'
-                ? `Pro (${TIER_CAPS.PRO.price}/${TIER_CAPS.PRO.per}) para un engine en vivo, o All-Access (${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per}) para todos.`
-                : tier === 'PRO'
-                  ? `${TIER_CAPS.ALL_ACCESS.price}/${TIER_CAPS.ALL_ACCESS.per} para desbloquear todos los engines en vivo y los límites más altos.`
-                  : 'Cambia tu método de pago, descarga facturas, o cancela en cualquier momento.'}
-            </p>
-            <div className="cc-mod-meta">
-              <span>→ {tier === 'ALL_ACCESS' ? 'Ver suscripción' : 'Ver planes'}</span>
-            </div>
-          </Link>
-
-          <Link
-            href={'/app/usage' as Route}
-            className="cc-mod-card"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div className="cc-mod-card-head">
-              <span className="cc-mod-tag">03</span>
-              <span className="cc-mod-tag">Monitoreo</span>
-            </div>
-            <h4>Mide tu uso en vivo</h4>
-            <p>
-              Cuotas, ejecuciones y costo IA — actualizados en tiempo real conforme tus engines
-              trabajan.
-            </p>
-            <div className="cc-mod-meta">
-              <span>→ Ver mi uso</span>
-            </div>
-          </Link>
-
-          <Link
-            href={'/app/settings' as Route}
-            className="cc-mod-card"
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div className="cc-mod-card-head">
-              <span className="cc-mod-tag">04</span>
-              <span className="cc-mod-tag">Cuenta</span>
-            </div>
-            <h4>Asegura tu cuenta</h4>
-            <p>Activa 2FA, revisa tus sesiones, y configura notificaciones del sistema.</p>
-            <div className="cc-mod-meta">
-              <span>→ Abrir ajustes</span>
-            </div>
-          </Link>
+          {/* Upsell card — only for Free users (keeps the path to live execution
+              one click away now that "Próximos pasos" is engine-first). */}
+          {tier === 'FREE' && (
+            <Link
+              href={'/app/subscription' as Route}
+              className="cc-mod-card"
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'flex',
+                flexDirection: 'column',
+                borderStyle: 'dashed',
+              }}
+            >
+              <div className="cc-mod-card-head">
+                <span className="cc-mod-tag">Upgrade</span>
+                <span className="cc-mod-badge cy">Cuando estés listo</span>
+              </div>
+              <h4>Activa ejecución en vivo</h4>
+              <p>
+                Pro ({TIER_CAPS.PRO.price}/{TIER_CAPS.PRO.per}) para un engine en vivo, o VIP (
+                {TIER_CAPS.VIP.price}/{TIER_CAPS.VIP.per}) para todos.
+              </p>
+              <div className="cc-mod-meta" style={{ marginTop: 'auto' }}>
+                <span>→ Ver planes</span>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>

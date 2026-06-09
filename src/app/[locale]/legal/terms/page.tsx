@@ -93,7 +93,7 @@ export default async function TermsPage({
         </li>
         <li>
           <strong>Tier</strong>: nivel de acceso. Tiers actuales:
-          <code>FREE</code>, <code>PRO</code>, <code>ALL_ACCESS</code>. Las
+          <code>FREE</code>, <code>PRO</code>, <code>VIP</code>. Las
           capacidades de cada uno están publicadas en{' '}
           <Link href={'/app/subscription' as Route}>/app/subscription</Link>.
         </li>
@@ -142,7 +142,7 @@ export default async function TermsPage({
           tu elección, cuotas extendidas, soporte por correo.
         </li>
         <li>
-          <strong>All-Access</strong>: $2,499 MXN / mes. Ejecución en vivo de
+          <strong>VIP</strong>: $2,499 MXN / mes. Ejecución en vivo de
           todos los Engines activos, cuotas máximas, soporte prioritario.
         </li>
       </ul>
@@ -202,7 +202,7 @@ export default async function TermsPage({
         </li>
         <li>
           Nexo AI provisiona una cuenta para ti en el Engine y mantiene la
-          sincronización del tier (Free / Pro / All-Access).
+          sincronización del tier (Free / Pro / VIP).
         </li>
         <li>
           La ejecución de jobs (clips, transmisiones, llamadas a IA) la realiza

@@ -16,7 +16,7 @@ export default async function SubscriptionPage({
 
   const session = await getSessionUser();
   if (!session) redirect('/sign-in?next=/app/subscription');
-  // For admins, quotas + capabilities follow the EFFECTIVE tier (ALL_ACCESS).
+  // For admins, quotas + capabilities follow the EFFECTIVE tier (VIP).
   // The stored tier is still shown in the "Plan card" so the billing row is
   // honest — admins are simply not gated by it.
   const storedTier = session.tier;
@@ -65,7 +65,7 @@ export default async function SubscriptionPage({
           {isAdmin ? (
             <div className="cc-mod-stat">
               <div className="cc-mod-stat-l">Acceso efectivo</div>
-              <div className="cc-mod-stat-v pu">All-Access</div>
+              <div className="cc-mod-stat-v pu">VIP</div>
               <div className="cc-mod-stat-sub">vía rol {role.replace('_', ' ')}</div>
             </div>
           ) : (

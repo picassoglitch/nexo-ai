@@ -88,7 +88,7 @@ export default async function PrivacyPage({
           directamente conforme a su propio aviso de privacidad.
         </li>
         <li>
-          Historial de tier (Free / Pro / All-Access) y fecha de cada cambio.
+          Historial de tier (Free / Pro / VIP) y fecha de cada cambio.
         </li>
       </ul>
 
@@ -188,7 +188,7 @@ export default async function PrivacyPage({
         <li>Tu user_id de Nexo AI (identificador opaco).</li>
         <li>Tu correo electrónico.</li>
         <li>Tu nombre de display.</li>
-        <li>Tu tier actual (free / pro / all_access) — para que el engine sepa qué features habilitarte.</li>
+        <li>Tu tier actual (free / pro / vip) — para que el engine sepa qué features habilitarte.</li>
       </ul>
       <p>
         Esa información permite al Engine crear tu tenant y validar tu acceso.

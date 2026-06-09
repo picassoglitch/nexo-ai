@@ -13,7 +13,7 @@ const TIER_LABELS: Record<SubscriptionTier, string> = {
   FREE: TIER_CAPS.FREE.label,
   PRO: TIER_CAPS.PRO.label,
   PARTNER: TIER_CAPS.PARTNER.label,
-  ALL_ACCESS: TIER_CAPS.ALL_ACCESS.label,
+  VIP: TIER_CAPS.VIP.label,
 };
 
 // Marketing copy that DOESN'T live in TIER_CAPS (taglines, feature bullets,
@@ -25,21 +25,21 @@ const TIER_MARKETING: Record<
   FREE: {
     tagline: 'Explora la plataforma sin compromiso.',
     features: [
-      'Cuenta Google completa',
+      'NexoClip gratis 7 días — y sigue mientras te queden tokens',
       'Cualquier sistema en simulación',
-      'Dashboard en vivo (solo lectura)',
-      'Hasta 100 trabajos / mes',
+      'Acceso a la comunidad',
+      'Clips con marca de agua · descarga manual',
     ],
   },
   PRO: {
-    tagline: 'Acceso en vivo a un sistema a tu elección.',
+    tagline: 'Un engine en vivo a tu elección + NexoClip Pro.',
     featured: true,
     features: [
       'Todo lo de Free',
-      'Un bot/agente/automatización en vivo',
-      'Ejecución real · límites estándar',
-      'Historial completo y analíticas',
-      'Soporte por correo',
+      '1 engine en vivo · tú eliges cuál',
+      '1,000,000 de tokens / mes (se regeneran)',
+      'NexoClip Pro: sin marca de agua · ~12 streams/mes · 1 brand kit',
+      'Comunidad premium',
     ],
   },
   // PARTNER tier is admin-granted only — never shown as a buyable card.
@@ -56,14 +56,14 @@ const TIER_MARKETING: Record<
       'Acceso anticipado a nuevas herramientas',
     ],
   },
-  ALL_ACCESS: {
-    tagline: 'Todos los sistemas desbloqueados.',
+  VIP: {
+    tagline: 'Todo Nexo desbloqueado — IA + Clip, sin límites.',
     features: [
       'Todo lo de Pro',
-      'Todos los sistemas en vivo',
-      'Los límites de uso más altos',
-      'Acceso anticipado a nuevas herramientas',
-      'Soporte prioritario',
+      'Todos los engines en vivo',
+      '5× los tokens de Pro (5,000,000 / mes)',
+      'Todas las funciones de NexoClip',
+      'El equipo Nexo te ayuda a construir tu idea · soporte prioritario',
     ],
   },
 };
@@ -177,7 +177,7 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
   //   - TIER_CAPS in src/lib/billing/tiers.ts  (display string)
   //   - TIER_PRICING in src/lib/payments/pricing.ts  (real MP cents)
   // To change feature bullets, edit TIER_MARKETING above.
-  const ORDER: SubscriptionTier[] = ['FREE', 'PRO', 'ALL_ACCESS'];
+  const ORDER: SubscriptionTier[] = ['FREE', 'PRO', 'VIP'];
   const cards = ORDER.map((id) => ({
     id,
     name: TIER_CAPS[id].label,

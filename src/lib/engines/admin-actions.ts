@@ -1,7 +1,7 @@
 'use server';
 
 // Engine admin mutations — change status (active/coming_soon/deprecated) and
-// tier_required (FREE/PRO/ALL_ACCESS). Used from /dashboard/engines.
+// tier_required (FREE/PRO/VIP). Used from /dashboard/engines.
 //
 // SECURITY:
 //   1. Next.js layer checks: caller must be SUPER_ADMIN or ADMIN (session.role,
@@ -19,7 +19,7 @@ import { getSessionUser, type SubscriptionTier } from '@/lib/auth/session';
 import type { EngineStatus } from '@/lib/data/types';
 
 const VALID_STATUS: EngineStatus[] = ['active', 'coming_soon', 'deprecated'];
-const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'ALL_ACCESS'];
+const VALID_TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'VIP'];
 
 type Result = { ok: true } | { ok: false; error: string };
 
