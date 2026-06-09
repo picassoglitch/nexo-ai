@@ -356,7 +356,8 @@
   },
   "tour": {
     "step": "{current} de {total}",
-    "skip": "Saltar",
+    "later": "Ver más tarde",
+    "close": "Cerrar",
     "back": "Atrás",
     "next": "Siguiente",
     "done": "Entendido",

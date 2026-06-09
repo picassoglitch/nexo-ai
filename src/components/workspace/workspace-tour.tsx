@@ -67,15 +67,23 @@ export function WorkspaceTour() {
     return () => window.clearTimeout(id);
   }, [setMobileSidebarOpen]);
 
-  const finish = useCallback(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, '1');
-    } catch {
-      /* private mode — tour just re-shows next visit, acceptable */
-    }
-    if (openedSidebar.current) setMobileSidebarOpen(false);
-    setActive(false);
-  }, [setMobileSidebarOpen]);
+  // Close the tour. `persist: true` ("Close" / finishing) writes the flag so it
+  // never auto-shows again. `persist: false` ("Ver más tarde" / Esc) just hides
+  // it — it pops back up on the next login until the user truly closes it.
+  const close = useCallback(
+    (persist: boolean) => {
+      if (persist) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, '1');
+        } catch {
+          /* private mode — tour re-shows next visit, acceptable */
+        }
+      }
+      if (openedSidebar.current) setMobileSidebarOpen(false);
+      setActive(false);
+    },
+    [setMobileSidebarOpen],
+  );
 
   // Resolve the current step's target rect (scrolling it into view first so a
   // long sidebar still spotlights an item below the fold).
@@ -155,9 +163,9 @@ export function WorkspaceTour() {
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') finish();
+      if (e.key === 'Escape') close(false); // Esc = see later, not permanent
       else if (e.key === 'Enter' || e.key === 'ArrowRight') {
-        if (step >= STEPS.length - 1) finish();
+        if (step >= STEPS.length - 1) close(true);
         else setStep((s) => s + 1);
       } else if (e.key === 'ArrowLeft') {
         setStep((s) => Math.max(0, s - 1));
@@ -165,7 +173,7 @@ export function WorkspaceTour() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [active, step, finish]);
+  }, [active, step, close]);
 
   const current = STEPS[step];
   if (!active || !current) return null;
@@ -217,12 +225,15 @@ export function WorkspaceTour() {
           <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--cc-green)] [font-family:var(--cc-mono),monospace]">
             {t('step', { current: step + 1, total: STEPS.length })}
           </span>
+          {/* Permanent close — the only action that stops the tour for good. */}
           <button
             type="button"
-            onClick={finish}
-            className="text-[11.5px] font-medium text-[var(--cc-txt-4)] transition-colors hover:text-[var(--cc-txt-2)]"
+            onClick={() => close(true)}
+            aria-label={t('close')}
+            title={t('close')}
+            className="-mr-1 -mt-1 grid size-7 place-items-center rounded-lg text-[var(--cc-txt-4)] transition-colors hover:bg-white/[0.04] hover:text-[var(--cc-txt-2)]"
           >
-            {t('skip')}
+            ✕
           </button>
         </div>
 
@@ -249,22 +260,34 @@ export function WorkspaceTour() {
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3">
+          {/* See later — postpone; reappears on next login. */}
           <button
             type="button"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-            className="rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-[var(--cc-txt-3)] transition-colors enabled:hover:text-[var(--cc-txt)] disabled:opacity-0"
+            onClick={() => close(false)}
+            className="rounded-lg px-1 py-1.5 text-[12px] font-semibold text-[var(--cc-txt-4)] transition-colors hover:text-[var(--cc-txt-2)]"
           >
-            {t('back')}
+            {t('later')}
           </button>
-          <button
-            type="button"
-            onClick={() => (isLast ? finish() : setStep((s) => s + 1))}
-            style={{ color: '#0a0c0e' }}
-            className="rounded-lg bg-[var(--cc-green)] px-4 py-2 text-[12.5px] font-bold transition-[filter] hover:brightness-110"
-          >
-            {isLast ? t('done') : t('next')}
-          </button>
+
+          <div className="flex items-center gap-1">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+                className="rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]"
+              >
+                {t('back')}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => (isLast ? close(true) : setStep((s) => s + 1))}
+              style={{ color: '#0a0c0e' }}
+              className="rounded-lg bg-[var(--cc-green)] px-4 py-2 text-[12.5px] font-bold transition-[filter] hover:brightness-110"
+            >
+              {isLast ? t('done') : t('next')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
