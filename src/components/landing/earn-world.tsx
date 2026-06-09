@@ -190,15 +190,12 @@ export function EarnWorld() {
             </div>
             <div className="price-tagline">{tPrice(`${tier.k}.tag`)}</div>
             <ul className="price-feats">
-              {Array.from({ length: FEATURE_COUNT[tier.k] }, (_, i) => i + 1).map((f) => {
-                const muted = tier.k === 'free' && f === FEATURE_COUNT.free;
-                return (
-                  <li key={f} className={muted ? 'muted' : undefined}>
-                    <span className="tick">{muted ? '○' : '✓'}</span>
-                    {tPrice(`${tier.k}.f${f}`)}
-                  </li>
-                );
-              })}
+              {Array.from({ length: FEATURE_COUNT[tier.k] }, (_, i) => i + 1).map((f) => (
+                <li key={f}>
+                  <span className="tick">✓</span>
+                  {tPrice(`${tier.k}.f${f}`)}
+                </li>
+              ))}
             </ul>
             <Link
               href={TIER_DESTINATIONS[tier.k] as Route}

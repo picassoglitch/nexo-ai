@@ -322,10 +322,10 @@
       "amt": "$0",
       "per": " /siempre",
       "tag": "Crea una cuenta y explora toda la plataforma.",
-      "f1": "NexoClip gratis 7 días — y sigue mientras te queden tokens",
-      "f2": "Acceso a la comunidad",
-      "f3": "Clips con marca de agua · descarga manual",
-      "f4": "Sin ejecución en vivo en otros engines",
+      "f1": "NexoClip gratis 7 días",
+      "f2": "50,000 tokens IA de regalo",
+      "f3": "Acceso a la comunidad",
+      "f4": "Clips con marca de agua · descarga manual",
       "btn": "Empezar"
     },
     "pro": {
@@ -333,7 +333,7 @@
       "amt": "MXN $749",
       "per": " /mes",
       "badge": "El más elegido",
-      "tag": "Un engine en vivo a tu elección, más NexoClip Pro.",
+      "tag": "Un engine en vivo a tu elección.",
       "f1": "Todo lo de Gratis",
       "f2": "1 engine en vivo · tú eliges cuál",
       "f3": "1,000,000 de tokens / mes (se regeneran)",
@@ -349,7 +349,7 @@
       "f1": "Todo lo de Pro",
       "f2": "Todos los engines en vivo",
       "f3": "5× los tokens de Pro",
-      "f4": "Todas las funciones de NexoClip",
+      "f4": "Paquete completo de streamer de NexoClip",
       "f5": "Soporte prioritario · el equipo Nexo te ayuda a construir tu idea",
       "btn": "Obtener VIP"
     }
@@ -540,5 +540,105 @@
     "num": "Construido por operadores",
     "title": "No una marca. <em>Un equipo.</em>",
     "body": "Liderado por su fundador, con experiencia en arquitectura cloud en un procesador de pagos global de primer nivel, producción bajo PCI DSS 4.0 en organizaciones AWS multi-cuenta, y trayectoria entregando SaaS multi-tenant, sistemas de sensores e infraestructura de trading. Trabajamos como construimos — directo, técnico, on-call."
+  },
+  "engines": {
+    "title": "Mis engines",
+    "hero": {
+      "badgeLive": "{count} en vivo ahora",
+      "badgeIdle": "Tu hub de engines",
+      "headingContinue": "Continúa donde lo dejaste",
+      "headingStart": "Empezá con NexoClip",
+      "subContinue": "{name} está corriendo en vivo. Retoma el control cuando quieras.",
+      "subStart": "Convierte tus streams en clips virales — el único engine listo para usar ahora mismo.",
+      "ctaContinue": "Continuar →",
+      "ctaOpen": "Abrir NexoClip →",
+      "ctaDemo": "Ver demo"
+    },
+    "sections": {
+      "available": "Disponibles ahora",
+      "availableSub": "Listos para usar con tu plan actual.",
+      "pro": "Desbloueá con Pro",
+      "proSub": "Activa estos engines al subir de plan.",
+      "soon": "Próximamente",
+      "soonSub": "En construcción — te avisamos al lanzar.",
+      "soonShow": "Ver próximos engines ({count})",
+      "soonHide": "Ocultar próximos engines"
+    },
+    "card": {
+      "ribbon": "Disponible ahora",
+      "statusLive": "En vivo",
+      "statusTrial": "Prueba en vivo",
+      "statusSimulation": "Simulación",
+      "statusLocked": "Requiere {plan}",
+      "statusSoon": "Próximamente",
+      "open": "Abrir engine →",
+      "openNamed": "Abrir {name} →",
+      "unlock": "Desbloquear con Pro",
+      "notify": "Avísame",
+      "details": "Ver detalles",
+      "ownerNexo": "by Nexo AI",
+      "ownerBy": "by {owner}",
+      "ownerMine": "Tu engine",
+      "notifyDone": "Listo — te avisaremos cuando lancemos {name}."
+    },
+    "filters": {
+      "aria": "Filtrar engines",
+      "all": "Todos",
+      "live": "En vivo",
+      "simulation": "Simulación",
+      "coming_soon": "Próximamente",
+      "locked": "Requiere Pro",
+      "emptyTitle": "No hay engines en este filtro",
+      "emptyCta": "Ver todos"
+    },
+    "upsell": {
+      "title": "Desbloquea más engines con Pro",
+      "sub": "Corre NexoCrypto, NexoOBS y más en vivo con un plan Pro.",
+      "cta": "Actualizar a Pro →"
+    },
+    "caps": {
+      "heading": "Capacidades de tu plan · {plan}",
+      "headingPriced": "Capacidades de tu plan · {plan} · {price}/{per}",
+      "liveEngines": "Engines en vivo",
+      "tokens": "Tokens IA / mes",
+      "storage": "Almacenamiento",
+      "history": "Historial",
+      "historyYear": "1 año+",
+      "historyDays": "{days} días",
+      "support": "Soporte",
+      "supportPriority": "Prioritario",
+      "supportEmail": "Email",
+      "supportCommunity": "Comunidad"
+    },
+    "empty": {
+      "title": "Sin engines disponibles",
+      "hint": "Si eres admin: corre 0010_rename_bots_to_engines.sql en Supabase y refresca."
+    },
+    "marketing": {
+      "nexoclip": {
+        "tagline": "Convierte tus streams en clips virales, en automático.",
+        "bullets": [
+          "Detecta los mejores momentos con IA",
+          "Render vertical 9:16 listo para publicar",
+          "Exporta a TikTok, Reels y Shorts"
+        ]
+      },
+      "nexocrypto": {
+        "tagline": "Señales y automatización de trading cripto 24/7.",
+        "bullets": ["Estrategias backtesteadas", "Alertas en tiempo real", "Ejecución sin emociones"]
+      },
+      "nexoobs": {
+        "tagline": "Controla tu transmisión en vivo desde un solo panel.",
+        "bullets": ["Escenas y overlays dinámicos", "Automatización del stream", "Conecta con NexoClip"]
+      }
+    },
+    "marketingCat": {
+      "STREAMING": "Automatiza tu flujo de streaming en vivo.",
+      "CONTENT": "Genera contenido a escala con IA.",
+      "TRADING": "Opera con señales y automatización de IA.",
+      "AGENTS": "Agentes de IA que ejecutan tareas por ti.",
+      "RESEARCH": "Investigación automatizada con IA.",
+      "INTERNAL": "Herramienta interna de la plataforma Nexo."
+    }
   }
 }
