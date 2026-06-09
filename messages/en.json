@@ -354,6 +354,35 @@
       "btn": "Get VIP"
     }
   },
+  "tour": {
+    "step": "{current} of {total}",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "done": "Got it",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Nexo AI",
+        "body": "Here's a quick tour of your workspace — under 30 seconds."
+      },
+      "nav": {
+        "title": "Your menu",
+        "body": "Navigate everything from here: your account, your engines and settings."
+      },
+      "engines": {
+        "title": "Your engines",
+        "body": "Under “My engines” you view, open and activate engines like NexoClip."
+      },
+      "tokens": {
+        "title": "Your token balance",
+        "body": "Under “Usage” you can see how many AI tokens you have left this month."
+      },
+      "account": {
+        "title": "Your info",
+        "body": "Under “Profile & security” you change your details, password and plan."
+      }
+    }
+  },
   "academy": {
     "title": "The operator network — <em>Nexo Academy</em>",
     "p": "The platform isn't just tools — it's an operator network. Nexo Academy is the community where builders and operators learn the systems, share what works, and run alongside each other. Free, Premium and VIP tiers, hosted on Skool. Deeper integration into this platform is on the roadmap.",

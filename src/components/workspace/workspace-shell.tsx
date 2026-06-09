@@ -3,6 +3,7 @@
 import { usePathname } from '@/i18n/routing';
 import { useWorkspace } from '@/lib/workspace/store';
 import { WorkspaceSidebar } from './workspace-sidebar';
+import { WorkspaceTour } from './workspace-tour';
 import { PAGE_META } from '@/components/dashboard/nav-data';
 
 interface Props {
@@ -75,6 +76,9 @@ export function WorkspaceShell({
           <span dangerouslySetInnerHTML={{ __html: toastHtml }} />
         </div>
       )}
+
+      {/* First-run onboarding tour (once per browser, /app only). */}
+      <WorkspaceTour />
     </div>
   );
 }

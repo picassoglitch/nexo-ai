@@ -48,7 +48,7 @@ export function WorkspaceSidebar({
         <span className="cc-env">{tierLabel}</span>
       </div>
 
-      <div className="cc-sb-scroll">
+      <div className="cc-sb-scroll" data-tour="nav">
         {SUBSCRIBER_NAV.map((g) => (
           <div key={g.grp} className="cc-sb-grp">
             <div className="cc-gl">{g.grp}</div>
@@ -65,6 +65,7 @@ export function WorkspaceSidebar({
                   <Link
                     key={it.id}
                     href={it.href as Route}
+                    data-tour={`nav-${it.id}`}
                     className={`cc-nav-item${isActive(it.href) ? ' on' : ''}`}
                     onClick={() => setMobileSidebarOpen(false)}
                   >

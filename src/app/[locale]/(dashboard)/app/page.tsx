@@ -16,6 +16,7 @@ import {
 } from '@/lib/billing/tiers';
 import { WelcomeGiftBanner } from '@/components/workspace/welcome-gift-banner';
 import { NexoclipGraceBanner } from '@/components/workspace/nexoclip-grace-banner';
+import { EngineGlyph } from '@/components/workspace/engines/engine-glyph';
 
 export const metadata = { title: 'Tu espacio' };
 
@@ -204,8 +205,16 @@ export default async function WorkspaceHomePage({
                 }}
               >
                 <div className="cc-mod-card-head">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 22 }}>{engine.icon}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span
+                      className={`grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border ${
+                        isComingSoon
+                          ? 'border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] text-[var(--cc-txt-4)]'
+                          : 'border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] text-[var(--cc-green)]'
+                      }`}
+                    >
+                      <EngineGlyph slug={engine.slug} size={22} />
+                    </span>
                     <div>
                       <h4 style={{ fontSize: 14 }}>{engine.name}</h4>
                       <div
@@ -224,9 +233,9 @@ export default async function WorkspaceHomePage({
                     <span
                       className="cc-mod-badge"
                       style={{
-                        color: 'var(--cc-amber)',
-                        borderColor: 'rgba(245,177,61,.3)',
-                        background: 'var(--cc-amber-g)',
+                        color: 'var(--cc-purple)',
+                        borderColor: 'rgba(157,123,255,.3)',
+                        background: 'var(--cc-purple-g)',
                       }}
                     >
                       Próximamente
