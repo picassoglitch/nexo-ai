@@ -177,11 +177,6 @@ export default async function WorkspaceHomePage({
           <div className="cc-mod-stat-sub">{liveSub}</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Trabajos este mes</div>
-          <div className="cc-mod-stat-v">0</div>
-          <div className="cc-mod-stat-sub">de {caps.jobsPerMonth.toLocaleString()} permitidos</div>
-        </div>
-        <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Tokens IA</div>
           <div className="cc-mod-stat-v cy">{tokensBig}</div>
           <div className="cc-mod-stat-sub">{tokensSub}</div>

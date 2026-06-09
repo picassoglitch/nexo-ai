@@ -1,9 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
-import type { Route } from 'next';
-import { Link } from '@/i18n/routing';
-import { listEngines } from '@/lib/data/engines';
-import { ENV_LABEL } from '@/lib/data/types';
 import { getSessionUser } from '@/lib/auth/session';
+import { listEngines } from '@/lib/data/engines';
+import { CATS, ENV_LABEL, type EngineCategory } from '@/lib/data/types';
 import { getTokenBalance } from '@/lib/usage/tokens';
 import {
   engineIsLiveForUser,
@@ -13,19 +11,34 @@ import {
   effectiveTier,
   isAdminRole,
 } from '@/lib/billing/tiers';
-import { LiveEngineSelectButton } from '@/components/workspace/live-engine-selector';
+import { EnginesExplorer } from '@/components/workspace/engines/engines-explorer';
+import {
+  filterKeysFor,
+  marketingFor,
+  type EngineLiveState,
+  type EngineVM,
+} from '@/components/workspace/engines/engine-config';
 
 // Browser tab → "Mis engines · Nexo AI" (template in [locale]/layout.tsx).
 export const metadata = { title: 'Mis engines' };
 
 // PARTNER ranks alongside PRO for tier-required gates (same level of access).
-// The owned-engine override is handled separately via engineCanRunLive.
-const TIER_LABEL_SHORT = {
-  FREE: 'Free',
-  PRO: 'Pro',
-  PARTNER: 'Partner',
-  VIP: 'VIP',
-} as const;
+const TIER_LABEL_SHORT = { FREE: 'Free', PRO: 'Pro', PARTNER: 'Partner', VIP: 'VIP' } as const;
+const TIER_ORDER = { FREE: 0, PRO: 1, PARTNER: 1, VIP: 2 } as const;
+const CAT_LABEL = Object.fromEntries(CATS.map((c) => [c.id, c.label])) as Record<
+  EngineCategory,
+  string
+>;
+
+// Spotlight ordering inside the grid: featured first, then live, sim, locked,
+// coming-soon — so the most actionable cards lead.
+const STATE_RANK: Record<EngineLiveState, number> = {
+  live: 1,
+  trial: 1,
+  simulation: 2,
+  locked: 3,
+  coming_soon: 4,
+};
 
 export default async function MyEnginesPage({
   params,
@@ -42,8 +55,9 @@ export default async function MyEnginesPage({
   const isAdmin = isAdminRole(role);
   const selectedEngineId = session?.selectedEngineId ?? null;
   const caps = TIER_CAPS[tier];
-  // NexoClip 7-day trial: grants live access to NexoClip regardless of tier.
-  // After it expires, FREE users keep NexoClip live in "grace" while tokens last.
+
+  // NexoClip trial (7-day) + post-trial grace (bonus tokens) — both let a FREE
+  // user run NexoClip live. Mirror of the home/detail surfaces.
   const nowMs = new Date().getTime();
   const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
   const clipBonusTokens =
@@ -56,416 +70,129 @@ export default async function MyEnginesPage({
     tier === 'FREE' &&
     isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
 
-  // Tier-specific page intro copy. Admin gets its own copy noting role-overrides-tier.
-  const intro = isAdmin
-    ? `Como ${role.replace('_', ' ')}, tienes acceso completo a todos los engines — tu rol pasa por encima del tier almacenado (${storedTier.replace('_', '-')}).`
-    : tier === 'FREE'
-      ? 'Estás en el plan Free — todos los engines están disponibles en modo simulación. Pasa a Pro para ejecutar uno en vivo, o VIP para todos.'
-      : tier === 'PRO'
-        ? 'Estás en Pro — elige UN engine para correr en vivo. El resto sigue disponible en simulación. Cambia tu selección cuando quieras.'
-        : 'Estás en VIP — todos los engines disponibles corren en vivo, con los límites más altos de uso.';
+  // Build the serializable view-models the client explorer renders. Deprecated
+  // engines are hidden from the hub (consistent with the home page).
+  const vms: EngineVM[] = engines
+    .filter((e) => e.status !== 'deprecated')
+    .map((engine) => {
+      const meetsTier = TIER_ORDER[tier] >= TIER_ORDER[engine.tierRequired];
+      const isOwnedByMe =
+        engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
+      const isPlatformOwned = engine.ownerUserId === null;
+      const isLive = engineIsLiveForUser({
+        tier,
+        engineId: engine.id,
+        engineSlug: engine.slug,
+        engineStatus: engine.status,
+        meetsTier,
+        selectedEngineId,
+        isOwnedByUser: isOwnedByMe,
+        trialActive,
+        graceActive,
+      });
+
+      const state: EngineLiveState =
+        engine.status === 'coming_soon'
+          ? 'coming_soon'
+          : isLive
+            ? tier === 'FREE'
+              ? 'trial'
+              : 'live'
+            : !meetsTier
+              ? 'locked'
+              : 'simulation';
+
+      const { tagline, bullets } = marketingFor(engine.slug, engine.category, engine.description);
+
+      return {
+        id: engine.id,
+        slug: engine.slug,
+        name: engine.name,
+        icon: engine.icon,
+        type: engine.type,
+        categoryLabel: CAT_LABEL[engine.category] ?? engine.category,
+        state,
+        filterKeys: filterKeysFor(state),
+        tagline,
+        bullets,
+        requiresPlanLabel:
+          engine.tierRequired !== 'FREE' ? TIER_LABEL_SHORT[engine.tierRequired] : null,
+        meetsTier,
+        isPlatformOwned,
+        isOwnedByMe,
+        ownerLabel: isPlatformOwned
+          ? 'Nexo AI'
+          : engine.ownerDisplayName || engine.ownerEmail?.split('@')[0] || 'Partner',
+        envLabel: ENV_LABEL[engine.env],
+        region: engine.region,
+        featured: engine.slug === 'nexoclip' && engine.status === 'active',
+        canSelectLive: tier === 'PRO' && engine.status === 'active' && meetsTier,
+        isSelectedLive: engine.id === selectedEngineId,
+      } satisfies EngineVM;
+    })
+    .sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1;
+      return STATE_RANK[a.state] - STATE_RANK[b.state];
+    });
+
+  const liveCount = vms.filter((v) => v.state === 'live' || v.state === 'trial').length;
+  const showOnboarding =
+    tier === 'FREE' && vms.some((v) => v.slug === 'nexoclip' && v.state !== 'coming_soon');
 
   return (
     <div className="cc-scroll">
-      <p
-        style={{
-          color: 'var(--cc-txt-3)',
-          fontSize: 13,
-          marginBottom: 18,
-          maxWidth: '64ch',
-        }}
-      >
-        {intro}
-      </p>
-
-      {tier === 'FREE' && (
-        <div
-          style={{
-            padding: '14px 18px',
-            border: '1px solid var(--cc-line-2)',
-            background: 'var(--cc-panel)',
-            borderRadius: 'var(--cc-r-l)',
-            marginBottom: 20,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
-              Desbloquea ejecución en vivo
+      <div className="pt-2">
+        {vms.length === 0 ? (
+          <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-14 text-center">
+            <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">
+              Sin engines disponibles
             </div>
-            <div style={{ fontSize: 12.5, color: 'var(--cc-txt-3)' }}>
-              Pro: 1 engine en vivo · {TIER_CAPS.PRO.jobsPerMonth.toLocaleString()} trabajos/mes ·{' '}
-              {TIER_CAPS.PRO.historyDays} días de historial.
+            <div className="mt-2 text-[12px] text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
+              Si eres admin: corre <b>0010_rename_bots_to_engines.sql</b> en Supabase y refresca.
             </div>
           </div>
-          <Link
-            href={'/app/subscription' as Route}
-            style={{
-              background: 'var(--cc-green)',
-              color: '#070809',
-              padding: '10px 16px',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 13,
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Ver planes →
-          </Link>
-        </div>
-      )}
+        ) : (
+          <EnginesExplorer engines={vms} liveCount={liveCount} showOnboarding={showOnboarding} />
+        )}
 
-      {tier === 'PRO' && selectedEngineId && (
-        <div
-          style={{
-            padding: '12px 16px',
-            border: '1px solid var(--cc-green)',
-            background: 'var(--cc-green-g)',
-            borderRadius: 'var(--cc-r-l)',
-            marginBottom: 20,
-            fontSize: 12.5,
-            color: 'var(--cc-txt-2)',
-          }}
-        >
-          ● Tu slot Pro está ocupado por{' '}
-          <b style={{ color: 'var(--cc-green)' }}>
-            {engines.find((e) => e.id === selectedEngineId)?.name ?? 'un engine'}
-          </b>
-          . Haz clic en &laquo;Activar en vivo&raquo; en otro engine para cambiar la selección.
-        </div>
-      )}
-
-      {/* Empty state for when the migration hasn't run yet */}
-      {engines.length === 0 && (
-        <div
-          style={{
-            padding: '40px 24px',
-            border: '1px dashed var(--cc-line-2)',
-            borderRadius: 'var(--cc-r-l)',
-            textAlign: 'center',
-            color: 'var(--cc-txt-3)',
-            fontSize: 13,
-            lineHeight: 1.55,
-            marginBottom: 24,
-          }}
-        >
-          Sin engines disponibles.
-          <br />
-          <span
-            style={{
-              color: 'var(--cc-txt-4)',
-              fontSize: 12,
-              fontFamily: 'var(--cc-mono), monospace',
-              marginTop: 6,
-              display: 'inline-block',
-            }}
-          >
-            Si eres admin: corre <b>supabase/migrations/0010_rename_bots_to_engines.sql</b>{' '}
-            en Supabase y refresca.
-          </span>
-        </div>
-      )}
-
-      <div className="cc-mod-grid">
-        {engines.map((engine) => {
-          const isComingSoon = engine.status === 'coming_soon';
-          const isDeprecated = engine.status === 'deprecated';
-          // Available = engine is active AND user's tier qualifies for its tier_required.
-          const tierOrder = { FREE: 0, PRO: 1, PARTNER: 1, VIP: 2 } as const;
-          const meetsTier = tierOrder[tier] >= tierOrder[engine.tierRequired];
-          // Partner-owned override: the engine's owner sees it as always-live,
-          // regardless of selected_engine_id. Marketplace viewers (other users)
-          // see the same badge metadata but the live flag uses the standard rule.
-          const isOwnedByMe =
-            engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
-          const isLive = engineIsLiveForUser({
-            tier,
-            engineId: engine.id,
-            engineSlug: engine.slug,
-            engineStatus: engine.status,
-            meetsTier,
-            selectedEngineId,
-            isOwnedByUser: isOwnedByMe,
-            trialActive,
-            graceActive,
-          });
-          const isSelected = engine.id === selectedEngineId;
-          // Owner attribution: every engine gets a chip. Platform-owned
-          // (no partner_id) → "by Nexo AI" in a muted style. Partner-owned
-          // → "by [name]" in the partner-purple style.
-          const isPlatformOwned = engine.ownerUserId === null;
-          const ownerLabel = isPlatformOwned
-            ? 'Nexo AI'
-            : engine.ownerDisplayName ||
-              engine.ownerEmail?.split('@')[0] ||
-              'Partner';
-
-          return (
-            <div
-              key={engine.id}
-              className="cc-mod-card"
-              style={{
-                borderColor: isLive
-                  ? 'var(--cc-green)'
-                  : isComingSoon
-                    ? 'var(--cc-line-2)'
-                    : undefined,
-                background: isLive
-                  ? 'rgba(158,234,58,.04)'
-                  : isComingSoon
-                    ? 'rgba(255,255,255,.015)'
-                    : undefined,
-                opacity: isComingSoon || isDeprecated ? 0.75 : 1,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <div className="cc-mod-card-head">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 22 }}>{engine.icon}</span>
-                  <div>
-                    <h4 style={{ fontSize: 14 }}>
-                      {engine.name}
-                      {/* Attribution chip — purple for partner engines,
-                          muted gray for platform-owned (Nexo AI). */}
-                      <span
-                        style={{
-                          marginLeft: 8,
-                          fontFamily: 'var(--cc-mono), monospace',
-                          fontSize: 9.5,
-                          letterSpacing: '0.1em',
-                          color: isPlatformOwned ? 'var(--cc-txt-4)' : 'var(--cc-purple)',
-                          background: isPlatformOwned
-                            ? 'rgba(255,255,255,.03)'
-                            : 'var(--cc-purple-g)',
-                          border: isPlatformOwned
-                            ? '1px solid var(--cc-line-2)'
-                            : '1px solid rgba(157,123,255,.3)',
-                          padding: '2px 7px',
-                          borderRadius: 4,
-                          textTransform: 'uppercase',
-                          verticalAlign: 'middle',
-                        }}
-                        title={`Engine creado por ${ownerLabel}${isOwnedByMe ? ' (tú)' : ''}`}
-                      >
-                        {isOwnedByMe ? 'Tu engine' : `by ${ownerLabel}`}
-                      </span>
-                    </h4>
-                    <div
-                      style={{
-                        fontFamily: 'var(--cc-mono), monospace',
-                        fontSize: 10.5,
-                        color: 'var(--cc-txt-4)',
-                        marginTop: 2,
-                      }}
-                    >
-                      {engine.type}
-                    </div>
-                  </div>
+        {/* Plan capabilities — compact reference strip */}
+        {vms.length > 0 && (
+          <section className="mt-8">
+            <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
+              Capacidades de tu plan · {caps.label}
+              {!isAdmin && ` · ${caps.price}/${caps.per}`}
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {[
+                {
+                  k: 'Engines en vivo',
+                  v: caps.liveEnginesCount === Infinity ? '∞' : String(caps.liveEnginesCount),
+                },
+                { k: 'Tokens IA / mes', v: caps.tokensPerMonth.toLocaleString('es-MX') },
+                {
+                  k: 'Almacenamiento',
+                  v:
+                    caps.storageMB >= 1000
+                      ? `${caps.storageMB / 1000} GB`
+                      : `${caps.storageMB} MB`,
+                },
+                { k: 'Historial', v: caps.historyDays >= 365 ? '1 año+' : `${caps.historyDays} días` },
+                {
+                  k: 'Soporte',
+                  v: caps.hasPrioritySupport ? 'Prioritario' : tier === 'PRO' ? 'Email' : 'Comunidad',
+                },
+              ].map((row) => (
+                <div
+                  key={row.k}
+                  className="rounded-[12px] border border-[var(--cc-line)] bg-[var(--cc-panel)] px-4 py-3"
+                >
+                  <div className="text-[18px] font-bold text-[var(--cc-txt)]">{row.v}</div>
+                  <div className="mt-0.5 text-[11px] text-[var(--cc-txt-3)]">{row.k}</div>
                 </div>
-
-                {/* Status badge: coming-soon trumps live/simulation labels */}
-                {isComingSoon ? (
-                  <span
-                    className="cc-mod-badge"
-                    style={{
-                      color: 'var(--cc-amber)',
-                      borderColor: 'rgba(245,177,61,.3)',
-                      background: 'var(--cc-amber-g)',
-                    }}
-                  >
-                    Próximamente
-                  </span>
-                ) : isDeprecated ? (
-                  <span className="cc-mod-badge r">Deprecado</span>
-                ) : isLive ? (
-                  <span className="cc-mod-badge gr">● EN VIVO</span>
-                ) : tier === 'FREE' ? (
-                  <span className="cc-mod-badge cy">Simulación</span>
-                ) : (
-                  <span className="cc-mod-badge">Simulación</span>
-                )}
-              </div>
-              <p>{engine.description}</p>
-
-              <div className="cc-mod-meta">
-                <span>{ENV_LABEL[engine.env]}</span>
-                <span>{engine.region}</span>
-                {/* Tier-required hint, only when relevant (suppressed when the
-                    engine is already live for the user, e.g. NexoClip trial). */}
-                {engine.tierRequired !== 'FREE' && !isLive && (
-                  <span
-                    style={{
-                      color: meetsTier ? 'var(--cc-txt-4)' : 'var(--cc-amber)',
-                      fontFamily: 'var(--cc-mono), monospace',
-                      fontSize: 10.5,
-                    }}
-                  >
-                    Requiere {TIER_LABEL_SHORT[engine.tierRequired]}
-                  </span>
-                )}
-              </div>
-
-              {/* ── Action area ──────────────────────────────────────────
-                  Active engines get an "Abrir →" CTA going to /app/engines/[slug]
-                  + (for PRO users) the "Activar en vivo" toggle. Coming-soon
-                  engines show a disabled teaser. */}
-              <div
-                style={{
-                  marginTop: 'auto',
-                  paddingTop: 12,
-                  borderTop: '1px solid var(--cc-line-soft)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                }}
-              >
-                {/* Primary CTA: Open / Coming soon teaser */}
-                {engine.status === 'active' ? (
-                  <Link
-                    href={`/app/engines/${engine.slug}` as Route}
-                    style={{
-                      color: meetsTier || isLive ? 'var(--cc-green)' : 'var(--cc-txt-2)',
-                      fontSize: 12.5,
-                      fontWeight: 600,
-                      fontFamily: 'inherit',
-                      textDecoration: 'none',
-                      padding: '6px 10px 6px 0',
-                    }}
-                  >
-                    Abrir engine →
-                  </Link>
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--cc-txt-4)',
-                      fontFamily: 'var(--cc-mono), monospace',
-                    }}
-                  >
-                    📅 te avisamos al lanzar
-                  </span>
-                )}
-
-                {/* Secondary: PRO live-bot toggle (when applicable) */}
-                {tier === 'PRO' && engine.status === 'active' && meetsTier && (
-                  <LiveEngineSelectButton
-                    engineId={engine.id}
-                    engineName={engine.name}
-                    isCurrentlySelected={isSelected}
-                  />
-                )}
-                {tier === 'FREE' && engine.status === 'active' && !isLive && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--cc-txt-4)',
-                      fontFamily: 'var(--cc-mono), monospace',
-                    }}
-                  >
-                    🔒 Live → Pro
-                  </span>
-                )}
-                {tier === 'FREE' && engine.status === 'active' && isLive && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--cc-cyan)',
-                      fontFamily: 'var(--cc-mono), monospace',
-                    }}
-                  >
-                    ✦ Prueba en vivo
-                  </span>
-                )}
-                {tier === 'PRO' && engine.status === 'active' && !meetsTier && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: 'var(--cc-amber)',
-                      fontFamily: 'var(--cc-mono), monospace',
-                    }}
-                  >
-                    🔒 VIP
-                  </span>
-                )}
-              </div>
+              ))}
             </div>
-          );
-        })}
-      </div>
-
-      {/* Tier capability footer reference */}
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Capacidades de tu plan</div>
-        <div className="cc-mod-list">
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Plan</div>
-              <div className="cc-mod-sub">{caps.label} · {caps.price} / {caps.per}</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>{caps.liveEnginesCount === Infinity ? '∞' : caps.liveEnginesCount}</b>
-              <span>engines en vivo</span>
-            </div>
-          </div>
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Trabajos / mes</div>
-              <div className="cc-mod-sub">incluidos en el plan</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>{caps.jobsPerMonth.toLocaleString()}</b>
-            </div>
-          </div>
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Tokens IA / mes</div>
-              <div className="cc-mod-sub">across all engines</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>{caps.tokensPerMonth.toLocaleString()}</b>
-            </div>
-          </div>
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Almacenamiento</div>
-              <div className="cc-mod-sub">clips · VODs · uploads</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>{caps.storageMB >= 1000 ? `${caps.storageMB / 1000} GB` : `${caps.storageMB} MB`}</b>
-            </div>
-          </div>
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Historial</div>
-              <div className="cc-mod-sub">retención de logs y ejecuciones</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>{caps.historyDays >= 365 ? '1 año+' : `${caps.historyDays} días`}</b>
-            </div>
-          </div>
-          <div className="cc-mod-row">
-            <div className="cc-mod-body">
-              <div className="cc-mod-name">Soporte</div>
-              <div className="cc-mod-sub">canal de contacto</div>
-            </div>
-            <div className="cc-mod-right">
-              <b>
-                {caps.hasPrioritySupport
-                  ? 'Prioritario'
-                  : tier === 'PRO'
-                    ? 'Email'
-                    : 'Comunidad'}
-              </b>
-            </div>
-          </div>
-        </div>
+          </section>
+        )}
       </div>
     </div>
   );
