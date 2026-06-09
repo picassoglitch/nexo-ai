@@ -55,7 +55,7 @@ The SMTP swap fixes the `From:` header. The email BODY still uses Supabase's
 default copy ("Hi there! Confirm your signup..."). To make them match our
 brand we paste branded HTML into Supabase's template editor.
 
-In the same screen (**Authentication → Emails**) you'll see **5 template
+In the same screen (**Authentication → Emails**) you'll see **6 template
 slots**:
 
 - Confirm signup
@@ -63,6 +63,7 @@ slots**:
 - Magic link
 - Change email address
 - Reset password
+- Reauthentication (a 6-digit `{{ .Token }}` code, not a link)
 
 For each one:
 

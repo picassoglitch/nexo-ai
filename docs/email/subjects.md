@@ -13,6 +13,7 @@ in the subject too (rarely useful, but legal).
 | Magic link | `Tu link de acceso a Nexo AI` |
 | Change email address | `Confirma tu nuevo correo en Nexo AI` |
 | Reset password | `Restablece tu contraseña en Nexo AI` |
+| Reauthentication | `Tu código de verificación de Nexo AI` |
 
 The subject ↔ HTML body pairing is what the recipient sees first in their
 inbox preview. The HTML templates assume these subjects and don't repeat
