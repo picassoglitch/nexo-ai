@@ -85,6 +85,16 @@ export interface TierCapabilities {
   clipAutoPublish: boolean;
   /** How many brand kits NexoClip stores (Infinity = uncapped). */
   clipBrandKits: number;
+  /** Whether the user can auto-ingest VODs from a watched Google Drive folder
+   *  (NexoClip "Watch a Drive folder"). false = manual upload only. Gated here
+   *  so NexoClip reads it off the SSO tier like every other clip cap. */
+  clipDriveAutoIngest: boolean;
+  /** Whether the user can connect their own social accounts (TikTok/IG/YT/…)
+   *  and one-click publish clips via the Zernio publishing API. This is the
+   *  COGS-bearing action (Zernio bills per connected account), so it's tier-
+   *  gated. `clipAutoPublish` above is the stronger VIP perk: hands-off
+   *  auto-publish + scheduling on top of connect. */
+  clipConnectSocials: boolean;
 
   // ── Display ───────────────────────────────────────────────────────────
   label: string;
@@ -111,6 +121,8 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     clipExportMaxQuality: 'sd',
     clipAutoPublish: false,
     clipBrandKits: 0,
+    clipDriveAutoIngest: false,
+    clipConnectSocials: false,
     label: 'Free',
     price: '$0',
     per: 'siempre',
@@ -136,6 +148,8 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     clipExportMaxQuality: 'hd',
     clipAutoPublish: false,
     clipBrandKits: 1,
+    clipDriveAutoIngest: true,
+    clipConnectSocials: true,
     label: 'Pro',
     price: 'MXN $749',
     per: 'mes',
@@ -163,6 +177,8 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     clipExportMaxQuality: 'hd',
     clipAutoPublish: false,
     clipBrandKits: 1,
+    clipDriveAutoIngest: true,
+    clipConnectSocials: true,
     label: 'Partner',
     price: 'Programa',
     per: '',
@@ -186,6 +202,8 @@ export const TIER_CAPS: Record<SubscriptionTier, TierCapabilities> = {
     clipExportMaxQuality: '4k',
     clipAutoPublish: true,
     clipBrandKits: Infinity,
+    clipDriveAutoIngest: true,
+    clipConnectSocials: true,
     label: 'VIP',
     price: 'MXN $2,499',
     per: 'mes',
