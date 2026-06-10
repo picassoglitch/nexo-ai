@@ -207,7 +207,7 @@ export default async function WorkspaceHomePage({
                 <div className="cc-mod-card-head">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span
-                      className={`grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border ${
+                      className={`relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border ${
                         isComingSoon
                           ? 'border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] text-[var(--cc-txt-4)]'
                           : 'border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] text-[var(--cc-green)]'

@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
+import Image from 'next/image';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
@@ -71,6 +72,10 @@ export default async function EngineWorkspacePage({
   const engines = await listEngines();
   const engine = engines.find((e) => e.slug === slug);
   if (!engine || engine.status === 'deprecated') notFound();
+
+  // NexoClip has a real brand lockup — show it as a hero banner and drop the
+  // generic emoji icon box from the header (the lockup already brands the page).
+  const isNexoclip = engine.slug === NEXOCLIP_TRIAL_SLUG;
 
   const role = session.role;
   const storedTier = session.tier;
@@ -147,6 +152,32 @@ export default async function EngineWorkspacePage({
         </Link>
       </div>
 
+      {/* NexoClip brand hero — full lockup. The logo's own dark background
+          (#03040b) matches the banner fill, so the square reads as a floating
+          mark rather than a pasted tile. */}
+      {isNexoclip && (
+        <div
+          style={{
+            marginBottom: 24,
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '22px 20px',
+            border: '1px solid var(--cc-line-2)',
+            borderRadius: 'var(--cc-r-l)',
+            background: '#03040b',
+          }}
+        >
+          <Image
+            src="/nexoclip-logo.png"
+            alt="NexoClip — clips virales para streamers"
+            width={240}
+            height={240}
+            priority
+            style={{ display: 'block', width: 240, height: 240 }}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div
         style={{
@@ -157,21 +188,23 @@ export default async function EngineWorkspacePage({
           flexWrap: 'wrap',
         }}
       >
-        <div
-          style={{
-            fontSize: 44,
-            width: 64,
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid var(--cc-line-2)',
-            borderRadius: 14,
-            background: 'var(--cc-panel)',
-          }}
-        >
-          {engine.icon}
-        </div>
+        {!isNexoclip && (
+          <div
+            style={{
+              fontSize: 44,
+              width: 64,
+              height: 64,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid var(--cc-line-2)',
+              borderRadius: 14,
+              background: 'var(--cc-panel)',
+            }}
+          >
+            {engine.icon}
+          </div>
+        )}
         <div style={{ flex: 1, minWidth: 220 }}>
           <h2
             style={{

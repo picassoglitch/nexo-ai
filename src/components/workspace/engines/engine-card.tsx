@@ -71,7 +71,7 @@ function EngineIcon({ vm, variant, box, glyph }: { vm: EngineVM; variant: Engine
         ? 'border-[var(--cc-line-2)] bg-[var(--cc-bg-2)] text-[var(--cc-txt-4)]'
         : 'border-[var(--cc-green)]/30 bg-[var(--cc-green-g)] text-[var(--cc-green)]';
   return (
-    <span className={`grid shrink-0 place-items-center overflow-hidden rounded-2xl border ${tint} ${box}`}>
+    <span className={`relative grid shrink-0 place-items-center overflow-hidden rounded-2xl border ${tint} ${box}`}>
       <EngineGlyph slug={vm.slug} size={glyph} />
     </span>
   );

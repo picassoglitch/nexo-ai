@@ -1,7 +1,7 @@
 'use client';
 
+import Image from 'next/image';
 import {
-  Scissors,
   CandlestickChart,
   Video,
   Radio,
@@ -17,9 +17,14 @@ import {
 // inconsistently across OS/fonts (the old ✂ / 📊 / 🎥 showed as tofu boxes).
 // Mapped by slug, with a neutral fallback for any engine we haven't styled yet.
 // Color comes from the parent via `currentColor`, so the card tints per state.
+//
+// NexoClip is the exception: it has a real brand mark (public/nexoclip-mark.png),
+// so we render the logo tile filling the parent box instead of a lucide glyph.
+// The mark carries its own dark background, so the parent's tint shows only as a
+// thin frame. The parent box must be `relative` (and is square + overflow-hidden)
+// for the `fill` image to lay out correctly.
 
 const BY_SLUG: Record<string, LucideIcon> = {
-  nexoclip: Scissors,
   nexocrypto: CandlestickChart,
   nexotrade: TrendingUp,
   nexoobs: Video,
@@ -38,6 +43,18 @@ export function EngineGlyph({
   size?: number;
   className?: string;
 }) {
+  if (slug === 'nexoclip') {
+    return (
+      <Image
+        src="/nexoclip-mark.png"
+        alt=""
+        aria-hidden
+        fill
+        sizes="64px"
+        className={`object-cover ${className ?? ''}`}
+      />
+    );
+  }
   const Icon = BY_SLUG[slug] ?? Boxes;
   return <Icon size={size} strokeWidth={1.75} className={className} aria-hidden />;
 }
