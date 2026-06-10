@@ -364,23 +364,31 @@
     "steps": {
       "welcome": {
         "title": "Bienvenido a Nexo AI",
-        "body": "Te damos un recorrido rápido por tu espacio — menos de 30 segundos."
+        "body": "Este es tu espacio de trabajo. Te mostramos lo esencial en un minuto — puedes verlo más tarde o cerrarlo cuando quieras."
       },
       "nav": {
         "title": "Tu menú",
-        "body": "Desde aquí navegas todo: tu cuenta, tus engines y los ajustes."
+        "body": "Todo se navega desde aquí, agrupado en Tu cuenta, Plataforma y Ajustes. Cámbiate de sección con un clic."
       },
       "engines": {
         "title": "Tus engines",
-        "body": "En «Mis engines» ves, abres y activas tus engines, como NexoClip."
+        "body": "En «Mis engines» ves, abres y activas tus engines (NexoClip, NexoCrypto y más). «En vivo» = corriendo; «Disponible» = listo para usar con tu plan."
       },
       "tokens": {
         "title": "Tu balance de tokens",
-        "body": "En «Uso» revisas cuántos tokens IA te quedan este mes."
+        "body": "En «Uso» revisas cuántos tokens IA te quedan este mes y tu consumo. Si se acaban, puedes recargar o subir de plan."
+      },
+      "plan": {
+        "title": "Tu plan",
+        "body": "En «Suscripción» comparas Free, Pro y VIP y cambias de plan. En «Facturación» ves tus pagos y comprobantes."
       },
       "account": {
         "title": "Tu información",
-        "body": "En «Perfil & seguridad» cambias tus datos, contraseña y plan."
+        "body": "En «Perfil & seguridad» actualizas tus datos, cambias tu contraseña y activas la verificación en dos pasos."
+      },
+      "help": {
+        "title": "¿Necesitas ayuda?",
+        "body": "En «Mensajes» hablas directo con el equipo Nexo, y en «Ayuda» encuentras guías y soporte. Estamos para ayudarte."
       }
     }
   },

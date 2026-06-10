@@ -26,7 +26,9 @@ const STEPS: Step[] = [
   { key: 'nav', target: '[data-tour="nav"]' },
   { key: 'engines', target: '[data-tour="nav-myengines"]' },
   { key: 'tokens', target: '[data-tour="nav-usage"]' },
+  { key: 'plan', target: '[data-tour="nav-subscription"]' },
   { key: 'account', target: '[data-tour="nav-profile"]' },
+  { key: 'help', target: '[data-tour="nav-help"]' },
 ];
 
 interface Pos {
@@ -131,7 +133,7 @@ export function WorkspaceTour() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const M = 12;
-    const width = Math.min(416, vw - 2 * M);
+    const width = Math.min(480, vw - 2 * M);
     const th = tip.offsetHeight;
 
     if (!rect) {
@@ -216,10 +218,10 @@ export function WorkspaceTour() {
           position: 'fixed',
           top: pos?.top ?? -9999,
           left: pos?.left ?? -9999,
-          width: pos?.width ?? 416,
+          width: pos?.width ?? 480,
           visibility: pos ? 'visible' : 'hidden',
         }}
-        className="rounded-2xl border border-[var(--cc-line-2)] bg-[var(--cc-panel)] p-7 shadow-[0_24px_70px_-15px_rgba(0,0,0,0.75)]"
+        className="rounded-[20px] border border-[var(--cc-line-2)] bg-[var(--cc-panel)] p-8 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.8)]"
       >
         <div className="mb-3 flex items-center justify-between">
           <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--cc-green)] [font-family:var(--cc-mono),monospace]">
@@ -238,12 +240,12 @@ export function WorkspaceTour() {
         </div>
 
         <h3
-          className="text-[17px] font-bold tracking-tight text-[var(--cc-txt)]"
+          className="text-[19px] font-bold tracking-tight text-[var(--cc-txt)]"
           style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
         >
           {t(`steps.${key}.title`)}
         </h3>
-        <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--cc-txt-2)]">
+        <p className="mt-2.5 text-[14px] leading-relaxed text-[var(--cc-txt-2)]">
           {t(`steps.${key}.body`)}
         </p>
 

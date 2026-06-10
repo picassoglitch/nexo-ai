@@ -364,23 +364,31 @@
     "steps": {
       "welcome": {
         "title": "Welcome to Nexo AI",
-        "body": "Here's a quick tour of your workspace — under 30 seconds."
+        "body": "This is your workspace. Here's the essentials in a minute — you can see it later or close it anytime."
       },
       "nav": {
         "title": "Your menu",
-        "body": "Navigate everything from here: your account, your engines and settings."
+        "body": "Navigate everything from here, grouped into Your account, Platform and Settings. Switch sections in one click."
       },
       "engines": {
         "title": "Your engines",
-        "body": "Under “My engines” you view, open and activate engines like NexoClip."
+        "body": "Under “My engines” you view, open and activate engines (NexoClip, NexoCrypto and more). “Live” = running; “Available” = ready to use on your plan."
       },
       "tokens": {
         "title": "Your token balance",
-        "body": "Under “Usage” you can see how many AI tokens you have left this month."
+        "body": "Under “Usage” you check how many AI tokens you have left this month and your consumption. Out of tokens? Top up or upgrade."
+      },
+      "plan": {
+        "title": "Your plan",
+        "body": "Under “Subscription” you compare Free, Pro and VIP and switch plans. “Billing” has your payments and receipts."
       },
       "account": {
         "title": "Your info",
-        "body": "Under “Profile & security” you change your details, password and plan."
+        "body": "Under “Profile & security” you update your details, change your password and enable two-factor auth."
+      },
+      "help": {
+        "title": "Need help?",
+        "body": "“Messages” is a direct line to the Nexo team, and “Help” has guides and support. We've got you."
       }
     }
   },
