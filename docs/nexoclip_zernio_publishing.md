@@ -83,12 +83,25 @@ Three steps (NexoClip already has the rendered clip on disk/CDN):
    Response: `post._id`, `post.status`, and `post.results[]` with
    `{ platform, status, platformPostId, postUrl, error }` — store the `postUrl`s.
 
-**Media constraints — VERIFY before launch:** the media guide states MP4/MOV/
-AVI/WebM up to **5 GB** (no explicit duration cap), but another docs page lists
-MP4 ≤50 MB / ≤60 s. Clip output is short-form vertical, so either is workable,
-but confirm the real per-platform limits (TikTok/IG Reels/Shorts) against
-NexoClip's render presets and transcode to fit if needed. One video per post per
-platform (no photo+video mixing on TikTok).
+### Per-platform video specs (verified from Zernio docs)
+
+| Platform | Max size | Duration | Format / codec | Resolution / aspect | Caption |
+|---|---|---|---|---|---|
+| **TikTok** | 4 GB | 3 s – 10 min | MP4/MOV/WebM · H.264 | 1080×1920 · 9:16 · 30 fps | 2,200 |
+| **IG Reels** | 300 MB (auto-compresses above) | 3–90 s | MP4/MOV · H.264 | 1080×1920 · 9:16 | 2,200 |
+| **YT Shorts** | 256 GB (channel limits apply) | ≤ 3 min | MP4/MOV/WebM… | 1080×1920 · 9:16 | title 100 / desc 5,000 |
+
+**The single render preset that posts to all three:** MP4, **H.264, 1080×1920
+(9:16), ≤ 90 s, ≤ 300 MB, 30 fps, caption ≤ 2,200**. Render the master clip to
+that and one `POST /posts` fans out to TikTok + IG Reels + YT Shorts. (The
+binding limits are IG Reels' 90 s / 300 MB.) One video per post per platform — no
+photo+video mixing on TikTok.
+
+**TikTok gotchas:** every TikTok post must set `content_preview_confirmed` and
+`express_consent_given` = true (TikTok legal consent). TikTok also enforces a
+**per-account daily cap for third-party-API posts** separate from the app — plan
+for `daily limit exceeded` errors with a 24 h retry/backoff, and surface a clear
+"try again tomorrow" state rather than silently failing.
 
 ---
 
@@ -155,3 +168,92 @@ Subscribe to:
 - FREE tenant sees no connect button (gated on `clipConnectSocials`).
 - Disconnecting on the platform → `account.disconnected` → reconnect CTA.
 - Downgrade below `clipConnectSocials` → profile deleted, Zernio billing stops.
+
+---
+
+## 9. NexoClip-side reference — schema & endpoints
+
+What NexoClip owns. Zernio is the upstream; these are NexoClip's own DB tables +
+the routes its frontend calls. All routes resolve `tenant_id` from the NexoClip
+session and read entitlements (`clipConnectSocials`, `clipAutoPublish`) from the
+SSO `tier` claim.
+
+### DB (NexoClip)
+
+```sql
+alter table tenants add column if not exists zernio_profile_id text;  -- one Zernio profile per tenant
+
+-- Local mirror of accounts connected through Zernio (so the UI never round-trips).
+create table social_accounts (
+  id                uuid primary key default gen_random_uuid(),
+  tenant_id         text not null,
+  zernio_account_id text not null unique,
+  platform          text not null,          -- tiktok | instagram | youtube | ...
+  username          text,
+  status            text not null default 'active',  -- active | revoked
+  connected_at      timestamptz not null default now(),
+  unique (tenant_id, platform, zernio_account_id)
+);
+
+-- One publish attempt of one clip; targets fan out per platform.
+create table clip_publishes (
+  id            uuid primary key default gen_random_uuid(),
+  tenant_id     text not null,
+  clip_id       uuid not null,
+  zernio_post_id text,
+  status        text not null default 'pending', -- pending|scheduled|published|partial|failed
+  scheduled_for timestamptz,                      -- null = publish now
+  created_at    timestamptz not null default now()
+);
+create table clip_publish_targets (
+  publish_id       uuid not null references clip_publishes(id) on delete cascade,
+  platform         text not null,
+  social_account_id uuid not null references social_accounts(id),
+  status           text not null default 'pending',
+  platform_post_id text,
+  post_url         text,
+  error            text,
+  primary key (publish_id, platform, social_account_id)
+);
+```
+
+### NexoClip routes (its backend → Zernio)
+
+| Method | Route | Gate | Does |
+|---|---|---|---|
+| `POST` | `/api/social/profile` | connect | Ensure `zernio_profile_id` (idempotent `POST /profiles`). |
+| `GET`  | `/api/social/accounts` | connect | List the tenant's `social_accounts`. |
+| `POST` | `/api/social/connect` | `clipConnectSocials` | Body `{platform}` → `GET /connect/{platform}?profileId` → return `authUrl`. |
+| `DELETE` | `/api/social/accounts/:id` | connect | Disconnect on Zernio; mark local `revoked`. |
+| `POST` | `/api/clips/:clipId/publish` | `clipConnectSocials` (+ `clipAutoPublish` if `scheduledFor` set) | presign → PUT clip → `POST /posts`; write `clip_publishes` + targets. |
+| `POST` | `/api/webhooks/zernio` | — (HMAC) | Verify `X-Zernio-Signature`, dedup `payload.id`; update publishes (`post.*`) + accounts (`account.disconnected`). |
+
+### Publish handler (pseudocode)
+
+```python
+def publish_clip(tenant, clip, req):
+    require(tier_allows(tenant, "clipConnectSocials"))
+    if req.scheduled_for:
+        require(tier_allows(tenant, "clipAutoPublish"))   # scheduling = VIP
+
+    presign = zernio.media.presign()                       # POST /v1/media/presign
+    http_put(presign.uploadUrl, clip.render_bytes)         # 1080x1920 H.264 <=90s/300MB
+
+    pub = db.create_publish(tenant, clip, req.scheduled_for)
+    post = zernio.posts.create(                            # POST /posts
+        content=req.caption,
+        platforms=[{"platform": t.platform, "accountId": t.zernio_account_id}
+                   for t in req.targets],
+        mediaItems=[{"type": "video", "url": presign.publicUrl}],
+        publishNow=(req.scheduled_for is None),
+        scheduledFor=req.scheduled_for, timezone=req.timezone,
+        # TikTok consent flags when a tiktok target is present:
+        tiktok={"content_preview_confirmed": True, "express_consent_given": True},
+    )
+    db.attach_post(pub, post)        # store zernio_post_id; targets updated by webhook
+    return pub
+```
+
+The `post.published / partial / failed` webhooks fill in `post_url` / `error`
+per target; `account.disconnected` flips `social_accounts.status = revoked` and
+pauses dependent scheduled publishes.
