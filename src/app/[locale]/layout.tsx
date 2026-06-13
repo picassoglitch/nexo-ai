@@ -6,13 +6,21 @@ import { Analytics } from '@vercel/analytics/next';
 import { routing } from '@/i18n/routing';
 import './globals.css';
 
+// Lock the [locale] segment to real locales. Without this, requests for
+// non-locale top-level paths (/favicon.ico, /robots.txt, …) match the dynamic
+// segment and run generateMetadata with locale="favicon.ico", which threw
+// MODULE_NOT_FOUND on `import('messages/favicon.ico.json')`. Now they 404 clean.
+export const dynamicParams = false;
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const messages = (await import(`../../../messages/${locale}.json`)).default;
+  // Belt to dynamicParams' suspenders: never import a non-locale messages file.
+  const safeLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
+  const messages = (await import(`../../../messages/${safeLocale}.json`)).default;
   // Title template: pages that export `metadata: { title: 'Engines' }` will
   // render as "Engines · Nexo AI" in the browser tab. Pages without a title
   // fall back to the locale-level meta.title (the marketing tagline).

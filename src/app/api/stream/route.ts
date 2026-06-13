@@ -16,8 +16,16 @@ import { nextActivityEvent, tickRail, tickStrip } from '@/lib/data/telemetry';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+// Vercel kills the function at this limit; we self-close just before it so the
+// stream ends with a clean 200 instead of "Task timed out after 300 seconds".
+export const maxDuration = 300;
 
 const ENCODER = new TextEncoder();
+
+// Recycle the connection ~30s before Vercel's hard timeout. EventSource
+// auto-reconnects, so the only visible effect is a fresh stream every ~4.5 min
+// — with clean logs and bounded per-invocation cost.
+const MAX_LIFETIME_MS = 270_000;
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -78,6 +86,10 @@ export async function GET(request: Request) {
         setInterval(async () => sendJson({ kind: 'rail', rail: await tickRail() }), 4800),
         // Keepalive ping every 25s to defeat proxy idle timeouts.
         setInterval(() => safeEnqueue(`: ping\n\n`), 25000),
+        // Self-close before Vercel's maxDuration so the connection recycles
+        // cleanly instead of being killed with a timeout error. clearInterval
+        // also cancels a setTimeout handle in Node, so cleanup() clears it too.
+        setTimeout(cleanup, MAX_LIFETIME_MS),
       );
     },
     cancel() {
