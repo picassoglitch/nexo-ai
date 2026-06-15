@@ -19,7 +19,7 @@ import { MessageThread } from '@/components/messages/message-thread';
 import { AdminReplyComposer } from '@/components/messages/admin-reply-composer';
 import { InquiryActions } from '@/components/messages/inquiry-actions';
 
-export const metadata = { title: 'Mensajes — Admin' };
+export const metadata = { title: 'Mensajes — Administración' };
 
 // Admin inbox.
 //
@@ -55,7 +55,7 @@ function buildInboxList(
     items.push({
       kind: 'thread',
       id: t.threadUserId,
-      primary: t.userFullName ?? t.userEmail ?? '(usuario sin nombre)',
+      primary: t.userFullName ?? t.userEmail ?? '(sin nombre)',
       secondary: t.lastMessage.slice(0, 80),
       ts: t.lastMessageAt,
       unread: t.unreadForAdmin > 0,
@@ -72,10 +72,10 @@ function buildInboxList(
       unread: i.read_at_admin === null,
       badge:
         i.pane === 'partner'
-          ? 'Lead Partner'
+          ? 'Prospecto Partner'
           : i.pane === 'earn'
-            ? 'Lead Earn'
-            : 'Lead',
+            ? 'Prospecto Earn'
+            : 'Prospecto',
     });
   }
   // Unread items always come first; within each group sort by ts desc.
@@ -161,7 +161,7 @@ export default async function AdminMessagesPage({
               textTransform: 'uppercase',
             }}
           >
-            Bandeja · {items.length} item{items.length === 1 ? '' : 's'}
+            Mensajes · {items.length} mensaje{items.length === 1 ? '' : 's'}
           </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {items.length === 0 ? (
@@ -173,8 +173,8 @@ export default async function AdminMessagesPage({
                   fontSize: 12.5,
                 }}
               >
-                Bandeja vacía. Los mensajes de subscribers y leads de la landing
-                aparecerán aquí.
+                Todavía no tienes mensajes. Aquí verás lo que te escriben tus
+                suscriptores y las personas que te contactan desde tu página.
               </div>
             ) : (
               items.map((it) => {
@@ -272,7 +272,7 @@ export default async function AdminMessagesPage({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {it.secondary || '(sin contenido)'}
+                      {it.secondary || '(mensaje vacío)'}
                     </div>
                   </Link>
                 );
@@ -318,7 +318,7 @@ function ThreadDetail({
         }}
       >
         <h3 style={{ fontSize: 14, marginBottom: 2 }}>
-          {summary.userFullName ?? summary.userEmail ?? '(usuario)'}
+          {summary.userFullName ?? summary.userEmail ?? '(sin nombre)'}
         </h3>
         <div
           style={{
@@ -327,7 +327,7 @@ function ThreadDetail({
             color: 'var(--cc-txt-4)',
           }}
         >
-          {summary.userEmail ?? '—'} · tier {summary.userTier}
+          {summary.userEmail ?? '—'} · plan {summary.userTier}
         </div>
       </div>
 
@@ -381,7 +381,7 @@ function InquiryDetail({ inquiry }: { inquiry: PartnerInquiryRow }) {
               textTransform: 'uppercase',
             }}
           >
-            Lead {inquiry.pane}
+            Prospecto {inquiry.pane}
           </span>
         </div>
         <div
@@ -431,12 +431,12 @@ function EmptyDetail() {
     >
       <div style={{ fontSize: 30, marginBottom: 12 }}>✉</div>
       <p style={{ fontSize: 13, marginBottom: 6 }}>
-        Selecciona un hilo o lead de la izquierda.
+        Elige una conversación o un contacto de la lista.
       </p>
       <small style={{ fontSize: 11.5, color: 'var(--cc-txt-4)' }}>
-        Los mensajes nuevos llegan automáticamente cuando algún subscriber escribe
-        desde <code>/app/messages</code> o alguien envía la forma de contacto en la
-        landing.
+        Los mensajes nuevos llegan solos: cuando un suscriptor te escribe desde{' '}
+        <code>/app/messages</code> o cuando alguien llena el formulario de contacto
+        de tu página.
       </small>
     </div>
   );

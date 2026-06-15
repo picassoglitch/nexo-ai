@@ -24,12 +24,12 @@ export function EngineReprovisionButton({ engineId, engineName }: Props) {
       const result = await reprovisionEngine(engineId);
       if (result.ok) {
         showToast(
-          `<b>${engineName}</b> · cuenta provisionada (id: ${result.externalUserId})`,
+          `<b>${engineName}</b> · tu cuenta ya está lista (id: ${result.externalUserId})`,
         );
         // RSC refresh so the "Tu acceso" panel re-renders with the new id.
         router.refresh();
       } else {
-        showToast(`<b>Error</b> · ${result.error ?? 'Falló el provisioning'}`);
+        showToast(`<b>Error</b> · ${result.error ?? 'No pudimos crear tu cuenta'}`);
       }
     });
   }
@@ -52,7 +52,7 @@ export function EngineReprovisionButton({ engineId, engineName }: Props) {
         opacity: pending ? 0.7 : 1,
       }}
     >
-      {pending ? 'Provisionando…' : `↻ Re-provisionar en ${engineName}`}
+      {pending ? 'Creando tu cuenta…' : `↻ Crear tu cuenta en ${engineName}`}
     </button>
   );
 }

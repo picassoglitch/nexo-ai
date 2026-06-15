@@ -74,8 +74,8 @@ function ContactInner({ isAuthenticated }: { isAuthenticated: boolean }) {
                 maxWidth: '56ch',
               }}
             >
-              Demos, integraciones, partnerships, o curiosidad sobre cómo Nexo AI puede orquestar
-              tu operación. Te respondemos en menos de 24 horas hábiles.
+              ¿Quieres una demo, integrar algo, sumarte como partner o saber cómo Nexo AI puede
+              poner orden en tu operación? Escríbenos y te respondemos en menos de 24 horas hábiles.
             </p>
           </div>
 
@@ -103,9 +103,9 @@ function ContactInner({ isAuthenticated }: { isAuthenticated: boolean }) {
               fontFamily: 'var(--font-mono), monospace',
             }}
           >
-            <span>· Respuesta &lt; 24h hábiles</span>
+            <span>· Te respondemos en menos de 24h hábiles</span>
             <span>· Tu correo no se publica</span>
-            <span>· Sin newsletter forzado</span>
+            <span>· No te metemos a ningún newsletter</span>
           </div>
         </div>
       </main>

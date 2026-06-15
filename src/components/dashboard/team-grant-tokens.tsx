@@ -85,13 +85,13 @@ export function TeamGrantTokens({ userId, userName, bonusBalance }: Props) {
   function apply(deltaOverride?: number) {
     const parsed = deltaOverride ?? parseAmount(raw);
     if (!Number.isFinite(parsed) || parsed === 0) {
-      showToast('<b>Error</b> · cantidad inválida (usa 100k, 1.5M, etc.)');
+      showToast('<b>Error</b> · cantidad no válida (escribe 100k, 1.5M, etc.)');
       return;
     }
     startTransition(async () => {
       const res = await grantTokensToUser(userId, parsed, reason.trim() || null);
       if (!res.ok) {
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo'}`);
+        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo aplicar'}`);
         return;
       }
       const verb = parsed > 0 ? 'Otorgaste' : 'Revocaste';
@@ -110,7 +110,7 @@ export function TeamGrantTokens({ userId, userName, bonusBalance }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        title="Otorgar o revocar tokens bonus"
+        title="Dar o quitar tokens bonus"
         style={{
           padding: '6px 10px',
           borderRadius: 7,
@@ -211,7 +211,7 @@ export function TeamGrantTokens({ userId, userName, bonusBalance }: Props) {
           />
           <input
             type="text"
-            placeholder="Razón (opcional, va al audit log)"
+            placeholder="Motivo (opcional, queda en el registro)"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             style={{

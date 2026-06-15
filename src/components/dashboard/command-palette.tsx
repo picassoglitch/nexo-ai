@@ -17,12 +17,12 @@ const STATIC_CMDS: Cmd[] = [
   { g: 'Acciones', ic: '▶', n: 'Iniciar stream', s: 'NexoStreamManager', k: 'S' },
   { g: 'Acciones', ic: '✂', n: 'Crear clip', s: 'NexoClip · último VOD' },
   { g: 'Acciones', ic: '↗', n: 'Publicar a TikTok', s: 'Publishing' },
-  { g: 'Acciones', ic: '⟳', n: 'Reiniciar worker', s: 'Selecciona un engine' },
-  { g: 'Acciones', ic: '👥', n: 'Invitar miembro', s: 'Team & Roles' },
-  { g: 'Navegar', ic: '◑', n: 'Abrir Analytics', s: 'Métricas e ingresos' },
+  { g: 'Acciones', ic: '⟳', n: 'Reiniciar worker', s: 'Elige un engine' },
+  { g: 'Acciones', ic: '👥', n: 'Invitar a tu equipo', s: 'Team & Roles' },
+  { g: 'Navegar', ic: '◑', n: 'Abrir Analytics', s: 'Tus métricas e ingresos' },
   { g: 'Navegar', ic: '$', n: 'Abrir Revenue', s: 'MRR por engine' },
   { g: 'Navegar', ic: '▤', n: 'Abrir Infra', s: 'Workers · GPU · costos' },
-  { g: 'Navegar', ic: '◉', n: 'Abrir Audit log', s: 'Eventos de cuenta' },
+  { g: 'Navegar', ic: '◉', n: 'Abrir Audit log', s: 'Todo lo que pasa en tu cuenta' },
 ];
 
 export function CommandPalette() {
@@ -106,7 +106,7 @@ export function CommandPalette() {
       openDrawer(c.engineId);
       return;
     }
-    showToast(`<b>${c.n}</b> — ejecutado`);
+    showToast(`<b>${c.n}</b> — listo`);
   }
 
   if (!open) return null;
@@ -128,7 +128,7 @@ export function CommandPalette() {
               setQ(e.target.value);
               setSel(0);
             }}
-            placeholder="Escribe un comando o busca un engine…"
+            placeholder="Escribe un comando o busca tu engine…"
             autoComplete="off"
           />
           <kbd>ESC</kbd>
@@ -156,7 +156,7 @@ export function CommandPalette() {
               </div>
             );
           })}
-          {!items.length && <div className="cc-empty-feed">Sin resultados.</div>}
+          {!items.length && <div className="cc-empty-feed">No encontramos nada.</div>}
         </div>
         <div className="cc-cf">
           <span>

@@ -94,7 +94,7 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
   if (!checkRate(ip)) {
     return {
       ok: false,
-      error: 'Demasiados mensajes desde tu IP. Espera unos minutos e intenta de nuevo.',
+      error: 'Recibimos muchos mensajes desde tu conexión. Espera unos minutos y vuelve a intentarlo.',
     };
   }
 
@@ -121,7 +121,7 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
   });
 
   if (!inboxResult.ok && inboxResult.reason !== 'not_configured') {
-    return { ok: false, error: 'No pudimos entregar tu mensaje. Intenta de nuevo en unos minutos.' };
+    return { ok: false, error: 'No pudimos enviar tu mensaje. Vuelve a intentarlo en unos minutos.' };
   }
 
   // Persist to partner_inquiries so the admin inbox shows it even if the

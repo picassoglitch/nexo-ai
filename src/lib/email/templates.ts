@@ -58,9 +58,9 @@ function wrap(opts: { title: string; preview: string; body: string }): string {
             <!-- Footer -->
             <tr>
               <td style="padding:24px 28px 40px;font-size:11.5px;color:${INK_FAINT};line-height:1.55;font-family:'SF Mono',Menlo,Consolas,monospace;">
-                Nexo AI · operación AI autónoma · <a href="https://nexo-ai.world" style="color:${INK_FAINT};text-decoration:underline;">nexo-ai.world</a>
+                Nexo AI · tu equipo de AI que trabaja solo · <a href="https://nexo-ai.world" style="color:${INK_FAINT};text-decoration:underline;">nexo-ai.world</a>
                 <br />
-                Si este correo te llegó por error, ignóralo — no se requiere acción.
+                Si este correo te llegó por error, ignóralo — no tienes que hacer nada.
               </td>
             </tr>
           </table>
@@ -86,7 +86,7 @@ export function contactInboxTemplate(opts: {
       Nuevo mensaje de contacto
     </h1>
     <p style="margin:0 0 24px;font-size:13px;color:${INK_DIM};">
-      Llegó a través del formulario en /contacto
+      Llegó desde el formulario de /contacto
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-size:13.5px;">
@@ -118,7 +118,7 @@ export function contactInboxTemplate(opts: {
     </table>
 
     <p style="margin:24px 0 0;padding:14px 16px;background:${BG_DARK};border-radius:8px;font-size:11.5px;color:${INK_FAINT};line-height:1.5;">
-      ▸ Responde directo a este correo — reply-to apunta al remitente.
+      ▸ Responde directo a este correo y tu respuesta le llega a quien escribió.
     </p>
   `;
 
@@ -155,7 +155,7 @@ export function contactConfirmTemplate(opts: {
       Recibimos tu mensaje
     </h1>
     <p style="margin:0 0 24px;font-size:14px;color:${INK_DIM};line-height:1.55;">
-      Gracias por escribirnos, <strong style="color:${INK_PRIMARY};">${escapeHtml(opts.name)}</strong>. Tu consulta entró a nuestra bandeja con el asunto:
+      Gracias por escribirnos, <strong style="color:${INK_PRIMARY};">${escapeHtml(opts.name)}</strong>. Tu mensaje ya nos llegó con el asunto:
     </p>
 
     <div style="padding:14px 18px;background:${BG_DARK};border:1px solid ${LINE};border-radius:8px;margin-bottom:24px;">
@@ -173,7 +173,7 @@ export function contactConfirmTemplate(opts: {
     </p>
 
     <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid ${LINE};font-size:12px;color:${INK_FAINT};line-height:1.55;">
-      Si no enviaste este mensaje, alguien podría haber usado tu correo por error. Puedes ignorar este correo sin hacer nada — no creamos cuenta ni newsletter automático.
+      Si tú no enviaste este mensaje, quizá alguien escribió tu correo por error. Puedes ignorar este correo sin hacer nada — no te abrimos cuenta ni te suscribimos a nada.
     </p>
   `;
 
@@ -220,7 +220,7 @@ export function paymentSuccessTemplate(opts: {
     </h1>
 
     <p style="margin:0 0 28px;font-size:14px;color:${INK_DIM};line-height:1.55;text-align:center;">
-      Mercado Pago confirmó tu pago. Ya tienes acceso a todo lo que incluye tu nuevo plan.
+      Mercado Pago confirmó tu pago. Ya puedes usar todo lo que trae tu nuevo plan.
     </p>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:${BG_DARK};border-radius:10px;margin-bottom:28px;">

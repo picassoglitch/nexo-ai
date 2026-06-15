@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { Link, routing } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/client';
 
 /**
@@ -64,7 +64,8 @@ export function ResetPasswordForm({ tokenHash }: { tokenHash?: string }) {
       // their NEW password. Full navigation so the cleared session is in effect.
       await supabase.auth.signOut();
       setDone(true);
-      const prefix = locale === 'en' ? '' : `/${locale}`;
+      // 'as-needed' prefixing: the default locale has no prefix; others do.
+      const prefix = locale === routing.defaultLocale ? '' : `/${locale}`;
       window.location.assign(`${prefix}/sign-in?reset=success`);
     });
   }

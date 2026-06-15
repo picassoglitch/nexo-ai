@@ -148,7 +148,7 @@ export default async function EngineWorkspacePage({
             textDecoration: 'none',
           }}
         >
-          ← Volver a Mis engines
+          ← Volver a mis engines
         </Link>
       </div>
 
@@ -268,7 +268,7 @@ export default async function EngineWorkspacePage({
             </span>
           ) : isLive ? (
             <span className="cc-mod-badge gr" style={{ padding: '6px 12px', fontSize: 11 }}>
-              ● EN VIVO
+              ● En vivo
             </span>
           ) : meetsTier ? (
             <span className="cc-mod-badge cy" style={{ padding: '6px 12px', fontSize: 11 }}>
@@ -419,12 +419,12 @@ function LaunchPanel({
             marginBottom: 6,
           }}
         >
-          {isLive ? '● Modo en vivo' : 'Modo simulación'}
+          {isLive ? '● Modo en vivo' : 'Modo de prueba'}
         </div>
         <div style={{ fontSize: 15.5, color: 'var(--cc-txt)', fontWeight: 500 }}>
           {isLive
             ? `${engineName} está corriendo en vivo.`
-            : `Prueba ${engineName} sin tocar credenciales reales.`}
+            : `Prueba ${engineName} sin usar tus credenciales reales.`}
         </div>
         <div
           style={{
@@ -436,12 +436,12 @@ function LaunchPanel({
           }}
         >
           {isLive
-            ? 'Tus trabajos cuentan contra tu cuota mensual y los resultados afectan tus integraciones externas.'
+            ? 'Cada trabajo descuenta de tu cuota mensual y los resultados se reflejan en tus integraciones externas.'
             : isAdmin
-              ? 'Como admin estás viendo lo que vería un subscriber Free. Para correr en vivo, usa la lógica normal de PRO/VIP.'
+              ? 'Como admin estás viendo lo que vería un usuario Free. Para correrlo en vivo, usa el flujo normal de Pro o VIP.'
               : tier === 'FREE'
-                ? 'En Free todos los engines corren con datos de prueba — sin riesgo, sin costo. Sube a Pro para ejecutar en vivo.'
-                : 'Este engine no es tu selección activa en vivo. Cámbiala desde /app/engines si quieres correrlo en vivo.'}
+                ? 'En Free todos los engines corren con datos de prueba: sin riesgo y sin costo. Sube a Pro para ejecutarlo en vivo.'
+                : 'Este engine no es el que tienes activo en vivo. Cámbialo desde /app/engines si quieres correrlo en vivo.'}
         </div>
       </div>
 
@@ -449,7 +449,7 @@ function LaunchPanel({
         <EngineLaunchButton
           engineId={engineId}
           engineName={engineName}
-          label={isLive ? `Abrir ${engineName} ↗` : `Abrir simulación de ${engineName} ↗`}
+          label={isLive ? `Abrir ${engineName} ↗` : `Abrir prueba de ${engineName} ↗`}
         />
         {!isLive && tier !== 'FREE' && (
           <Link
@@ -465,7 +465,7 @@ function LaunchPanel({
               alignSelf: 'center',
             }}
           >
-            Cambiar selección live
+            Cambiar engine en vivo
           </Link>
         )}
       </div>
@@ -481,8 +481,8 @@ function LaunchPanel({
         }}
       >
         {hasExternalSurface
-          ? `▸ Te abre ${engineName} en una nueva pestaña con sesión SSO firmada.`
-          : `▸ La interfaz interactiva de ${engineName} se conecta aquí cuando el engine sea deployado.`}
+          ? `▸ Abre ${engineName} en una pestaña nueva con sesión SSO firmada.`
+          : `▸ La interfaz de ${engineName} se conecta aquí cuando el engine esté publicado.`}
       </p>
     </div>
   );
@@ -515,7 +515,7 @@ function UpgradeGatePanel({
           marginBottom: 6,
         }}
       >
-        🔒 Requiere upgrade
+        🔒 Necesitas un plan superior
       </div>
       <div style={{ fontSize: 15.5, color: 'var(--cc-txt)', fontWeight: 500, marginBottom: 4 }}>
         {engineName} requiere el plan {TIER_LABEL_SHORT[tierRequired]}.
@@ -529,7 +529,7 @@ function UpgradeGatePanel({
           maxWidth: '60ch',
         }}
       >
-        Sube tu plan para desbloquear ejecución en vivo. Tu plan actual sigue activo hasta el
+        Sube tu plan para desbloquear la ejecución en vivo. Tu plan actual sigue activo hasta el
         final del período.
       </div>
       <Link
@@ -571,7 +571,7 @@ function AccessPanel({
 }) {
   // Explain each `source` value in user-friendly language.
   const SOURCE_LABEL: Record<string, string> = {
-    pro_selection: 'al seleccionar el engine como tu live bot',
+    pro_selection: 'al elegir este engine como tu engine en vivo',
     all_access_seed: 'al activar tu plan VIP',
     admin_grant: 'concedido por admin',
     mp_payment: 'al confirmar tu pago en Mercado Pago',
@@ -613,7 +613,7 @@ function AccessPanel({
             >
               ●{' '}
               {status === 'active'
-                ? 'Cuenta provisionada'
+                ? 'Cuenta lista'
                 : status === 'paused'
                   ? 'Cuenta pausada'
                   : 'Cuenta cancelada'}
@@ -658,7 +658,7 @@ function AccessPanel({
                     color: 'var(--cc-amber)',
                   }}
                 >
-                  ⚠ Provisioning incompleto — sin ID en {engineName}.
+                  ⚠ La configuración quedó incompleta — todavía no tienes ID en {engineName}.
                 </div>
                 <EngineReprovisionButton engineId={engineId} engineName={engineName} />
                 <div
@@ -687,7 +687,7 @@ function AccessPanel({
                   color: 'var(--cc-txt-4)',
                 }}
               >
-                ▸ ID externo pendiente — se asigna cuando {engineName} expone su API de provisioning.
+                ▸ ID pendiente — se asigna cuando {engineName} abra su API de configuración.
               </div>
             )}
           </div>

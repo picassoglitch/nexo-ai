@@ -49,24 +49,24 @@ export default async function SubscriberMessagesPage({
           borderRadius: 'var(--cc-r-l)',
         }}
       >
-        <h3 style={{ fontSize: 14, marginBottom: 4 }}>Habla con el equipo Nexo</h3>
+        <h3 style={{ fontSize: 14, marginBottom: 4 }}>Habla directo con el equipo Nexo</h3>
         <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', lineHeight: 1.5 }}>
-          Este hilo va directo a los admins. Úsalo para ideas de producto, problemas,
-          propuestas de colaboración o cualquier cosa que prefieras no mandar por correo.
-          Solo nosotros lo vemos.
+          Este chat llega directo a nosotros. Escríbenos para ideas, fallas que
+          encontraste, propuestas de colaboración o lo que prefieras no mandar por correo.
+          Nadie más lo ve.
         </p>
       </div>
 
       <MessageThread
         messages={messages}
         viewer="USER"
-        emptyMessage="Aún no hay mensajes en este hilo. Mándanos el primero abajo — leemos todo."
+        emptyMessage="Todavía no hay mensajes. Escríbenos el primero aquí abajo — leemos todo."
       />
 
       <div style={{ marginTop: 18 }}>
         <MessageComposer
           send={sendMessageFromUser}
-          placeholder="Cuéntanos qué piensas. Enter envía · Shift+Enter agrega línea."
+          placeholder="Cuéntanos qué tienes en mente. Enter envía · Shift+Enter agrega línea."
           buttonLabel="Enviar al equipo"
         />
       </div>

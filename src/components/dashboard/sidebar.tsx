@@ -98,7 +98,7 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen, unreadMes
               href={'/app' as Route}
               className="cc-nav-item"
               onClick={() => setMobileSidebarOpen(false)}
-              title="Ver lo que ven tus subscribers"
+              title="Mira tu plataforma como la ven tus subscribers"
             >
               <span className="cc-ic">◐</span>
               <span>Vista de subscriber</span>
@@ -117,7 +117,7 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen, unreadMes
         <Link
           href={'/dashboard/settings' as Route}
           className="cc-cog"
-          title="Settings"
+          title="Ajustes"
           onClick={() => setMobileSidebarOpen(false)}
         >
           ⚙

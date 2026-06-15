@@ -28,9 +28,17 @@ interface ClaimResult {
   alreadyClaimed?: boolean;
 }
 
-export async function claimWelcomeGift(): Promise<ClaimResult> {
+/** Where the claim originated. 'welcome_banner' is the self-serve banner on
+ *  /app; 'nexoclip_landing_launch' is the silent claim the /auth/launch/nexoclip
+ *  route runs for users who registered from the NexoClip landing page — that
+ *  value in the audit log IS the "registered via NexoClip" marker. */
+type ClaimVia = 'welcome_banner' | 'nexoclip_landing_launch';
+
+export async function claimWelcomeGift(
+  via: ClaimVia = 'welcome_banner',
+): Promise<ClaimResult> {
   const session = await getSessionUser();
-  if (!session) return { ok: false, error: 'No autenticado' };
+  if (!session) return { ok: false, error: 'Inicia sesión para continuar.' };
 
   const userId = session.user.id;
   const admin = createAdminClient();
@@ -41,7 +49,7 @@ export async function claimWelcomeGift(): Promise<ClaimResult> {
     .eq('id', userId)
     .maybeSingle();
   if (readErr) return { ok: false, error: readErr.message };
-  if (!before) return { ok: false, error: 'Perfil no encontrado' };
+  if (!before) return { ok: false, error: 'No encontramos tu perfil.' };
 
   // Idempotent — already accepted, nothing to do.
   if (before.welcome_gift_claimed_at) {
@@ -85,7 +93,7 @@ export async function claimWelcomeGift(): Promise<ClaimResult> {
     targetUserId: userId,
     targetEmail: (before.email as string | null) ?? null,
     after: { welcome_gift_claimed_at: nowIso, nexoclip_trial_started_at: trialStart },
-    metadata: { via: 'welcome_banner', self_serve: true },
+    metadata: { via, self_serve: true },
   });
 
   revalidatePath('/[locale]', 'layout');

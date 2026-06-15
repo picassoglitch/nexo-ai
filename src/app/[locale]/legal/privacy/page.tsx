@@ -95,12 +95,12 @@ export default async function PrivacyPage({
       <h3>2.3. Datos de uso</h3>
       <ul>
         <li>
-          Eventos de consumo de tokens IA por engine — cuándo, cuántos, qué
-          engine los consumió.
+          Eventos de consumo de tokens IA por engine — cuándo, cuántos y qué
+          engine los usó.
         </li>
         <li>
-          Logs de inicio de sesión (timestamp, IP, user-agent) — los retenemos
-          90 días para detección de fraude.
+          Registros de inicio de sesión (fecha y hora, IP, navegador) — los
+          guardamos 90 días para detectar fraude.
         </li>
         <li>
           Selección de engine activo, configuración de bots, preferencias de
@@ -123,9 +123,9 @@ export default async function PrivacyPage({
         </li>
       </ul>
       <p>
-        Tu contenido se almacena cifrado en reposo y se procesa solo cuando lo
-        solicitas. No lo usamos para entrenar modelos públicos ni lo
-        compartimos con terceros sin tu consentimiento.
+        Guardamos tu contenido cifrado y solo lo procesamos cuando tú lo
+        pides. No lo usamos para entrenar modelos públicos ni lo
+        compartimos con terceros sin tu permiso.
       </p>
 
       <h2 id="finalidades">3. Finalidades del tratamiento</h2>
@@ -137,12 +137,12 @@ export default async function PrivacyPage({
         <li><strong>Facturación fiscal</strong>: emitir CFDI cuando lo solicites con tu RFC.</li>
         <li><strong>Cumplimiento legal</strong>: responder a requerimientos de autoridades cuando sean legalmente válidos.</li>
         <li><strong>Detección de fraude</strong>: análisis de patrones de pago y uso para prevenir abuso.</li>
-        <li><strong>Mejora del producto</strong>: analítica agregada y anonimizada — nunca con tu contenido personal identificable.</li>
+        <li><strong>Mejora del producto</strong>: estadísticas agregadas y anónimas — nunca con datos que te identifiquen.</li>
       </ul>
       <p>
         <strong>NO usamos tus datos para:</strong> publicidad de terceros, venta
-        de bases de datos, entrenamiento de modelos IA públicos, ni perfilado con
-        fines no relacionados al servicio.
+        de bases de datos, entrenamiento de modelos IA públicos, ni crear perfiles
+        con fines ajenos al servicio.
       </p>
 
       <h2 id="terceros">4. Terceros con los que compartimos datos</h2>
@@ -181,17 +181,17 @@ export default async function PrivacyPage({
 
       <h2 id="engines">5. Datos enviados a los Engines</h2>
       <p>
-        Cuando activas un Engine, Nexo AI provisiona una cuenta para ti en él. Le
+        Cuando activas un Engine, Nexo AI crea una cuenta para ti en él. Le
         enviamos:
       </p>
       <ul>
         <li>Tu user_id de Nexo AI (identificador opaco).</li>
         <li>Tu correo electrónico.</li>
         <li>Tu nombre de display.</li>
-        <li>Tu tier actual (free / pro / vip) — para que el engine sepa qué features habilitarte.</li>
+        <li>Tu tier actual (free / pro / vip) — para que el engine sepa qué funciones habilitarte.</li>
       </ul>
       <p>
-        Esa información permite al Engine crear tu tenant y validar tu acceso.
+        Esa información le permite al Engine crear tu espacio y validar tu acceso.
         Cualquier contenido adicional que generes <strong>dentro</strong> del
         Engine (VODs, clips, configuraciones) se rige por el aviso de privacidad
         de ese Engine en particular, al cual te suscribes en su primera
@@ -217,8 +217,8 @@ export default async function PrivacyPage({
         </li>
       </ul>
       <p>
-        No usamos cookies publicitarias, ni de rastreo cross-site, ni
-        fingerprinting de navegador.
+        No usamos cookies publicitarias, ni de rastreo entre sitios, ni
+        huella digital del navegador (fingerprinting).
       </p>
 
       <h2 id="retencion">7. Retención de datos</h2>
@@ -303,9 +303,9 @@ export default async function PrivacyPage({
         <li>Acceso a producción restringido a personal autorizado con MFA.</li>
       </ul>
       <p>
-        Ninguna medida de seguridad es perfecta. En caso de una vulnerabilidad
-        que comprometa datos personales, te notificaremos en máximo{' '}
-        <strong>72 horas</strong> según las mejores prácticas internacionales.
+        Ninguna medida de seguridad es perfecta. Si ocurre una falla
+        que ponga en riesgo tus datos personales, te avisaremos en máximo{' '}
+        <strong>72 horas</strong>, siguiendo las mejores prácticas internacionales.
       </p>
 
       <h2 id="menores">11. Menores de edad</h2>

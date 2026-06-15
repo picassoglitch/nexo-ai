@@ -40,7 +40,7 @@ export function MessageComposer({
     startTransition(async () => {
       const res = await send(trimmed);
       if (!res.ok) {
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo enviar'}`);
+        showToast(`<b>Error</b> · ${res.error ?? 'No pudimos enviar tu mensaje'}`);
         return;
       }
       setBody('');

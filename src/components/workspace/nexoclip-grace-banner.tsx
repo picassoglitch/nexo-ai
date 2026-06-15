@@ -65,7 +65,7 @@ export function NexoclipGraceBanner({ tokensRemaining }: { tokensRemaining: numb
           Sigue usando <b style={{ color: 'var(--cc-cyan)' }}>NexoClip</b> en vivo hasta que se te
           acaben los tokens — te quedan{' '}
           <b style={{ color: 'var(--cc-cyan)' }}>{tokensRemaining.toLocaleString('es-MX')}</b>. ¿Lo
-          quieres sin fecha de caducidad? Pasa a Pro.
+          quieres para siempre, sin que se acabe? Pasa a Pro.
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>

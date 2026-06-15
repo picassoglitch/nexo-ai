@@ -64,7 +64,7 @@ export function TeamInviteForm() {
         <div className="cc-mod-toggle">
           <div className="cc-mod-toggle-text">
             <span className="t">Notificar por correo</span>
-            <span className="s">Se enviará un enlace de invitación al destinatario.</span>
+            <span className="s">Le mandamos un enlace de invitación a esa persona.</span>
           </div>
           <button
             type="button"
@@ -97,7 +97,7 @@ export function TeamInviteForm() {
             color: 'var(--cc-txt-4)',
           }}
         >
-          ▸ Invitaciones se cablean al flujo Resend en step 07. Hoy se guardan localmente.
+          ▸ Las invitaciones se conectan con Resend en el step 07. Por ahora solo se guardan aquí.
         </p>
       </form>
 

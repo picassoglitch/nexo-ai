@@ -25,7 +25,7 @@ function formatPeriod(iso: string): string {
 function displayName(p: { partnerName: string | null; partnerEmail: string | null }): string {
   if (p.partnerName) return p.partnerName;
   if (p.partnerEmail) return p.partnerEmail.split('@')[0]!;
-  return 'Partner sin nombre';
+  return 'Socio sin nombre';
 }
 
 export default async function RoyaltiesPage({
@@ -54,9 +54,9 @@ export default async function RoyaltiesPage({
       {/* ── Top stats ─────────────────────────────────────────────────── */}
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Período actual</div>
+          <div className="cc-mod-stat-l">Mes en curso</div>
           <div className="cc-mod-stat-v">{formatPeriod(summary.periodStart)}</div>
-          <div className="cc-mod-stat-sub">basado en usage_events</div>
+          <div className="cc-mod-stat-sub">según el uso registrado</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Por pagar este mes</div>
@@ -64,21 +64,21 @@ export default async function RoyaltiesPage({
             {formatCents(accruableTotal)}
           </div>
           <div className="cc-mod-stat-sub">
-            {summary.partnersWithAccrual} partner
-            {summary.partnersWithAccrual === 1 ? '' : 's'} con accrual
+            {summary.partnersWithAccrual} socio
+            {summary.partnersWithAccrual === 1 ? '' : 's'} con saldo a favor
           </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Ya finalizado</div>
+          <div className="cc-mod-stat-l">Ya cerrado</div>
           <div className={`cc-mod-stat-v ${alreadyFinalizedTotal > 0 ? 'gr' : ''}`}>
             {formatCents(alreadyFinalizedTotal)}
           </div>
-          <div className="cc-mod-stat-sub">snapshoteado en payouts</div>
+          <div className="cc-mod-stat-sub">ya guardado como pago</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Total acumulado mes</div>
+          <div className="cc-mod-stat-l">Total del mes</div>
           <div className="cc-mod-stat-v">{formatCents(totalThisPeriod)}</div>
-          <div className="cc-mod-stat-sub">por pagar + finalizado</div>
+          <div className="cc-mod-stat-sub">por pagar + ya cerrado</div>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default async function RoyaltiesPage({
           }}
         >
           <div className="cc-mod-sl" style={{ marginBottom: 0 }}>
-            Accruals en vivo · {formatPeriod(summary.periodStart)}
+            Ganancias en vivo · {formatPeriod(summary.periodStart)}
           </div>
           <RoyaltyFinalizeButton accruableCount={summary.accruals.filter((a) => a.accruedCents > 0 && !a.alreadyFinalized).length} />
         </div>
@@ -108,11 +108,11 @@ export default async function RoyaltiesPage({
             marginBottom: 14,
           }}
         >
-          Cada fila es <code>tokens consumidos × rate / 1M</code>. La rate
-          (centavos por millón) se setea por engine. Al hacer click en{' '}
-          <b>Finalizar</b> los accruals actuales se snapshotean como rows en{' '}
-          <code>engine_royalty_payouts</code> (status pending) — los pagos
-          se procesan offline después.
+          Cada fila se calcula como <code>tokens consumidos × tarifa / 1M</code>. La
+          tarifa (centavos por millón) la defines en cada engine. Cuando das clic en{' '}
+          <b>Finalizar</b>, lo acumulado hasta ese momento se guarda en{' '}
+          <code>engine_royalty_payouts</code> como pago pendiente — los pagos se
+          procesan aparte más tarde.
         </p>
         {summary.accruals.length === 0 ? (
           <div
@@ -125,7 +125,7 @@ export default async function RoyaltiesPage({
               fontSize: 13,
             }}
           >
-            Sin accruals — ningún engine con royalty rate &gt; 0 tiene owner asignado.
+            Aún no hay ganancias — ningún engine con tarifa &gt; 0 tiene un socio asignado.
             <br />
             <span style={{ color: 'var(--cc-txt-4)', fontSize: 11.5, fontFamily: 'var(--cc-mono), monospace', marginTop: 6, display: 'inline-block' }}>
               Configura: dashboard → Engines → set partner_royalty_per_million_tokens_cents.
@@ -141,11 +141,11 @@ export default async function RoyaltiesPage({
                     {a.engineName}{' '}
                     <span className="cc-mod-badge">{a.engineSlug}</span>
                     {a.alreadyFinalized && (
-                      <span className="cc-mod-badge gr">finalizado</span>
+                      <span className="cc-mod-badge gr">cerrado</span>
                     )}
                   </div>
                   <div className="cc-mod-sub">
-                    Partner: <b>{displayName(a)}</b> · rate{' '}
+                    Socio: <b>{displayName(a)}</b> · tarifa{' '}
                     <code>{formatCents(a.ratePerMillionCents)}</code> / 1M tokens
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export default async function RoyaltiesPage({
 
       {/* ── Payout history ────────────────────────────────────────────── */}
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Historial de payouts · últimos 50</div>
+        <div className="cc-mod-sl">Historial de pagos · últimos 50</div>
         {history.length === 0 ? (
           <div
             style={{
@@ -175,7 +175,7 @@ export default async function RoyaltiesPage({
               fontSize: 13,
             }}
           >
-            Sin pagos registrados todavía. Aparecen aquí al finalizar el primer período.
+            Todavía no hay pagos registrados. Aparecen aquí cuando cierras el primer mes.
           </div>
         ) : (
           <div className="cc-mod-list">
@@ -191,7 +191,7 @@ export default async function RoyaltiesPage({
                     </span>
                   </div>
                   <div className="cc-mod-sub">
-                    Partner: <b>{displayName(p)}</b> · período{' '}
+                    Socio: <b>{displayName(p)}</b> · mes{' '}
                     <code>{formatPeriod(p.periodStart)}</code> ·{' '}
                     {formatTokens(p.tokensAttributed)} tokens
                   </div>

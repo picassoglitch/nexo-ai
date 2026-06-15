@@ -44,7 +44,7 @@ export function ActivityFeedLive() {
     <>
       <div className="cc-feed">
         {events.length === 0 && (
-          <div className="cc-empty-feed">Esperando eventos en vivo…</div>
+          <div className="cc-empty-feed">Aquí verás la actividad en vivo en cuanto empiece…</div>
         )}
         {events.map((e) => (
           <div key={e.id} className="cc-ev">

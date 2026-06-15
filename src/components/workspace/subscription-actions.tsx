@@ -23,7 +23,7 @@ const TIER_MARKETING: Record<
   { tagline: string; features: string[]; featured?: boolean }
 > = {
   FREE: {
-    tagline: 'Crea una cuenta y explora toda la plataforma.',
+    tagline: 'Crea tu cuenta y prueba toda la plataforma gratis.',
     features: [
       'NexoClip gratis 7 días',
       '50,000 tokens IA de regalo',
@@ -32,7 +32,7 @@ const TIER_MARKETING: Record<
     ],
   },
   PRO: {
-    tagline: 'Un engine en vivo a tu elección.',
+    tagline: 'Enciende el engine que quieras, en vivo.',
     featured: true,
     features: [
       'Todo lo de Free',
@@ -47,7 +47,7 @@ const TIER_MARKETING: Record<
   // and the labels map can be indexed by any tier. The card-filtering
   // ORDER array below excludes it.
   PARTNER: {
-    tagline: 'Programa de partners · acceso por invitación.',
+    tagline: 'Programa de partners · solo por invitación.',
     features: [
       'Todo lo de Pro',
       'Tu propio engine siempre activo + 1 a elegir',
@@ -57,7 +57,7 @@ const TIER_MARKETING: Record<
     ],
   },
   VIP: {
-    tagline: 'Todo Nexo desbloqueado — IA + Clip, sin límites.',
+    tagline: 'Todo Nexo abierto — IA + Clip, sin límites.',
     features: [
       'Todo lo de Pro',
       'Todos los engines en vivo',
@@ -101,14 +101,14 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
         setPendingTier(null);
         if (!res.ok) {
           setTier(prev);
-          const msg = res.error ?? 'no se pudo cambiar el plan';
+          const msg = res.error ?? 'No pudimos cambiar tu plan.';
           showToast(`<b>Error</b> · ${msg}`);
           setStickyError(msg);
           return;
         }
         showToast(
           next === 'FREE'
-            ? `Suscripción cambiada a <b>${TIER_LABELS[next]}</b>.`
+            ? `Listo, tu plan ahora es <b>${TIER_LABELS[next]}</b>.`
             : `Plan <b>${TIER_LABELS[next]}</b> activado.`,
         );
       });
@@ -132,7 +132,7 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
           resolve({
             ok: false,
             error:
-              'El checkout de Mercado Pago no respondió en 18s. Probable causa: ' +
+              'Mercado Pago no respondió en 18s. Posible causa: ' +
               'MP_ACCESS_TOKEN inválido o no configurado en Vercel.',
           });
         }, CLIENT_TIMEOUT_MS);
@@ -141,7 +141,7 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
       if (!res.ok || !('url' in res) || !res.url) {
         setPendingTier(null);
         const msg =
-          ('error' in res && res.error) || 'no se pudo iniciar el checkout';
+          ('error' in res && res.error) || 'No pudimos abrir el pago.';
         showToast(`<b>Error</b> · ${msg}`);
         setStickyError(msg);
         console.error('[tier-checkout] failed', {
@@ -152,19 +152,19 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
         return;
       }
       // Don't reset pendingTier — the browser is about to navigate away.
-      showToast(`Redirigiendo a Mercado Pago…`);
+      showToast(`Te llevamos a Mercado Pago…`);
       window.location.href = res.url;
     });
   }
 
   function cancelSubscription() {
     if (tier === 'FREE') {
-      showToast('Ya estás en el plan Free.');
+      showToast('Ya tienes el plan Free.');
       return;
     }
     if (
       !confirm(
-        '¿Cancelar tu suscripción? Mantendrás el plan hasta el final del período actual.',
+        '¿Cancelar tu suscripción? Conservas el plan hasta que termine el período que ya pagaste.',
       )
     ) {
       return;
@@ -202,8 +202,8 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
             marginBottom: 16,
           }}
         >
-          ▸ <b>Modo admin</b> — los cambios de plan se aplican inmediatamente sin pasar por el
-          checkout.
+          ▸ <b>Modo admin</b> — los cambios de plan se aplican al instante, sin pasar por el
+          pago.
         </div>
       )}
 
@@ -226,7 +226,7 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
           <span style={{ fontSize: 14, lineHeight: 1 }}>▸</span>
           <div style={{ flex: 1 }}>
             <b style={{ display: 'block', marginBottom: 3 }}>
-              No se pudo iniciar el checkout
+              No pudimos abrir el pago
             </b>
             <span>{stickyError}</span>
           </div>
@@ -378,7 +378,7 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
             <div className="cc-mod-toggle-text">
               <span className="t">Cancelar suscripción</span>
               <span className="s">
-                Mantendrás acceso a {TIER_LABELS[tier]} hasta el final del período actual.
+                Conservas tu acceso a {TIER_LABELS[tier]} hasta que termine el período que ya pagaste.
               </span>
             </div>
             <button

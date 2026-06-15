@@ -20,7 +20,7 @@ export default async function HistoryPage({
           lineHeight: 1.65,
         }}
       >
-        Sin ejecuciones en tu historial todavía.
+        Aún no tienes nada en tu historial.
         <br />
         <span
           style={{
@@ -29,8 +29,8 @@ export default async function HistoryPage({
             fontFamily: 'var(--cc-mono), monospace',
           }}
         >
-          Cuando lances tu primer sistema en simulación o en vivo, verás aquí cada trabajo, sus
-          logs y el resultado.
+          Cuando corras tu primer sistema, en prueba o en vivo, aquí vas a ver cada trabajo, sus
+          logs y cómo salió.
         </span>
       </div>
     </div>

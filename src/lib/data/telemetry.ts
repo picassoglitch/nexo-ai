@@ -357,22 +357,3 @@ export async function nextActivityEvent(): Promise<ActivityEvent> {
   recentEventsCursor += 1;
   return next;
 }
-
-/**
- * Health drift — small random walk for non-offline/error engines.
- * Returns an array of {engineId, health} for the SSE client to merge into local state.
- * NOT persisted to Supabase (rev: keep DB stable, drift is purely visual).
- *
- * Kept as a synthetic visual since we don't have a real per-engine health
- * metric yet. Once each engine reports a heartbeat, this can be replaced.
- */
-export function driftHealth(
-  current: Array<{ id: string; health: number; stateCode: EngineStateCode }>,
-) {
-  return current
-    .filter((e) => e.stateCode !== 'o' && e.stateCode !== 'r')
-    .map((e) => ({
-      engineId: e.id,
-      health: Math.max(20, Math.min(99, Math.round(e.health + (Math.random() - 0.5) * 4))),
-    }));
-}

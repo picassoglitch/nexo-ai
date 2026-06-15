@@ -34,14 +34,14 @@ export function AnthropicSyncButton({ engineId, engineName }: Props) {
     startTransition(async () => {
       const res = await syncEngineCostFromAnthropic(engineId);
       if (!res.ok) {
-        showToast(`<b>Anthropic sync falló</b> · ${res.error ?? 'sin detalle'}`);
+        showToast(`<b>No se pudo sincronizar con Anthropic</b> · ${res.error ?? 'sin detalle'}`);
         return;
       }
       const rateFmt = `$${((res.rate ?? 0) / 100).toLocaleString('es-MX')}`;
       const totalFmt = `$${((res.totalCostCents ?? 0) / 100).toLocaleString('es-MX')}`;
       showToast(
-        `<b>${engineName}</b> · rate sync: ${rateFmt}/1M · ` +
-          `basado en ${formatTokens(res.totalTokens ?? 0)} tokens / ${totalFmt} MXN ` +
+        `<b>${engineName}</b> · costo actualizado: ${rateFmt}/1M · ` +
+          `con base en ${formatTokens(res.totalTokens ?? 0)} tokens / ${totalFmt} MXN ` +
           `en ${res.daysCounted ?? 30}d`,
       );
       router.refresh();
@@ -53,7 +53,7 @@ export function AnthropicSyncButton({ engineId, engineName }: Props) {
       type="button"
       onClick={handle}
       disabled={pending}
-      title="Pull los últimos 30 días de billing real de Anthropic y actualiza la rate"
+      title="Trae los últimos 30 días de facturación real de Anthropic y actualiza el costo"
       style={{
         padding: '6px 11px',
         borderRadius: 7,
@@ -71,7 +71,7 @@ export function AnthropicSyncButton({ engineId, engineName }: Props) {
       }}
     >
       <span style={{ fontSize: 12 }}>↻</span>
-      <span>{pending ? 'Anthropic sync…' : 'Sync desde Anthropic'}</span>
+      <span>{pending ? 'Sincronizando…' : 'Sincronizar con Anthropic'}</span>
     </button>
   );
 }

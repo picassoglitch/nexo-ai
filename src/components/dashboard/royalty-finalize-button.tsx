@@ -26,12 +26,12 @@ export function RoyaltyFinalizeButton({ accruableCount }: Props) {
     startTransition(async () => {
       const res = await finalizeCurrentPeriod();
       if (!res.ok) {
-        showToast(`<b>Finalize falló</b> · ${res.error ?? 'sin detalle'}`);
+        showToast(`<b>No se pudo finalizar</b> · ${res.error ?? 'sin detalle'}`);
         return;
       }
       const r = res.finalized!;
       showToast(
-        `Finalizado · ${r.created} payouts creados · total $${(r.totalAmountCents / 100).toLocaleString('es-MX')} MXN`,
+        `Listo · ${r.created} payouts creados · total $${(r.totalAmountCents / 100).toLocaleString('es-MX')} MXN`,
       );
       setConfirming(false);
       router.refresh();
@@ -59,7 +59,7 @@ export function RoyaltyFinalizeButton({ accruableCount }: Props) {
         }}
       >
         {disabled
-          ? 'Sin accruals para finalizar'
+          ? 'Nada por finalizar'
           : `Finalizar ${accruableCount} payout${accruableCount === 1 ? '' : 's'}`}
       </button>
     );
@@ -68,7 +68,7 @@ export function RoyaltyFinalizeButton({ accruableCount }: Props) {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <span style={{ fontSize: 12, color: 'var(--cc-txt-3)' }}>
-        ¿Snapshot el período como payouts pendientes?
+        ¿Cierras el período y dejas estos payouts como pendientes?
       </span>
       <button
         type="button"
@@ -103,7 +103,7 @@ export function RoyaltyFinalizeButton({ accruableCount }: Props) {
           cursor: pending ? 'default' : 'pointer',
         }}
       >
-        {pending ? 'Snapshoteando…' : 'Sí, finalizar'}
+        {pending ? 'Guardando…' : 'Sí, finalizar'}
       </button>
     </div>
   );

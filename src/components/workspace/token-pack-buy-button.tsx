@@ -43,9 +43,8 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
           resolve({
             ok: false,
             error:
-              'El checkout de Mercado Pago no respondió en 18s. Probable causa: ' +
-              'MP_ACCESS_TOKEN inválido o MP_ACCESS_TOKEN missing en Vercel. ' +
-              'Revisa Settings → Environment Variables.',
+              'Mercado Pago no respondió en 18 segundos. Inténtalo de nuevo en ' +
+              'un momento. Si vuelve a pasar, escríbenos y lo revisamos.',
           });
         }, CLIENT_TIMEOUT_MS);
       });
@@ -55,7 +54,7 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
       ]);
       if (!res.ok || !('url' in res) || !res.url) {
         const msg =
-          ('error' in res && res.error) || 'No se pudo iniciar el checkout';
+          ('error' in res && res.error) || 'No pudimos abrir el pago';
         showToast(`<b>Error</b> · ${msg}`);
         setStickyError(msg);
         console.error('[token-pack-checkout] failed', {
@@ -65,7 +64,7 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
         });
         return;
       }
-      showToast(`Redirigiendo a Mercado Pago para <b>${packLabel}</b>…`);
+      showToast(`Te llevamos a Mercado Pago para <b>${packLabel}</b>…`);
       window.location.href = res.url;
     });
   }
@@ -88,7 +87,7 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
           cursor: pending ? 'wait' : 'pointer',
         }}
       >
-        {pending ? 'Iniciando checkout…' : `Comprar ${packLabel} →`}
+        {pending ? 'Abriendo el pago…' : `Comprar ${packLabel} →`}
       </button>
       {stickyError && (
         <div

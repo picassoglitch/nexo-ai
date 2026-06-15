@@ -60,7 +60,7 @@ export function ContactForm({ pane = 'client' }: Props = {}) {
           ● Mensaje recibido
         </div>
         Gracias por escribirnos. Te respondemos al correo que dejaste en menos de 24 horas
-        hábiles. Revisa tu bandeja de entrada (y spam, por si acaso) para la confirmación.
+        hábiles. Revisa tu bandeja de entrada (y la carpeta de spam, por si acaso) para la confirmación.
       </div>
     );
   }

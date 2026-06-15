@@ -144,7 +144,7 @@ function CategorySection({ catId, bots }: { catId: Engine['category']; bots: Eng
             <div className="cc-h-type">Tipo</div>
             <div>Salud</div>
             <div className="cc-h-rev">Ingresos</div>
-            <div className="cc-h-act">Actividad</div>
+            <div className="cc-h-act">Última actividad</div>
             <div />
           </div>
           {bots.map((b) => (
@@ -161,7 +161,7 @@ function FeaturedStrip({ bots }: { bots: Engine[] }) {
   if (!bots.length) return null;
   return (
     <div className="cc-feat-wrap">
-      <div className="cc-feat-h">Destacados — fijados</div>
+      <div className="cc-feat-h">Tus favoritos</div>
       <div className="cc-feat">
         {bots.map((b) => {
           const [lbl] = [STATE_LABEL[b.stateCode]];
@@ -247,7 +247,7 @@ export function OperatorSurface() {
         return <CategorySection key={c.id} catId={c.id} bots={bs} />;
       })}
       {!filtered.length && (
-        <div className="cc-empty-state">▸ Sin sistemas que coincidan con el filtro.</div>
+        <div className="cc-empty-state">▸ Ningún sistema coincide con tu búsqueda.</div>
       )}
     </>
   );
@@ -272,7 +272,7 @@ export function Toolbar() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Filtrar sistemas por nombre, tipo o entorno…"
+          placeholder="Busca por nombre, tipo o entorno…"
         />
       </div>
       <div className="cc-chips">

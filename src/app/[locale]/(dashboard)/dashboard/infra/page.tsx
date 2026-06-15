@@ -1,19 +1,20 @@
 import { setRequestLocale } from 'next-intl/server';
+import { listEngines } from '@/lib/data/engines';
+import type { Engine, EngineState } from '@/lib/data/types';
 
-const WORKERS = [
-  { id: 'gpu-01', name: 'GPU-01', region: 'us-west-2', kind: 'RTX 4090', util: 82, ram: '38 / 64 GB', state: 'pu' as const, label: 'Rendering', cost: '$3.40/h' },
-  { id: 'gpu-02', name: 'GPU-02', region: 'us-west-2', kind: 'RTX 4090', util: 91, ram: '54 / 64 GB', state: 'pu' as const, label: 'Rendering', cost: '$3.40/h' },
-  { id: 'gpu-03', name: 'GPU-03', region: 'us-west-2', kind: 'A100 40GB', util: 68, ram: '21 / 40 GB', state: 'cy' as const, label: 'Training', cost: '$4.10/h' },
-  { id: 'gpu-04', name: 'GPU-04', region: 'us-west-2', kind: 'RTX 4090', util: 74, ram: '42 / 64 GB', state: 'pu' as const, label: 'Rendering', cost: '$3.40/h' },
-  { id: 'w-01', name: 'w-01', region: 'us-east-1', kind: 't3.large', util: 12, ram: '2.8 / 8 GB', state: 'r' as const, label: 'Error storage', cost: '$0.084/h' },
-  { id: 'w-02', name: 'w-02', region: 'us-east-1', kind: 't3.large', util: 38, ram: '4.1 / 8 GB', state: 'gr' as const, label: 'Active', cost: '$0.084/h' },
-  { id: 'w-03', name: 'w-03', region: 'us-east-1', kind: 't3.large', util: 22, ram: '3.1 / 8 GB', state: 'gr' as const, label: 'Active', cost: '$0.084/h' },
-  { id: 'w-07', name: 'w-07', region: 'us-east-1', kind: 'c6i.xlarge', util: 64, ram: '5.8 / 8 GB', state: 'am' as const, label: 'Hot', cost: '$0.170/h' },
-  { id: 'w-09', name: 'w-09', region: 'mx-central-1', kind: 't3.medium', util: 14, ram: '1.2 / 4 GB', state: 'gr' as const, label: 'Active', cost: '$0.042/h' },
-  { id: 'w-11', name: 'w-11', region: 'us-east-1', kind: 't3.large', util: 88, ram: '6.4 / 8 GB', state: 'am' as const, label: 'Hot', cost: '$0.084/h' },
-  { id: 'w-12', name: 'w-12', region: 'us-east-1', kind: 't3.large', util: 42, ram: '3.8 / 8 GB', state: 'gr' as const, label: 'Active', cost: '$0.084/h' },
-  { id: 'rtmp-1', name: 'rtmp-1', region: 'us-east-1', kind: 'c6i.2xlarge', util: 38, ram: '12 / 16 GB', state: 'gr' as const, label: 'Ingest', cost: '$0.34/h' },
-];
+export const metadata = { title: 'Infraestructura' };
+
+// Real topology: the nodes/regions each registered engine reports in the
+// `engines` table, with live state + latency from `engine_health`. No
+// synthetic utilization/RAM/cost — we don't poll cloud-provider APIs yet.
+const STATE_BADGE: Record<EngineState, { label: string; cls: string }> = {
+  HEALTHY: { label: 'Healthy', cls: 'gr' },
+  TRAINING: { label: 'Training', cls: 'cy' },
+  RENDERING: { label: 'Rendering', cls: 'pu' },
+  DELAYED: { label: 'Delayed', cls: 'am' },
+  ERROR: { label: 'Error', cls: 'r' },
+  OFFLINE: { label: 'Offline', cls: 'am' },
+};
 
 export default async function InfraPage({
   params,
@@ -22,64 +23,107 @@ export default async function InfraPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const engines = await listEngines();
+  const active = engines.filter((e) => e.status === 'active');
+
+  const byNode = new Map<string, Engine[]>();
+  for (const e of engines) {
+    const key = `${e.node} · ${e.region}`;
+    byNode.set(key, [...(byNode.get(key) ?? []), e]);
+  }
+  const regions = new Set(engines.map((e) => e.region));
+  const latencies = active.map((e) => e.latencyMs).filter((n) => n > 0);
+  const avgLatency =
+    latencies.length > 0
+      ? Math.round(latencies.reduce((s, n) => s + n, 0) / latencies.length)
+      : 0;
+  const inError = active.filter((e) => e.state === 'ERROR');
+
   return (
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Workers activos</div>
-          <div className="cc-mod-stat-v gr">11<small>/ 12</small></div>
-          <div className="cc-mod-stat-sub">1 en error · w-01</div>
+          <div className="cc-mod-stat-l">Engines en línea</div>
+          <div className="cc-mod-stat-v gr">
+            {active.length}
+            <small>/ {engines.length}</small>
+          </div>
+          <div className="cc-mod-stat-sub">
+            {inError.length === 0
+              ? 'todo funcionando bien'
+              : `${inError.length} con fallas · ${inError.map((e) => e.name).join(', ')}`}
+          </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">GPU util promedio</div>
-          <div className="cc-mod-stat-v pu">79<small>%</small></div>
-          <div className="cc-mod-stat-sub">4 nodos · us-west-2</div>
+          <div className="cc-mod-stat-l">Nodos registrados</div>
+          <div className="cc-mod-stat-v pu">{byNode.size}</div>
+          <div className="cc-mod-stat-sub">los que reporta cada engine</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Costo infra 24h</div>
-          <div className="cc-mod-stat-v am">$148.40</div>
-          <div className="cc-mod-stat-sub">$4,452 proyección mes</div>
+          <div className="cc-mod-stat-l">Latencia promedio</div>
+          <div className="cc-mod-stat-v cy">
+            {avgLatency}
+            <small>ms</small>
+          </div>
+          <div className="cc-mod-stat-sub">solo engines en línea</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Regiones</div>
-          <div className="cc-mod-stat-v">3</div>
-          <div className="cc-mod-stat-sub">us-east-1 · us-west-2 · mx-central-1</div>
+          <div className="cc-mod-stat-v">{regions.size}</div>
+          <div className="cc-mod-stat-sub">{[...regions].join(' · ') || '—'}</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Workers (12)</div>
-        <div className="cc-mod-list">
-          {WORKERS.map((w) => {
-            const fill = w.util > 85 ? 'r' : w.util > 60 ? 'am' : 'gr';
-            return (
-              <div key={w.id} className="cc-mod-row">
+        <div className="cc-mod-sl">Nodos ({byNode.size})</div>
+        {byNode.size === 0 ? (
+          <div
+            style={{
+              padding: '40px 24px',
+              border: '1px dashed var(--cc-line-2)',
+              borderRadius: 'var(--cc-r-l)',
+              textAlign: 'center',
+              color: 'var(--cc-txt-3)',
+              fontSize: 13,
+            }}
+          >
+            Todavía no tienes engines registrados.
+          </div>
+        ) : (
+          <div className="cc-mod-list">
+            {[...byNode.entries()].map(([node, nodeEngines]) => (
+              <div key={node} className="cc-mod-row">
                 <div className="cc-mod-ic">▤</div>
                 <div className="cc-mod-body">
-                  <div className="cc-mod-name">
-                    {w.name} <span className={`cc-mod-badge ${w.state}`}>{w.label}</span>
-                  </div>
+                  <div className="cc-mod-name">{node}</div>
                   <div
                     className="cc-mod-sub"
-                    style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6 }}
+                    style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}
                   >
-                    <span>
-                      {w.kind} · {w.region}
-                    </span>
-                    <span className="cc-bar-track" style={{ maxWidth: 120 }}>
-                      <span className={`cc-bar-fill ${fill}`} style={{ width: `${w.util}%` }} />
-                    </span>
-                    <span>{w.util}%</span>
+                    {nodeEngines.map((e) => {
+                      const badge = STATE_BADGE[e.state];
+                      return (
+                        <span key={e.id} style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+                          {e.icon} {e.name}
+                          <span className={`cc-mod-badge ${badge.cls}`}>{badge.label}</span>
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="cc-mod-right">
-                  <b>{w.cost}</b>
-                  <span>{w.ram}</span>
+                  <b>
+                    {nodeEngines.length} engine{nodeEngines.length === 1 ? '' : 's'}
+                  </b>
+                  <span>
+                    {Math.max(...nodeEngines.map((e) => e.latencyMs))}ms máx
+                  </span>
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

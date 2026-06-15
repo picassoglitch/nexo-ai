@@ -13,7 +13,7 @@ import { TeamReconcileEngine } from '@/components/dashboard/team-reconcile-engin
 import { PartnerEngineSelect, type EngineOption } from '@/components/dashboard/partner-engine-select';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
 
-export const metadata = { title: 'Team & Roles' };
+export const metadata = { title: 'Equipo y roles' };
 
 interface ProfileRow {
   id: string;
@@ -107,7 +107,7 @@ export default async function TeamPage({
           </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Suscripciones pagas</div>
+          <div className="cc-mod-stat-l">Suscripciones de pago</div>
           <div className="cc-mod-stat-v gr">{paidCount}</div>
           <div className="cc-mod-stat-sub">
             {profiles.filter((p) => p.tier === 'PRO').length} Pro ·{' '}
@@ -118,7 +118,7 @@ export default async function TeamPage({
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Invitaciones pendientes</div>
           <div className="cc-mod-stat-v">0</div>
-          <div className="cc-mod-stat-sub">Nadie pendiente</div>
+          <div className="cc-mod-stat-sub">Nadie por confirmar todavía</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Roles definidos</div>

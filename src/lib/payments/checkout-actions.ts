@@ -45,14 +45,14 @@ export async function createTierCheckout(targetTier: SubscriptionTier): Promise<
 
     // Admins bypass MP entirely — their tier changes through tier-actions.ts.
     if (isAdminRole(session.role)) {
-      return { ok: false, reason: 'admin_skip', error: 'Admin path uses direct tier write.' };
+      return { ok: false, reason: 'admin_skip', error: 'Las cuentas admin cambian de plan directo, sin pasar por el checkout.' };
     }
 
     // Downgrading to FREE doesn't need MP — that's just a tier write handled
     // by tier-actions.ts (no money changes hands).
     const pricing = TIER_PRICING[targetTier];
     if (!pricing) {
-      return { ok: false, reason: 'free_tier', error: 'Free no requiere checkout.' };
+      return { ok: false, reason: 'free_tier', error: 'El plan Free es gratis, no necesitas pasar por el checkout.' };
     }
 
     if (!isMercadoPagoConfigured()) {
@@ -60,7 +60,7 @@ export async function createTierCheckout(targetTier: SubscriptionTier): Promise<
         ok: false,
         reason: 'not_configured',
         error:
-          'Mercado Pago no está configurado todavía. Pide a un admin que active tu plan o configura MP_ACCESS_TOKEN.',
+          'Mercado Pago todavía no está listo. Pídele a un admin que active tu plan, o configura MP_ACCESS_TOKEN.',
       };
     }
 
@@ -122,7 +122,7 @@ export async function createTierCheckout(targetTier: SubscriptionTier): Promise<
     const url = result.init_point ?? result.sandbox_init_point;
     if (!url) {
       console.error('[mp/checkout] preference returned no URL', result);
-      return { ok: false, reason: 'mp_error', error: 'MP no devolvió URL de checkout.' };
+      return { ok: false, reason: 'mp_error', error: 'Mercado Pago no nos dio una URL de pago. Inténtalo de nuevo en un momento.' };
     }
 
     return { ok: true, url };
@@ -152,13 +152,13 @@ export async function createTierCheckout(targetTier: SubscriptionTier): Promise<
     // (most LatAm accounts only allow their local currency). Suggest a fix.
     const isCurrencyError = /currency|currency_id|moneda/i.test(detail);
     const hint = isCurrencyError
-      ? ' — tu cuenta MP probablemente requiere moneda local (MXN/ARS/BRL). Cambia `currency` en src/lib/payments/pricing.ts.'
+      ? ' — tu cuenta de Mercado Pago seguramente solo acepta moneda local (MXN/ARS/BRL). Cambia `currency` en src/lib/payments/pricing.ts.'
       : '';
 
     return {
       ok: false,
       reason: 'mp_error',
-      error: `MP rechazó la creación del checkout: ${detail}${hint}`,
+      error: `Mercado Pago no pudo abrir el checkout: ${detail}${hint}`,
     };
   }
 }
