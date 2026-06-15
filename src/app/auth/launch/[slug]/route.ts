@@ -6,10 +6,15 @@
 // straight into its dashboard — no landing/login bounce.
 //
 // Used by NexoClip's "Transmitir con NexoOBS" button (→ /auth/launch/nexoobs)
-// and NexoOBS's "Get Clips" button (→ /auth/launch/nexoclip).
+// and NexoOBS's "Get Clips" button (→ /auth/launch/nexoclip). Also the
+// registration funnel target for nexoclip.nexo-ai.world's landing CTAs
+// (/sign-in?next=/auth/launch/nexoclip) — sign-up flows straight back into
+// NexoClip with trial + provisioning handled here in the background.
 //
-// Gated to VIP: the cross-engine streaming↔clips feature is a
-// full-access perk. Lower tiers get redirected to the engine's upgrade page.
+// Gated to VIP for cross-engine launches (the streaming↔clips perk).
+// NexoClip itself is open to every signed-in user: first-timers get the
+// welcome gift / 7-day trial claimed silently, and NexoClip enforces its
+// own tier perks once inside.
 //
 // Under /auth/* so it's excluded from the i18n middleware matcher (no locale
 // prefix rewriting on a redirect-only endpoint).
@@ -17,9 +22,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { effectiveTier } from '@/lib/billing/tiers';
+import { effectiveTier, NEXOCLIP_TRIAL_SLUG } from '@/lib/billing/tiers';
 import { provisionEngineAccess } from '@/lib/engines/subscriptions';
 import { getEngineLaunchUrl } from '@/lib/engines/launch-actions';
+import { claimWelcomeGift } from '@/lib/usage/welcome-actions';
 
 export async function GET(
   request: NextRequest,
@@ -35,10 +41,28 @@ export async function GET(
     );
   }
 
-  // Full-access gate.
+  // Full-access gate — for cross-engine launches only. NexoClip is exempt:
+  // it's the registration funnel from nexoclip.nexo-ai.world (the landing
+  // links every CTA here via /sign-in?next=/auth/launch/nexoclip), so any
+  // signed-in user passes through. The platform onboarding happens silently
+  // below (trial claim + provisioning) and NexoClip enforces its own
+  // per-tier perks — the visitor goes straight from sign-up to
+  // NexoClip's /dashboard/start without ever seeing the Nexo AI dashboard.
   const tier = effectiveTier(session.role, session.tier);
-  if (tier !== 'VIP') {
+  if (slug !== NEXOCLIP_TRIAL_SLUG && tier !== 'VIP') {
     return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));
+  }
+
+  if (slug === NEXOCLIP_TRIAL_SLUG) {
+    // Idempotent: first-timers get the welcome gift + 7-day trial started
+    // and a NexoClip tenant provisioned; returning users no-op. The audit
+    // log's `via: nexoclip_landing_launch` marks the user as having
+    // registered through the NexoClip funnel. Never blocks the launch.
+    try {
+      await claimWelcomeGift('nexoclip_landing_launch');
+    } catch (err) {
+      console.warn('[launch] nexoclip welcome claim failed (non-fatal):', err);
+    }
   }
 
   const admin = createAdminClient();
@@ -53,9 +77,15 @@ export async function GET(
   const engineId = engine.id as string;
 
   // Ensure the user is provisioned on the target engine (idempotent) so the
-  // launch has an external_user_id to sign into the SSO token.
+  // launch has an external_user_id to sign into the SSO token. NexoClip
+  // funnel users are 'manual' (any tier); cross-engine launches keep the
+  // VIP seed source.
   try {
-    await provisionEngineAccess(session.user.id, engineId, 'all_access_seed');
+    await provisionEngineAccess(
+      session.user.id,
+      engineId,
+      slug === NEXOCLIP_TRIAL_SLUG ? 'manual' : 'all_access_seed',
+    );
   } catch {
     // Non-fatal — getEngineLaunchUrl will report if access is still missing.
   }

@@ -103,15 +103,15 @@ export default async function AdminBillingPage({
             {formatMxn(grossRevenueMxnCents)}
           </div>
           <div className="cc-mod-stat-sub">
-            {approvedThisMonth.length} pagos · {payingUsers.size} subscribers pagantes
+            {approvedThisMonth.length} pagos · {payingUsers.size} clientes que ya pagaron
           </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Costos operativos</div>
+          <div className="cc-mod-stat-l">Lo que cuesta operar</div>
           <div className={`cc-mod-stat-v ${totalCostMxnCents > 0 ? 'am' : ''}`}>
             {formatMxn(totalCostMxnCents)}
           </div>
-          <div className="cc-mod-stat-sub">infra · IA · email · fees MP</div>
+          <div className="cc-mod-stat-sub">infra · IA · email · comisiones MP</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Margen neto</div>
@@ -125,12 +125,12 @@ export default async function AdminBillingPage({
           </div>
           <div className="cc-mod-stat-sub">
             {grossRevenueMxnCents > 0
-              ? `${marginPct.toFixed(1)}% margen sobre bruto`
-              : 'sin ingresos todavía'}
+              ? `${marginPct.toFixed(1)}% de margen sobre lo bruto`
+              : 'todavía no hay ingresos'}
           </div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Subscribers pagantes</div>
+          <div className="cc-mod-stat-l">Clientes que pagan</div>
           <div className="cc-mod-stat-v">{payingUsers.size}</div>
           <div className="cc-mod-stat-sub">
             {proCount} Pro · {allAccessCount} VIP
@@ -140,7 +140,7 @@ export default async function AdminBillingPage({
 
       {/* ── Operating costs breakdown ────────────────────────────────── */}
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Costos operativos · estimado mensual</div>
+        <div className="cc-mod-sl">Lo que cuesta operar · estimado al mes</div>
         <div className="cc-mod-list">
           {operatingCosts.map((c) => (
             <div key={c.id} className="cc-mod-row">
@@ -184,15 +184,16 @@ export default async function AdminBillingPage({
             lineHeight: 1.5,
           }}
         >
-          ▸ Hardcoded por ahora. Para data real: cron que jale las APIs de
-          billing de cada proveedor y escriba en una tabla <code>platform_costs</code>.
-          MP fees son dinámicos (calculados sobre ingresos del mes).
+          ▸ Por ahora estos montos los pusimos a mano. Para verlos en tiempo
+          real: una tarea automática que traiga el cobro de cada proveedor y lo
+          guarde en la tabla <code>platform_costs</code>. Las comisiones de MP sí
+          se actualizan solas (se calculan sobre los ingresos del mes).
         </p>
       </div>
 
       {/* ── Revenue side — recent payments received ──────────────────── */}
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Pagos recibidos · últimos 100</div>
+        <div className="cc-mod-sl">Pagos recibidos · los últimos 100</div>
         {payments.length === 0 ? (
           <div
             style={{
@@ -204,7 +205,7 @@ export default async function AdminBillingPage({
               fontSize: 13,
             }}
           >
-            Sin pagos registrados todavía.
+            Todavía no hay pagos registrados.
             <br />
             <span
               style={{
@@ -215,7 +216,7 @@ export default async function AdminBillingPage({
                 display: 'inline-block',
               }}
             >
-              Aparecen automáticamente cuando MP confirma un cobro al subscriber.
+              Aparecen solos cuando MP confirma un cobro a un cliente.
             </span>
           </div>
         ) : (
@@ -260,9 +261,9 @@ export default async function AdminBillingPage({
             lineHeight: 1.55,
           }}
         >
-          ▸ Tipo de cambio USD→MXN hardcodeado a 17 MXN/USD para la conversión
-          mostrada. Actualízalo si el peso se mueve fuerte — esto es vista de
-          dirección, no contabilidad fiscal.
+          ▸ El tipo de cambio USD→MXN está fijo en 17 MXN/USD para las cuentas
+          que ves aquí. Actualízalo si el peso se mueve fuerte — esto es un
+          resumen para el equipo, no contabilidad fiscal.
         </p>
       </div>
     </div>

@@ -74,8 +74,8 @@ export default async function WorkspaceBillingPage({
             fontSize: 13,
           }}
         >
-          ● <b style={{ color: 'var(--cc-green)' }}>Pago recibido</b> — tu plan se activa cuando
-          Mercado Pago confirma la transacción (segundos hasta minutos). Esta página se actualiza
+          ● <b style={{ color: 'var(--cc-green)' }}>Pago recibido</b> — tu plan se activa en
+          cuanto Mercado Pago confirma el pago (de segundos a minutos). Esta página se actualiza
           sola.
         </div>
       )}
@@ -91,8 +91,8 @@ export default async function WorkspaceBillingPage({
             fontSize: 13,
           }}
         >
-          ● <b style={{ color: 'var(--cc-amber)' }}>Pago pendiente</b> — Mercado Pago aún no
-          confirma. Si pagaste en efectivo (OXXO, ticket), el ingreso se acredita cuando lo
+          ● <b style={{ color: 'var(--cc-amber)' }}>Pago pendiente</b> — Mercado Pago todavía no
+          lo confirma. Si pagaste en efectivo (OXXO, ticket), el dinero se acredita cuando lo
           procesan.
         </div>
       )}
@@ -108,7 +108,7 @@ export default async function WorkspaceBillingPage({
           <div className="cc-mod-stat-v">
             {payments.filter((p) => p.status === 'approved').length}
           </div>
-          <div className="cc-mod-stat-sub">cuentan para tu plan activo</div>
+          <div className="cc-mod-stat-sub">los que mantienen tu plan activo</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Total pagado</div>
@@ -120,7 +120,7 @@ export default async function WorkspaceBillingPage({
               payments[0]?.currency ?? 'USD',
             )}
           </div>
-          <div className="cc-mod-stat-sub">sumando solo aprobados</div>
+          <div className="cc-mod-stat-sub">solo los pagos aprobados</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Plan activo</div>
@@ -146,7 +146,7 @@ export default async function WorkspaceBillingPage({
               fontSize: 13,
             }}
           >
-            Aún no tienes pagos registrados.
+            Todavía no tienes pagos registrados.
             <br />
             <span
               style={{
@@ -157,7 +157,7 @@ export default async function WorkspaceBillingPage({
                 display: 'inline-block',
               }}
             >
-              Al activar Pro o VIP desde /app/subscription, tu pago aparece aquí.
+              Cuando actives Pro o VIP desde /app/subscription, tu pago aparece aquí.
             </span>
           </div>
         ) : (
@@ -203,8 +203,7 @@ export default async function WorkspaceBillingPage({
             paddingLeft: 4,
           }}
         >
-          ▸ Los pagos se sincronizan automáticamente cuando Mercado Pago notifica un cambio de
-          estado.
+          ▸ Tus pagos se actualizan solos cada vez que Mercado Pago avisa de un cambio de estado.
         </p>
       </div>
     </div>

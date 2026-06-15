@@ -42,10 +42,10 @@ export default async function SubscriptionPage({
             lineHeight: 1.55,
           }}
         >
-          ● <b style={{ color: 'var(--cc-purple)' }}>Modo {role.replace('_', ' ')}</b> — tu rol pasa
-          por encima del tier almacenado. Tienes acceso completo a todos los sistemas sin importar
-          el plan que aparezca abajo. La columna <code>profiles.tier</code> sigue presente para
-          probar la experiencia de subscribers; cambiarla no te limita.
+          ● <b style={{ color: 'var(--cc-purple)' }}>Modo {role.replace('_', ' ')}</b> — tu rol manda
+          sobre el plan guardado. Tienes acceso completo a todos los sistemas, sin importar el plan
+          que veas abajo. La columna <code>profiles.tier</code> sigue ahí para que pruebes lo que ven
+          los suscriptores; cambiarla no te quita acceso.
         </div>
       )}
 
@@ -66,14 +66,14 @@ export default async function SubscriptionPage({
             <div className="cc-mod-stat">
               <div className="cc-mod-stat-l">Acceso efectivo</div>
               <div className="cc-mod-stat-v pu">VIP</div>
-              <div className="cc-mod-stat-sub">vía rol {role.replace('_', ' ')}</div>
+              <div className="cc-mod-stat-sub">gracias a tu rol {role.replace('_', ' ')}</div>
             </div>
           ) : (
             <div className="cc-mod-stat">
               <div className="cc-mod-stat-l">Renovación</div>
               <div className="cc-mod-stat-v">{storedTier === 'FREE' ? '—' : '01 jun'}</div>
               <div className="cc-mod-stat-sub">
-                {storedTier === 'FREE' ? 'Free no caduca' : 'cargo automático'}
+                {storedTier === 'FREE' ? 'Free nunca vence' : 'se cobra solo'}
               </div>
             </div>
           )}
@@ -83,9 +83,9 @@ export default async function SubscriptionPage({
             <div className="cc-mod-stat-sub">
               {storedTier === 'FREE'
                 ? isAdmin
-                  ? 'Admin no necesita pago'
-                  : 'No requerido en Free'
-                : 'wires en step 05'}
+                  ? 'Como admin no pagas'
+                  : 'En Free no necesitas tarjeta'
+                : 'se conecta en el paso 05'}
             </div>
           </div>
           <div className="cc-mod-stat">
@@ -95,9 +95,9 @@ export default async function SubscriptionPage({
             </div>
             <div className="cc-mod-stat-sub">
               {tier === 'FREE'
-                ? 'solo simulación'
+                ? 'solo en modo prueba'
                 : tier === 'PRO'
-                  ? 'tú eliges cuál'
+                  ? 'tú eliges cuáles'
                   : 'todos los engines'}
             </div>
           </div>
@@ -145,7 +145,7 @@ export default async function SubscriptionPage({
             paddingLeft: 4,
           }}
         >
-          ▸ Los contadores reales se conectan al motor de telemetry en step 05.
+          ▸ Los contadores reales se conectan al motor de telemetry en el paso 05.
         </p>
       </div>
     </div>

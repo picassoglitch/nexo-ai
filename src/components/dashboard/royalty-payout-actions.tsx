@@ -24,7 +24,7 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
 
   function submitPaid() {
     if (!reference.trim()) {
-      showToast('<b>Falta referencia</b> · pega el id de la transferencia');
+      showToast('<b>Falta la referencia</b> · pega el id de la transferencia');
       return;
     }
     startTransition(async () => {
@@ -34,10 +34,10 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
         notes,
       });
       if (!res.ok) {
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo'}`);
+        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo completar'}`);
         return;
       }
-      showToast('Payout marcado como pagado');
+      showToast('Pago marcado como hecho');
       setMode('idle');
       setReference('');
       setNotes('');
@@ -49,10 +49,10 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
     startTransition(async () => {
       const res = await cancelPayout(payoutId, notes.trim() || 'cancelled');
       if (!res.ok) {
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo'}`);
+        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo completar'}`);
         return;
       }
-      showToast('Payout cancelado');
+      showToast('Pago cancelado');
       setMode('idle');
       setNotes('');
       router.refresh();
@@ -117,7 +117,7 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
         <>
           <input
             type="text"
-            placeholder="Ref del pago (transferencia, MP id, etc.)"
+            placeholder="Referencia del pago (transferencia, id de MP, etc.)"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             style={inputStyle}
@@ -151,7 +151,7 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
         <>
           <input
             type="text"
-            placeholder="Razón de cancelación (opcional pero recomendado)"
+            placeholder="Motivo de la cancelación (opcional, pero ayuda)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             style={inputStyle}
@@ -169,7 +169,7 @@ export function RoyaltyPayoutActions({ payoutId }: Props) {
               Volver
             </button>
             <button type="button" onClick={submitCancel} disabled={pending} style={btnPrimary}>
-              {pending ? 'Cancelando…' : 'Sí, cancelar payout'}
+              {pending ? 'Cancelando…' : 'Sí, cancelar el pago'}
             </button>
           </div>
         </>

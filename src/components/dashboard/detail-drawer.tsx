@@ -10,8 +10,8 @@ const TABS: Array<{ id: 'metrics' | 'logs' | 'console' | 'ai' | 'autos' | 'api';
   { id: 'logs', label: 'Logs' },
   { id: 'console', label: 'Consola' },
   { id: 'ai', label: 'AI / Persona' },
-  { id: 'autos', label: 'Automations' },
-  { id: 'api', label: 'API & Costos' },
+  { id: 'autos', label: 'Automatizaciones' },
+  { id: 'api', label: 'API y costos' },
 ];
 
 function fakeLogs(b: Engine) {
@@ -86,16 +86,16 @@ function MetricsTab({ b }: { b: Engine }) {
         <div className="cc-sl">Estado de salud</div>
         <div style={{ fontSize: 12.5, color: 'var(--cc-txt-2)', lineHeight: 1.6 }}>
           {b.stateCode === 'r'
-            ? '🔴 Error crítico — el sistema no procesa trabajos. Revisa logs.'
+            ? '🔴 Error crítico — el sistema no procesa trabajos. Revisa los logs.'
             : b.stateCode === 'a'
-              ? '🟡 Degradado — backpressure en cola, latencia elevada.'
+              ? '🟡 Va lento — la cola está saturada y la latencia subió.'
               : b.stateCode === 'p'
-                ? '🟣 Renderizando — pipeline de video activo.'
+                ? '🟣 Renderizando — el video se está procesando.'
                 : b.stateCode === 'c'
-                  ? '🔵 Entrenando — actualizando modelo/persona.'
+                  ? '🔵 Entrenando — actualizando el modelo y la persona.'
                   : b.stateCode === 'o'
-                    ? '⚫ Offline — sistema detenido.'
-                    : '🟢 Saludable — operando dentro de parámetros normales.'}
+                    ? '⚫ Offline — el sistema está detenido.'
+                    : '🟢 Todo bien — funcionando con normalidad.'}
         </div>
       </div>
     </>
@@ -179,7 +179,7 @@ export function DetailDrawer() {
 
           {drawerTab === 'console' && (
             <div className="cc-dwsec">
-              <div className="cc-sl">Consola del operador</div>
+              <div className="cc-sl">Consola</div>
               <div className="cc-logbox">
                 <div className="cc-ll">
                   <span className="cc-tm">nexo@{bot.slug}</span>{' '}
@@ -194,14 +194,14 @@ export function DetailDrawer() {
                   fontFamily: 'var(--cc-mono), monospace',
                 }}
               >
-                Consola interactiva — se cablea al worker real en build phase.
+                Consola interactiva — se conecta al worker real cuando lo activemos.
               </div>
             </div>
           )}
 
           {drawerTab === 'ai' && (
             <div className="cc-dwsec">
-              <div className="cc-sl">Identidad & memoria del bot</div>
+              <div className="cc-sl">Identidad y memoria del bot</div>
               {bot.persona ? (
                 <div className="cc-persona">
                   {(
@@ -235,7 +235,7 @@ export function DetailDrawer() {
                     fontFamily: 'var(--cc-mono), monospace',
                   }}
                 >
-                  Este sistema no usa capa de persona.
+                  Este sistema no usa una capa de persona.
                 </div>
               )}
             </div>
@@ -243,19 +243,19 @@ export function DetailDrawer() {
 
           {drawerTab === 'autos' && (
             <div className="cc-dwsec">
-              <div className="cc-sl">Automations vinculadas</div>
+              <div className="cc-sl">Automatizaciones vinculadas</div>
               <div className="cc-persona">
                 <div className="cc-prow">
-                  <div className="cc-pl">On error</div>
-                  <div className="cc-pv">Notificar + reintentar 3×</div>
+                  <div className="cc-pl">Si hay error</div>
+                  <div className="cc-pv">Avisar y reintentar 3×</div>
                 </div>
                 <div className="cc-prow">
-                  <div className="cc-pl">Schedule</div>
+                  <div className="cc-pl">Cada cuánto</div>
                   <div className="cc-pv">Cada 15 min · cron activo</div>
                 </div>
                 <div className="cc-prow">
-                  <div className="cc-pl">On revenue</div>
-                  <div className="cc-pv">Webhook → dashboard ingresos</div>
+                  <div className="cc-pl">Si hay ingresos</div>
+                  <div className="cc-pv">Webhook → panel de ingresos</div>
                 </div>
               </div>
             </div>
@@ -263,22 +263,22 @@ export function DetailDrawer() {
 
           {drawerTab === 'api' && (
             <div className="cc-dwsec">
-              <div className="cc-sl">API keys & costos</div>
+              <div className="cc-sl">API keys y costos</div>
               <div className="cc-persona">
                 <div className="cc-prow">
-                  <div className="cc-pl">Provider</div>
-                  <div className="cc-pv">Anthropic primary · OpenAI fallback</div>
+                  <div className="cc-pl">Proveedor</div>
+                  <div className="cc-pv">Anthropic principal · OpenAI de respaldo</div>
                 </div>
                 <div className="cc-prow">
                   <div className="cc-pl">Key</div>
                   <div className="cc-pv">sk-nexo-••••••••{bot.slug.slice(0, 4)}</div>
                 </div>
                 <div className="cc-prow">
-                  <div className="cc-pl">Costo 30d</div>
+                  <div className="cc-pl">Costo 30 días</div>
                   <div className="cc-pv">${(bot.health * 3.4).toFixed(2)}</div>
                 </div>
                 <div className="cc-prow">
-                  <div className="cc-pl">Rate limit</div>
+                  <div className="cc-pl">Límite de uso</div>
                   <div className="cc-pv">
                     {bot.stateCode === 'r' ? '🔴 Excedido' : '🟢 OK · 12% usado'}
                   </div>
@@ -311,13 +311,13 @@ export function DetailDrawer() {
               if (
                 !confirm(
                   `¿Reiniciar el worker de ${bot.name}?\n\n` +
-                    'Esto se encolará para ejecución cuando los workers reales estén desplegados.',
+                    'Quedará en cola y se ejecutará en cuanto los workers estén activos.',
                 )
               ) {
                 return;
               }
               showToast(
-                `Reinicio de <b>${bot.name}</b> encolado · pendiente integración con workers.`,
+                `Reinicio de <b>${bot.name}</b> en cola · falta conectar los workers.`,
               );
             }}
           >

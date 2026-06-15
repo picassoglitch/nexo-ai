@@ -130,8 +130,8 @@
   "proof": {
     "num": "La base",
     "title": "Un equipo. <em>Tres formas</em> de trabajar con nosotros.",
-    "desc": "Nexo AI es un equipo de tecnología y una plataforma de automatización con IA. Dirigida por su fundador, construida por un equipo. Los números abajo son lo que operamos hoy.",
-    "stat1": "Cuentas AWS bajo arquitectura",
+    "desc": "Nexo AI es un equipo de tecnología y una plataforma de automatización con IA. Dirigida por su fundador y construida por un equipo. Los números de abajo son lo que operamos hoy.",
+    "stat1": "Cuentas AWS que diseñamos",
     "stat2": "Gobernanza DSS a escala empresarial",
     "stat3": "Sistemas en producción entregados",
     "stat4": "Equipo, partnerships, plataforma",
@@ -154,12 +154,12 @@
     "1": {
       "num": "01",
       "title": "Validación",
-      "body": "Presionamos el brief — alcance, audiencia, restricciones — antes de escribir código."
+      "body": "Ponemos a prueba el plan — alcance, público, límites — antes de escribir una línea de código."
     },
     "2": {
       "num": "02",
       "title": "Arquitectura",
-      "body": "Stack, infraestructura, modelo de datos y línea base de seguridad definidos desde el inicio."
+      "body": "Stack, infraestructura, modelo de datos y la base de seguridad, todo definido desde el inicio."
     },
     "3": {
       "num": "03",
@@ -173,8 +173,8 @@
     },
     "5": {
       "num": "05",
-      "title": "Escalamiento y traspaso",
-      "body": "Arquitectura lista para producción, documentada, con traspaso limpio o soporte continuo."
+      "title": "Escalamiento y hand-off",
+      "body": "Arquitectura lista para producción y documentada, con un hand-off limpio o soporte continuo."
     },
     "num": "Cómo trabajamos",
     "title": "De la idea a producción — un camino claro."
@@ -182,7 +182,7 @@
   "svc": {
     "1": {
       "name": "Plataformas web y móviles",
-      "meta": "Del spec funcional al despliegue en producción y traspaso"
+      "meta": "De la especificación funcional al despliegue en producción y el hand-off"
     },
     "2": {
       "name": "Sistemas de sensores y detección",
@@ -197,31 +197,31 @@
       "meta": "Trading, contenido, scraping, automatización de operaciones — diseñados, desplegados, monitoreados"
     },
     "5": {
-      "name": "Arquitectura cloud",
-      "meta": "AWS multi-cuenta, gobernanza, líneas base de seguridad"
+      "name": "Arquitectura en la nube",
+      "meta": "AWS de varias cuentas, gobernanza y bases de seguridad"
     }
   },
   "cpc": {
     "1": {
       "tag": "Cliente · Tecnología para eventos",
       "title": "Sistema interactivo de activación",
-      "body": "Experiencia interactiva con detección de personas y sensores para la activación de una marca de consumo — diseñada para eventos de alta afluencia, desplegada y soportada en sitio.",
-      "scale": "Eventos de alta afluencia · operación on-site multi-día",
+      "body": "Experiencia interactiva con detección de personas y sensores para la activación de una marca de consumo — diseñada para eventos con mucha gente, desplegada y atendida en el lugar.",
+      "scale": "Eventos con mucha gente · operación de varios días en el lugar",
       "timeline": "Construido y desplegado en semanas"
     },
     "2": {
       "tag": "Cliente · Salud",
       "title": "Plataforma web farmacéutica",
-      "body": "Plataforma multiusuario para salud con RBAC, 2FA y arquitectura alineada con requisitos de privacidad y escalabilidad — construida de extremo a extremo, con traspaso estructurado al equipo del cliente.",
-      "scale": "RBAC multiusuario · 2FA · línea base alineada a privacidad",
-      "timeline": "Build de extremo a extremo · traspaso estructurado"
+      "body": "Plataforma multiusuario para salud con RBAC, 2FA y una arquitectura alineada a los requisitos de privacidad y escalabilidad — construida de extremo a extremo, con un hand-off ordenado al equipo del cliente.",
+      "scale": "RBAC multiusuario · 2FA · base alineada a privacidad",
+      "timeline": "Construcción de extremo a extremo · hand-off ordenado"
     },
     "3": {
       "tag": "Empresarial · Cloud",
       "title": "Infraestructura nivel pagos",
-      "body": "Arquitectura cloud para un procesador de pagos global de primer nivel — organización AWS multi-cuenta bajo gobernanza PCI DSS 4.0, con respuesta a incidentes en sistemas críticos en producción.",
-      "scale": "AWS multi-cuenta · gobernanza PCI DSS 4.0",
-      "timeline": "Engagement multi-año · respuesta a incidentes en producción"
+      "body": "Arquitectura en la nube para un procesador de pagos global de primer nivel — organización AWS de varias cuentas bajo gobernanza PCI DSS 4.0, con respuesta a incidentes en sistemas críticos en producción.",
+      "scale": "AWS de varias cuentas · gobernanza PCI DSS 4.0",
+      "timeline": "Trabajo de varios años · respuesta a incidentes en producción"
     }
   },
   "partner": {
@@ -394,7 +394,7 @@
   },
   "academy": {
     "title": "La red de operadores — <em>Nexo Academy</em>",
-    "p": "La plataforma no son solo herramientas — es una red de operadores. Nexo Academy es la comunidad donde builders y operadores aprenden los sistemas, comparten lo que funciona, y ejecutan junto a otros. Niveles Gratis, Premium y VIP, en Skool. La integración más profunda en esta plataforma está en el roadmap.",
+    "p": "La plataforma no son solo herramientas — es una red de operadores. Nexo Academy es la comunidad donde quienes construyen y operan aprenden los sistemas, comparten lo que funciona y ejecutan junto a otros. Niveles Gratis, Premium y VIP, en Skool. Una integración más profunda con esta plataforma ya está en planes.",
     "btn": "Visitar Nexo Academy →"
   },
   "contact": {
@@ -537,28 +537,28 @@
   },
   "operate": {
     "num": "Cómo operamos",
-    "title": "Entregamos como operadores, <em>no como freelancers.</em>",
-    "desc": "Todo proyecto corre con las mismas prácticas operativas que usamos en nuestros propios sistemas de producción. Esto separa a partners técnicos serios de las agencias.",
+    "title": "Entregamos como un equipo que opera sistemas reales, <em>no como freelancers.</em>",
+    "desc": "Cada proyecto corre con las mismas prácticas que usamos en nuestros propios sistemas en producción. Eso es lo que separa a un socio técnico serio de una agencia.",
     "items": {
-      "1": { "title": "Pipelines CI/CD", "body": "Cada deploy automatizado, probado, reproducible. Nada de FTP manual." },
-      "2": { "title": "Infraestructura como código", "body": "AWS gestionado con Terraform. Nada de clickops en producción." },
-      "3": { "title": "Monitoreo en producción", "body": "Dashboards, alertas, historial de ejecución. Las mismas herramientas que construimos para clientes." },
-      "4": { "title": "Despliegues multi-entorno", "body": "Aislamiento dev, staging, prod. Reglas de promoción. Sin sorpresas." },
-      "5": { "title": "Estrategia de rollback", "body": "Blue/green o canary por defecto. Un deploy malo nunca tira producción." },
-      "6": { "title": "Revisiones de seguridad", "body": "RBAC, 2FA, rotación de secretos, IAM con menor privilegio. Integrado, no añadido." },
-      "7": { "title": "Documentación y traspaso", "body": "Runbooks, diagramas de arquitectura, decision logs. Tu equipo puede tomarlo limpiamente." },
-      "8": { "title": "Demos semanales", "body": "Software funcional cada sprint. Siempre probable, nunca teórico." },
-      "9": { "title": "Monitoreo de costos cloud", "body": "Presupuestos AWS, detección de anomalías, recursos etiquetados. No quemamos tu dinero." }
+      "1": { "title": "Pipelines CI/CD", "body": "Cada despliegue es automático, probado y repetible. Nada se sube a mano." },
+      "2": { "title": "Infraestructura como código", "body": "AWS gestionado con Terraform. Nada de andar haciendo clics en la consola en producción." },
+      "3": { "title": "Monitoreo en producción", "body": "Dashboards, alertas e historial de ejecución. Las mismas herramientas que construimos para nuestros clientes." },
+      "4": { "title": "Despliegues por entornos", "body": "Dev, staging y producción separados. Reglas claras para pasar de uno a otro. Sin sorpresas." },
+      "5": { "title": "Plan de reversa", "body": "Despliegues graduales por defecto. Un mal despliegue nunca tumba producción." },
+      "6": { "title": "Revisiones de seguridad", "body": "RBAC, 2FA, rotación de secretos y acceso con el mínimo de permisos. Va incluido desde el inicio, no se agrega después." },
+      "7": { "title": "Documentación y hand-off", "body": "Runbooks, diagramas de arquitectura y registro de decisiones. Tu equipo puede tomar el control sin enredos." },
+      "8": { "title": "Demos semanales", "body": "Software funcionando cada sprint. Siempre se puede probar, nunca queda en teoría." },
+      "9": { "title": "Monitoreo de costos en la nube", "body": "Presupuestos de AWS, alertas de gastos raros y recursos etiquetados. No quemamos tu dinero." }
     },
     "why": {
       "title": "No somos una agencia tradicional.",
       "items": {
         "1": "Operamos sistemas reales en producción",
         "2": "Experiencia en arquitectura cloud a escala empresarial",
-        "3": "Equipo técnico directo — sin capas comerciales",
-        "4": "Menos reuniones, más ejecución",
+        "3": "Hablas directo con el equipo técnico — sin intermediarios de ventas",
+        "4": "Menos juntas, más trabajo hecho",
         "5": "Construido como infraestructura, lanzado como producto",
-        "6": "Trayectoria en fintech y producción"
+        "6": "Experiencia en fintech y en sistemas de producción"
       }
     }
   },
@@ -567,25 +567,25 @@
     "title": "Trabajo en curso, <em>en vivo.</em>",
     "desc": "Sistemas que estamos operando o lanzando ahora mismo. Construcciones públicas, producción real.",
     "items": {
-      "1": { "tag": "Trading", "title": "Quantor Polybot", "body": "Sistema async de trading sobre Polymarket — señales Ollama, dashboard FastAPI, log de ejecución SQLite, producción en vivo." },
+      "1": { "tag": "Trading", "title": "Quantor Polybot", "body": "Sistema de trading sobre Polymarket — señales con Ollama, dashboard en FastAPI, registro de ejecución en SQLite, en producción y en vivo." },
       "2": { "tag": "Plataforma", "title": "Dashboard operador Nexo AI", "body": "La plataforma multi-tenant que estás viendo ahora. Operadores despliegan bots y agentes IA desde una librería compartida." },
       "3": { "tag": "Automatización de contenido", "title": "Infraestructura AI clipping", "body": "Clipping de stream en tiempo real con scoring IA, distribución multi-plataforma, dashboards para creadores." },
-      "4": { "tag": "Sistemas de sensores", "title": "Analítica de sensores en tiempo real", "body": "Pipelines de visión y presencia para activaciones — analítica de sensor a dashboard en menos de un segundo." },
-      "5": { "tag": "Telegram + SaaS", "title": "Plataforma NexoPicks", "body": "Plataforma de picks deportivos + bot Telegram en monorepo Node/TS, Postgres, Redis, reasoner Ollama." }
+      "4": { "tag": "Sistemas de sensores", "title": "Analítica de sensores en tiempo real", "body": "Pipelines de visión y presencia para activaciones — del sensor al dashboard en menos de un segundo." },
+      "5": { "tag": "Telegram + SaaS", "title": "Plataforma NexoPicks", "body": "Plataforma de picks deportivos + bot de Telegram en monorepo Node/TS, Postgres, Redis y razonador con Ollama." }
     }
   },
   "founder": {
     "num": "Construido por operadores",
     "title": "No una marca. <em>Un equipo.</em>",
-    "body": "Liderado por su fundador, con experiencia en arquitectura cloud en un procesador de pagos global de primer nivel, producción bajo PCI DSS 4.0 en organizaciones AWS multi-cuenta, y trayectoria entregando SaaS multi-tenant, sistemas de sensores e infraestructura de trading. Trabajamos como construimos — directo, técnico, on-call."
+    "body": "Liderado por su fundador, con experiencia dirigiendo arquitectura en la nube para un procesador de pagos global de primer nivel, producción bajo PCI DSS 4.0 en organizaciones AWS de varias cuentas, y un historial entregando SaaS multi-tenant, sistemas de sensores e infraestructura de trading. Trabajamos como construimos — directo, técnico y disponibles cuando importa."
   },
   "engines": {
     "title": "Mis engines",
     "hero": {
       "badgeLive": "{count} en vivo ahora",
-      "badgeIdle": "Tu hub de engines",
+      "badgeIdle": "Tu centro de engines",
       "headingContinue": "Continúa donde lo dejaste",
-      "headingStart": "Empezá con NexoClip",
+      "headingStart": "Empieza con NexoClip",
       "subContinue": "{name} está corriendo en vivo. Retoma el control cuando quieras.",
       "subStart": "Convierte tus streams en clips virales — el único engine listo para usar ahora mismo.",
       "ctaContinue": "Continuar →",
@@ -595,7 +595,7 @@
     "sections": {
       "available": "Disponibles ahora",
       "availableSub": "Listos para usar con tu plan actual.",
-      "pro": "Desbloqueá con Pro",
+      "pro": "Desbloquea con Pro",
       "proSub": "Activa estos engines al subir de plan.",
       "soon": "Próximamente",
       "soonSub": "En construcción — te avisamos al lanzar.",

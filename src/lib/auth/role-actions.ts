@@ -13,13 +13,13 @@ export async function changeUserRole(
   newRole: UserRole,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!VALID_ROLES.includes(newRole)) {
-    return { ok: false, error: 'Invalid role' };
+    return { ok: false, error: 'That role does not exist.' };
   }
 
   const session = await getSessionUser();
-  if (!session) return { ok: false, error: 'Not authenticated' };
+  if (!session) return { ok: false, error: 'You need to sign in first.' };
   if (session.role !== 'SUPER_ADMIN' && session.role !== 'ADMIN') {
-    return { ok: false, error: 'Only ADMIN or SUPER_ADMIN can change roles' };
+    return { ok: false, error: 'Only an ADMIN or SUPER_ADMIN can change roles.' };
   }
 
   // Read target with the user-scoped client (RLS allows admins to SELECT all
@@ -44,14 +44,14 @@ export async function changeUserRole(
         .maybeSingle()
     ).data as typeof target;
   }
-  if (!target) return { ok: false, error: 'User not found' };
+  if (!target) return { ok: false, error: 'We could not find that user.' };
 
   // Allowlisted SUPER_ADMIN emails can't be demoted via the UI — they're forced
   // back by getSessionUser() on the next request anyway. Show an honest error.
   if (isSuperAdminEmail(target.email as string | null) && newRole !== 'SUPER_ADMIN') {
     return {
       ok: false,
-      error: 'Este usuario está en SUPER_ADMIN_EMAILS — el rol se restaura desde el entorno.',
+      error: 'Este usuario está en SUPER_ADMIN_EMAILS — su rol se restaura solo desde la configuración.',
     };
   }
 
@@ -75,7 +75,7 @@ export async function changeUserRole(
     return { ok: false, error: updateErr.message };
   }
   if (!data || data.length === 0) {
-    return { ok: false, error: 'No se actualizó ninguna fila — verifica el ID' };
+    return { ok: false, error: 'No se actualizó nada — revisa que el ID sea correcto.' };
   }
 
   // Audit log — capture the BEFORE state read above. Promotions to admin tiers

@@ -45,7 +45,7 @@ export function MessageThread({ messages, viewer, emptyMessage }: Props) {
         }}
       >
         {emptyMessage ??
-          'No hay mensajes todavía. Escribe abajo para empezar la conversación.'}
+          'Aún no hay mensajes. Escribe abajo y empieza la conversación.'}
       </div>
     );
   }

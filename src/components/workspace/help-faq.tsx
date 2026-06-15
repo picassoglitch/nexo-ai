@@ -20,11 +20,11 @@ const FAQ: FaqGroup[] = [
         q: '¿Cuál es la diferencia entre Free, Pro y VIP?',
         a: (
           <>
-            <b>Free</b> te deja explorar todos los sistemas en modo simulación, sin tarjeta de
+            <b>Free</b> te deja probar todos los sistemas en modo simulación, sin tarjeta de
             crédito. <b>Pro</b> activa <b>UN</b> sistema en ejecución real — tú eliges cuál
             desde tu lista de bots. <b>VIP</b> activa los 16 sistemas en vivo y te da los
-            límites más altos de uso. El admin puede cambiar tu tier desde su panel sin pasar
-            por checkout.
+            límites de uso más altos. El admin puede cambiarte de plan desde su panel sin pasar
+            por la página de pago.
           </>
         ),
       },
@@ -82,8 +82,8 @@ const FAQ: FaqGroup[] = [
         a: (
           <>
             Cada uno está descrito en <b>/app/engines</b>: lee la categoría y descripción debajo
-            del nombre. Para una explicación más profunda con casos de uso reales, escríbenos a
-            través de <b>/contacto</b> y te mandamos un brief.
+            del nombre. Para una explicación más a fondo con ejemplos reales, escríbenos a
+            través de <b>/contacto</b> y te mandamos un resumen.
           </>
         ),
       },
@@ -94,7 +94,7 @@ const FAQ: FaqGroup[] = [
             En simulación, el sistema corre con datos de prueba y no toca tus cuentas externas
             (Stripe, exchanges, redes sociales, etc.). Sirve para evaluar comportamiento y
             límites sin riesgo. <b>Ejecución real</b> conecta al sistema con tus credenciales y
-            actúa sobre data tuya — solo disponible en Pro y VIP.
+            actúa sobre tus datos — solo disponible en Pro y VIP.
           </>
         ),
       },
@@ -118,9 +118,10 @@ const FAQ: FaqGroup[] = [
         q: '¿Pueden ver mis datos los administradores de Nexo?',
         a: (
           <>
-            Solo el rol <b>SUPER_ADMIN</b> de tu organización puede ver tu profile + uso
-            agregado. El equipo de Nexo no accede a tu data operacional (lo que tus sistemas
-            generan). Para soporte técnico, te pedimos permiso explícito antes de mirar logs.
+            Solo el rol <b>SUPER_ADMIN</b> de tu organización puede ver tu perfil y tu uso
+            general. El equipo de Nexo no accede a los datos de tu operación (lo que tus sistemas
+            generan). Para soporte técnico, te pedimos permiso explícito antes de revisar
+            los registros.
           </>
         ),
       },
@@ -130,7 +131,7 @@ const FAQ: FaqGroup[] = [
           <>
             Cancela primero tu suscripción desde <b>/app/subscription</b> (te deja en Free) y
             luego escríbenos a <b>/contacto</b> pidiendo el borrado de cuenta. Eliminamos
-            profile + ejecuciones + pagos asociados en menos de 7 días, conforme a tu derecho a
+            tu perfil, tus ejecuciones y tus pagos en menos de 7 días, conforme a tu derecho a
             la portabilidad de datos.
           </>
         ),
@@ -146,7 +147,7 @@ const FAQ: FaqGroup[] = [
           <>
             Sí, para clientes en México emitimos CFDI 4.0. Después de tu primer pago en Pro o
             VIP, escríbenos vía <b>/contacto</b> con tu RFC + razón social y la generamos
-            dentro de los siguientes 3 días hábiles. Para otros países, emitimos invoice
+            dentro de los siguientes 3 días hábiles. Para otros países, emitimos una factura
             estándar en PDF.
           </>
         ),
@@ -157,8 +158,8 @@ const FAQ: FaqGroup[] = [
           <>
             Todos los que Mercado Pago soporta en tu país: tarjeta de crédito/débito,
             transferencia, OXXO/ticket (México), Rapipago/Pago Fácil (Argentina), y más.
-            Mercado Pago muestra las opciones disponibles según tu ubicación al momento del
-            checkout.
+            Mercado Pago muestra las opciones disponibles según tu ubicación al momento de
+            pagar.
           </>
         ),
       },

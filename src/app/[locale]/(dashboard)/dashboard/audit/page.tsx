@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata = { title: 'Audit log' };
+export const metadata = { title: 'Registro de actividad' };
 
 interface AuditRow {
   id: string;
@@ -19,11 +19,11 @@ interface AuditRow {
 }
 
 const ACTION_LABEL: Record<string, { label: string; cls: string }> = {
-  'tier.change': { label: 'Cambio de plan (admin)', cls: 'gr' },
-  'tier.payment': { label: 'Plan activado por pago', cls: 'gr' },
-  'tier.downgrade': { label: 'Bajada de plan (self)', cls: 'am' },
-  'role.change': { label: 'Cambio de rol', cls: 'pu' },
-  'selected_bot.change': { label: 'Cambio de bot en vivo', cls: 'cy' },
+  'tier.change': { label: 'Plan cambiado por un admin', cls: 'gr' },
+  'tier.payment': { label: 'Plan activado con el pago', cls: 'gr' },
+  'tier.downgrade': { label: 'El usuario bajó su propio plan', cls: 'am' },
+  'role.change': { label: 'Rol cambiado', cls: 'pu' },
+  'selected_bot.change': { label: 'Bot en vivo cambiado', cls: 'cy' },
 };
 
 function formatDiff(before: Record<string, unknown> | null, after: Record<string, unknown> | null): string {
@@ -72,9 +72,9 @@ export default async function AuditPage({
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Eventos totales</div>
+          <div className="cc-mod-stat-l">Movimientos en total</div>
           <div className="cc-mod-stat-v gr">{events.length}</div>
-          <div className="cc-mod-stat-sub">últimos 200</div>
+          <div className="cc-mod-stat-sub">los últimos 200</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Cambios de plan</div>
@@ -83,22 +83,22 @@ export default async function AuditPage({
               (byActionCount['tier.payment'] ?? 0) +
               (byActionCount['tier.downgrade'] ?? 0)}
           </div>
-          <div className="cc-mod-stat-sub">admin + pagos + self-downgrade</div>
+          <div className="cc-mod-stat-sub">admin + pagos + bajadas del propio usuario</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Cambios de rol</div>
           <div className="cc-mod-stat-v pu">{byActionCount['role.change'] ?? 0}</div>
-          <div className="cc-mod-stat-sub">promociones + demociones</div>
+          <div className="cc-mod-stat-sub">ascensos + bajas de rol</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Pagos automáticos</div>
           <div className="cc-mod-stat-v cy">{byActionCount['tier.payment'] ?? 0}</div>
-          <div className="cc-mod-stat-sub">vía webhook Mercado Pago</div>
+          <div className="cc-mod-stat-sub">confirmados por Mercado Pago</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Eventos recientes</div>
+        <div className="cc-mod-sl">Movimientos recientes</div>
         {events.length === 0 ? (
           <div
             style={{
@@ -110,7 +110,7 @@ export default async function AuditPage({
               fontSize: 13,
             }}
           >
-            Aún no hay eventos en el log.
+            Todavía no hay movimientos registrados.
             <br />
             <span
               style={{
@@ -121,7 +121,7 @@ export default async function AuditPage({
                 display: 'inline-block',
               }}
             >
-              Cualquier cambio de plan o rol aparecerá aquí en orden cronológico inverso.
+              Cada cambio de plan o de rol va a aparecer aquí, del más nuevo al más viejo.
             </span>
           </div>
         ) : (
@@ -181,7 +181,7 @@ export default async function AuditPage({
             paddingLeft: 4,
           }}
         >
-          ▸ Solo admins ven este log. Actor &laquo;sistema&raquo; = cambio automático vía webhook.
+          ▸ Solo los admins ven esto. Cuando el actor dice &laquo;sistema&raquo; es un cambio automático hecho por un pago.
         </p>
       </div>
     </div>

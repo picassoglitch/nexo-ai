@@ -365,8 +365,8 @@ export default async function UsagePage({
             fontSize: 13,
           }}
         >
-          ● <b style={{ color: 'var(--cc-green)' }}>Pago recibido</b> — los tokens entran a tu
-          balance cuando Mercado Pago confirma (segundos hasta minutos). Esta página se actualiza
+          ● <b style={{ color: 'var(--cc-green)' }}>Pago recibido</b> — tus tokens se suman a tu
+          balance en cuanto Mercado Pago confirma (de segundos a minutos). Esta página se actualiza
           sola.
         </div>
       )}
@@ -374,9 +374,9 @@ export default async function UsagePage({
       {/* Top stats */}
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Período</div>
+          <div className="cc-mod-stat-l">Periodo</div>
           <div className="cc-mod-stat-v">{periodLabel}</div>
-          <div className="cc-mod-stat-sub">renueva el 1° del próximo mes</div>
+          <div className="cc-mod-stat-sub">se renueva el 1° del próximo mes</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Balance disponible</div>
@@ -385,7 +385,7 @@ export default async function UsagePage({
           </div>
           <div className="cc-mod-stat-sub">
             {balance.unlimited
-              ? `admin · ilimitado (usado: ${formatNumber(balance.monthlyUsed)})`
+              ? `admin · sin límite (usados: ${formatNumber(balance.monthlyUsed)})`
               : `de ${formatNumber(balance.monthlyAllocation + balance.bonus)} tokens este mes`}
           </div>
         </div>
@@ -395,7 +395,7 @@ export default async function UsagePage({
             {formatNumber(balance.bonus)}
           </div>
           <div className="cc-mod-stat-sub">
-            {balance.bonus > 0 ? 'top-ups comprados · no expiran' : 'sin top-ups comprados aún'}
+            {balance.bonus > 0 ? 'tokens extra comprados · no caducan' : 'aún no compras tokens extra'}
           </div>
         </div>
         <div className="cc-mod-stat">
@@ -403,8 +403,8 @@ export default async function UsagePage({
           <div className="cc-mod-stat-v gr">{tier.replace('_', '-')}</div>
           <div className="cc-mod-stat-sub">
             {balance.unlimited
-              ? 'sin límite por rol'
-              : `incluye ${formatNumber(balance.monthlyAllocation)} tokens/mes`}
+              ? 'sin límite por tu rol'
+              : `incluye ${formatNumber(balance.monthlyAllocation)} tokens al mes`}
           </div>
         </div>
       </div>
@@ -424,7 +424,7 @@ export default async function UsagePage({
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: 'var(--cc-txt-2)' }}>
                 <b>{formatNumber(balance.monthlyUsed)}</b> usados ·{' '}
-                <b>{formatNumber(balance.remaining)}</b> disponibles
+                <b>{formatNumber(balance.remaining)}</b> te quedan
               </span>
               <span
                 style={{
@@ -451,7 +451,7 @@ export default async function UsagePage({
                   fontFamily: 'var(--cc-mono), monospace',
                 }}
               >
-                ▸ Estás cerca del límite. Compra un top-up para no bloquearte cuando se acabe.
+                ▸ Ya casi llegas a tu límite. Compra tokens extra para no quedarte sin servicio cuando se acaben.
               </div>
             )}
           </div>
@@ -471,8 +471,8 @@ export default async function UsagePage({
               marginBottom: 14,
             }}
           >
-            Los tokens comprados <b>nunca expiran</b> y se gastan <b>después</b> de tu allocation
-            mensual. Disponibles en todos los engines (NexoClip y los que vengan después).
+            Los tokens que compras <b>nunca caducan</b> y se usan <b>después</b> de los tokens que
+            ya trae tu plan cada mes. Sirven en todos los engines (NexoClip y los que vengan después).
           </p>
           <div className="cc-mod-grid">
             {TOKEN_PACKS.map((pack) => (
@@ -519,9 +519,9 @@ export default async function UsagePage({
               marginBottom: 14,
             }}
           >
-            Como owner de uno o más engines, acumulas regalías cada vez que
-            otros usuarios consumen tokens en ellos. El admin finaliza el
-            período al cierre del mes y procesa el pago offline.
+            Como dueño de uno o más engines, ganas regalías cada vez que
+            otros usuarios gastan tokens en ellos. El admin cierra el
+            periodo al final del mes y procesa el pago por fuera.
           </p>
           {royaltyAccruals.length > 0 && (
             <div className="cc-mod-list" style={{ marginBottom: 14 }}>
@@ -532,7 +532,7 @@ export default async function UsagePage({
                     <div className="cc-mod-name">
                       {a.engineName}{' '}
                       <span className="cc-mod-badge">
-                        {a.alreadyFinalized ? 'finalizado' : 'acumulando'}
+                        {a.alreadyFinalized ? 'cerrado' : 'acumulando'}
                       </span>
                     </div>
                     <div className="cc-mod-sub">
@@ -546,7 +546,7 @@ export default async function UsagePage({
                     <b className={a.alreadyFinalized ? 'gr' : 'am'}>
                       ${(a.accruedCents / 100).toLocaleString('es-MX')}
                     </b>
-                    <span>MXN este período</span>
+                    <span>MXN este periodo</span>
                   </div>
                 </div>
               ))}
@@ -578,7 +578,7 @@ export default async function UsagePage({
                         </span>
                       </div>
                       <div className="cc-mod-sub">
-                        Período{' '}
+                        Periodo{' '}
                         {new Date(p.periodStart).toLocaleDateString('es-MX', {
                           month: 'long',
                           year: 'numeric',
@@ -621,7 +621,7 @@ export default async function UsagePage({
               lineHeight: 1.55,
             }}
           >
-            Aún no tienes consumo registrado este mes.
+            Todavía no registras consumo este mes.
             <br />
             <span
               style={{
@@ -632,7 +632,7 @@ export default async function UsagePage({
                 display: 'inline-block',
               }}
             >
-              Tu actividad aparece aquí en cuanto un engine empiece a gastar tokens.
+              Tu actividad aparece aquí en cuanto un engine empiece a usar tokens.
             </span>
           </div>
         ) : (
@@ -707,8 +707,8 @@ export default async function UsagePage({
           }}
         >
           ▸ Algunos datos se mostraron con valores por defecto (
-          {data.warnings.join(', ')}). Si esto persiste, revisa los logs de
-          Vercel — buscamos por prefijo `[/app/usage]`.
+          {data.warnings.join(', ')}). Si esto sigue pasando, revisa los logs de
+          Vercel — busca por el prefijo `[/app/usage]`.
         </div>
       )}
     </div>

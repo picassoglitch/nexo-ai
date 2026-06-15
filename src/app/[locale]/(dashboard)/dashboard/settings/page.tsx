@@ -21,7 +21,7 @@ export default async function SettingsPage({
   return (
     <div className="cc-scroll">
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Cuenta</div>
+        <div className="cc-mod-sl">Tu cuenta</div>
         <div className="cc-mod-form">
           <div className="cc-mod-field">
             <label>Nombre</label>
@@ -50,7 +50,7 @@ export default async function SettingsPage({
             <input type="text" defaultValue="Nexo AI (demo)" disabled />
           </div>
           <div className="cc-mod-field">
-            <label>Locale por defecto</label>
+            <label>Idioma principal</label>
             <select defaultValue={locale} disabled>
               <option value="en">English</option>
               <option value="es">Español</option>
@@ -73,21 +73,21 @@ export default async function SettingsPage({
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Errores críticos</span>
-              <span className="s">Email + push cuando un sistema cae.</span>
+              <span className="s">Te avisamos por correo y push apenas se cae un sistema.</span>
             </div>
             <div className="cc-mod-switch on" />
           </div>
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Resumen diario</span>
-              <span className="s">Ingresos, jobs y errores del día anterior a las 09:00.</span>
+              <span className="s">Cada día a las 09:00 te llega lo del día anterior: ingresos, jobs y errores.</span>
             </div>
             <div className="cc-mod-switch on" />
           </div>
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Eventos de marketing</span>
-              <span className="s">Publicaciones virales o picos de engagement.</span>
+              <span className="s">Cuando una publicación se vuelve viral o el engagement se dispara.</span>
             </div>
             <div className="cc-mod-switch" />
           </div>
@@ -100,14 +100,14 @@ export default async function SettingsPage({
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">2FA con app autenticadora</span>
-              <span className="s">TOTP obligatorio para roles Admin y Super Admin.</span>
+              <span className="s">El código TOTP es obligatorio para los roles Admin y Super Admin.</span>
             </div>
             <div className="cc-mod-switch on" />
           </div>
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Sesiones activas</span>
-              <span className="s">1 sesión · navegador actual</span>
+              <span className="s">1 sesión · este navegador</span>
             </div>
             <button
               type="button"
@@ -123,7 +123,7 @@ export default async function SettingsPage({
               }}
               disabled
             >
-              Cerrar otras
+              Cerrar las demás
             </button>
           </div>
         </div>

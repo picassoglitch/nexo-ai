@@ -4,7 +4,7 @@ import { Link } from '@/i18n/routing';
 import { listEngines } from '@/lib/data/engines';
 import { getPlatformTokenStats } from '@/lib/usage/platform-stats';
 
-export const metadata = { title: 'Overview' };
+export const metadata = { title: 'Resumen general' };
 
 // Format token counts as a compact string. We render large numbers a lot
 // (millions of tokens per engine) so the K/M/B suffix keeps cards aligned.
@@ -61,7 +61,7 @@ export default async function OverviewPage({
             <small>/ {engines.length}</small>
           </div>
           <div className="cc-mod-stat-sub">
-            {comingSoon} próximamente · {errored} con error
+            {comingSoon} próximamente · {errored} con errores
           </div>
         </div>
         <div className="cc-mod-stat">
@@ -71,8 +71,8 @@ export default async function OverviewPage({
           </div>
           <div className="cc-mod-stat-sub">
             {totalRev > 0
-              ? 'agregado por todos los engines'
-              : 'sin ingresos registrados todavía'}
+              ? 'suma de todos tus engines'
+              : 'todavía no tienes ingresos'}
           </div>
         </div>
         <div className="cc-mod-stat">
@@ -96,7 +96,7 @@ export default async function OverviewPage({
                   .filter((e) => e.persona)
                   .map((e) => e.name)
                   .join(' · ')
-              : 'aún no se entrena ninguna'}
+              : 'todavía no has entrenado ninguna'}
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default async function OverviewPage({
               fontSize: 13,
             }}
           >
-            Ningún engine ha reportado tokens este mes.
+            Ningún engine ha reportado tokens este mes todavía.
             <br />
             <span
               style={{
@@ -152,8 +152,8 @@ export default async function OverviewPage({
                 display: 'inline-block',
               }}
             >
-              Los engines pushean a <code>/api/engines/[slug]/usage</code> en
-              cada llamada LLM exitosa.
+              Cada engine envía datos a <code>/api/engines/[slug]/usage</code> en
+              cada llamada al modelo que se completa bien.
             </span>
           </div>
         ) : (
@@ -270,7 +270,7 @@ export default async function OverviewPage({
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Engines con atención requerida</div>
+        <div className="cc-mod-sl">Engines que necesitan tu atención</div>
         {needAttention.length === 0 ? (
           <div
             style={{
@@ -283,8 +283,8 @@ export default async function OverviewPage({
               lineHeight: 1.55,
             }}
           >
-            ● <b style={{ color: 'var(--cc-green)' }}>Todo en verde</b> — ningún engine
-            requiere intervención.
+            ● <b style={{ color: 'var(--cc-green)' }}>Todo en orden</b> — ningún engine
+            necesita que intervengas.
             <br />
             <span
               style={{
@@ -295,7 +295,7 @@ export default async function OverviewPage({
                 display: 'inline-block',
               }}
             >
-              Aquí aparecen errores y degradaciones cuando ocurran.
+              Si algo falla o se pone lento, te avisamos aquí.
             </span>
           </div>
         ) : (
@@ -338,7 +338,7 @@ function EmptyEngines() {
         lineHeight: 1.55,
       }}
     >
-      Sin engines en el catálogo.
+      Todavía no hay engines en el catálogo.
       <br />
       <span
         style={{
@@ -349,8 +349,8 @@ function EmptyEngines() {
           display: 'inline-block',
         }}
       >
-        Si recién corriste las migraciones, hay 2 activos (NexoClip, NexoStreamManager) y 4
-        coming-soon — visibles en{' '}
+        Si acabas de correr las migraciones, hay 2 activos (NexoClip, NexoStreamManager) y 4
+        próximamente — los ves en{' '}
         <Link
           href={'/dashboard/engines' as Route}
           style={{ color: 'var(--cc-green)', textDecoration: 'underline' }}

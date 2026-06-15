@@ -99,8 +99,8 @@ export default async function WorkspaceHomePage({
       : liveEngineNames.length > 0
         ? `activo: ${liveEngineNames.join(', ')}`
         : tier === 'FREE'
-          ? 'solo simulación'
-          : 'todavía no elegido';
+          ? 'solo en modo prueba'
+          : 'aún sin elegir';
 
   // Spotlight engine goes first: the live selection, else the active trial
   // engine, else the first active engine. Then live ones, then active, then
@@ -132,16 +132,16 @@ export default async function WorkspaceHomePage({
   const heroSub = isAdmin
     ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los engines, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
     : trialActive
-      ? `Tu <b style="color:var(--cc-cyan)">prueba de NexoClip Pro</b> está activa — ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} restantes corriendo en vivo. Explora el resto en simulación.`
+      ? `Tu <b style="color:var(--cc-cyan)">prueba de NexoClip Pro</b> está activa — te quedan ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} corriendo en vivo. Mientras, prueba los demás en modo demo.`
       : tier === 'FREE'
-        ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Explora los engines en modo simulación y desbloquea ejecución en vivo cuando estés listo.`
+        ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Prueba los engines en modo demo y activa la ejecución en vivo cuando quieras.`
         : tier === 'PRO'
           ? `Estás en <b style="color:var(--cc-green)">Pro</b>${
               liveEngineNames.length > 0
-                ? ` — tu slot en vivo lo tiene <b>${liveEngineNames[0]}</b>.`
-                : ' — todavía no elegiste tu engine en vivo. Pasa a Mis engines para activar uno.'
+                ? ` — tu lugar en vivo lo tiene <b>${liveEngineNames[0]}</b>.`
+                : ' — aún no eliges tu engine en vivo. Entra a Mis engines para activar uno.'
             }`
-          : `Estás en <b style="color:var(--cc-green)">VIP</b>. Todos los engines disponibles corren en vivo con los límites más altos.`;
+          : `Estás en <b style="color:var(--cc-green)">VIP</b>. Todos los engines disponibles corren en vivo, con los límites más altos.`;
 
   return (
     <div className="cc-scroll">
@@ -274,7 +274,7 @@ export default async function WorkspaceHomePage({
                 <span className="cc-mod-tag">Upgrade</span>
                 <span className="cc-mod-badge cy">Cuando estés listo</span>
               </div>
-              <h4>Activa ejecución en vivo</h4>
+              <h4>Pon tus engines en vivo</h4>
               <p>
                 Pro ({TIER_CAPS.PRO.price}/{TIER_CAPS.PRO.per}) para un engine en vivo, o VIP (
                 {TIER_CAPS.VIP.price}/{TIER_CAPS.VIP.per}) para todos.

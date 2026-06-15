@@ -158,9 +158,9 @@ export default async function EngineDetailPage({
             textDecoration: 'none',
             fontFamily: 'inherit',
           }}
-          title="Abrir la página del subscriber para probar la UI"
+          title="Abre la vista del subscriber para ver cómo se ve para ellos"
         >
-          Probar como subscriber →
+          Ver como subscriber →
         </Link>
       </div>
 
@@ -173,7 +173,7 @@ export default async function EngineDetailPage({
             <small> / {metrics.totalSubs} total</small>
           </div>
           <div className="cc-mod-stat-sub">
-            {metrics.pausedSubs} paused · {metrics.newSubsThisMonth} nuevas este mes
+            {metrics.pausedSubs} en pausa · {metrics.newSubsThisMonth} nuevas este mes
           </div>
         </div>
         <div className="cc-mod-stat">
@@ -181,7 +181,7 @@ export default async function EngineDetailPage({
           <div className={`cc-mod-stat-v ${metrics.usersActiveThisMonth > 0 ? 'cy' : ''}`}>
             {metrics.usersActiveThisMonth}
           </div>
-          <div className="cc-mod-stat-sub">consumieron ≥ 1 token este mes</div>
+          <div className="cc-mod-stat-sub">usaron al menos 1 token este mes</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Tokens · mes</div>
@@ -189,7 +189,7 @@ export default async function EngineDetailPage({
             {formatTokens(metrics.tokensThisMonth)}
           </div>
           <div className="cc-mod-stat-sub">
-            {formatTokens(metrics.tokensLast7d)} en 7d ·{' '}
+            {formatTokens(metrics.tokensLast7d)} en 7 días ·{' '}
             {formatTokens(metrics.tokensLifetime)} histórico
           </div>
         </div>
@@ -198,7 +198,7 @@ export default async function EngineDetailPage({
           <div className={`cc-mod-stat-v ${metrics.revenueCentsThisMonth > 0 ? 'gr' : ''}`}>
             {formatCents(metrics.revenueCentsThisMonth)}
           </div>
-          <div className="cc-mod-stat-sub">aprox · pagos de subs activas</div>
+          <div className="cc-mod-stat-sub">aprox · pagos de las subs activas</div>
         </div>
       </div>
 
@@ -225,7 +225,7 @@ export default async function EngineDetailPage({
               letterSpacing: '0.08em',
             }}
           >
-            CALCULADO AL {new Date(metrics.computedAt).toLocaleString('es-MX', {
+            CALCULADO A LAS {new Date(metrics.computedAt).toLocaleString('es-MX', {
               hour: '2-digit',
               minute: '2-digit',
             })}
@@ -240,10 +240,10 @@ export default async function EngineDetailPage({
             marginBottom: 16,
           }}
         >
-          Costos que la plataforma paga proveedores (Claude API, Modal, infra) +
-          royalty al partner owner del engine. Edita las rates inline para que
-          el margen se recalcule. Vercel + Railway suelen amortizarse en el
-          <b> costo fijo</b> mensual. La rate de Claude actual ronda los{' '}
+          Lo que la plataforma le paga a los proveedores (Claude API, Modal,
+          infra) más el royalty del partner dueño del engine. Edita los costos
+          aquí mismo y el margen se recalcula solo. Vercel y Railway suelen
+          entrar en el <b>costo fijo</b> mensual. Hoy el costo de Claude está en
           <b>$180 MXN / 1M tokens</b> (Sonnet 4.5).
         </p>
 
@@ -344,8 +344,8 @@ export default async function EngineDetailPage({
                 label="Infraestructura fija (Modal / Vercel / Railway)"
                 note={
                   engine.fixedMonthlyCostCents > 0
-                    ? 'Costo amortizado del mes'
-                    : 'Sin configurar — edita arriba'
+                    ? 'La parte que toca este mes'
+                    : 'Sin configurar — edítalo arriba'
                 }
                 amountCents={metrics.fixedMonthlyCostCents}
               />
@@ -358,7 +358,7 @@ export default async function EngineDetailPage({
                 note={
                   engine.ownerUserId
                     ? `${formatTokens(metrics.tokensThisMonth)} × ${formatCents(engine.partnerRoyaltyPerMillionTokensCents)} / 1M`
-                    : 'No hay partner asignado a este engine'
+                    : 'Este engine no tiene partner asignado'
                 }
                 amountCents={metrics.royaltyPayableCents}
               />
@@ -412,8 +412,8 @@ export default async function EngineDetailPage({
               fontFamily: 'var(--cc-mono), monospace',
             }}
           >
-            ▸ Sin ingresos este mes — el margen es negativo porque el costo aún
-            corre. Normal durante onboarding; vigílalo cuando empiece la facturación.
+            ▸ Sin ingresos este mes — el margen sale negativo porque el costo
+            sigue corriendo. Es normal al arrancar; revísalo cuando empiece el cobro.
           </p>
         )}
       </div>
@@ -509,7 +509,7 @@ export default async function EngineDetailPage({
                   fontFamily: 'var(--cc-mono), monospace',
                 }}
               >
-                ▸ configura el costo arriba para ver $ por usuario
+                ▸ configura el costo arriba para ver cuánto gasta cada usuario
               </small>
             )}
           </div>
@@ -548,8 +548,8 @@ export default async function EngineDetailPage({
                           }}
                           title={
                             pct >= 40
-                              ? 'Concentración: este usuario es >40% del consumo del engine'
-                              : 'Costo >$500 MXN/mes'
+                              ? 'Concentración: este usuario es más del 40% del consumo del engine'
+                              : 'Gasto mayor a $500 MXN/mes'
                           }
                         >
                           concentración
@@ -569,7 +569,7 @@ export default async function EngineDetailPage({
                         ? formatCents(u.costCents)
                         : '—'}
                     </b>
-                    <span>{engine.costPerMillionTokensCents > 0 ? 'costo mes' : 'sin rate'}</span>
+                    <span>{engine.costPerMillionTokensCents > 0 ? 'costo del mes' : 'sin costo'}</span>
                   </div>
                 </div>
               );
@@ -592,8 +592,8 @@ export default async function EngineDetailPage({
               fontSize: 13,
             }}
           >
-            Sin actividad este mes. Cuando un usuario consuma tokens en este
-            engine los eventos aparecen aquí.
+            Sin actividad este mes. En cuanto alguien use tokens en este engine,
+            los eventos aparecen aquí.
           </div>
         ) : (
           <div className="cc-mod-list">

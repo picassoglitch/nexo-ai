@@ -1,17 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+import { getAutomationCounts } from '@/lib/data/ops';
 
-const AUTOS = [
-  { id: 'a1', trigger: 'On VOD upload', action: 'NexoClip → 12 clips · 3 variantes c/u', runs: 418, state: 'gr' as const },
-  { id: 'a2', trigger: 'On clip render done', action: 'SubtitleForge → captions word-level', runs: 1248, state: 'gr' as const },
-  { id: 'a3', trigger: 'On captions ready', action: 'Publishing → TikTok · Reels · Shorts', runs: 1186, state: 'gr' as const },
-  { id: 'a4', trigger: 'On stream start (AVA)', action: 'ChatWarden moderation activate', runs: 142, state: 'gr' as const },
-  { id: 'a5', trigger: 'Cron · 15min', action: 'Quantorpolybot scan signals', runs: 9120, state: 'gr' as const },
-  { id: 'a6', trigger: 'On price spread > 0.4%', action: 'ArbiX Spread place limit order', runs: 38, state: 'am' as const },
-  { id: 'a7', trigger: 'On lead capture', action: 'Realestate Scraper → Discord notify', runs: 612, state: 'gr' as const },
-  { id: 'a8', trigger: 'On worker error', action: 'Notify + reintentar 3× exponencial', runs: 24, state: 'r' as const },
-  { id: 'a9', trigger: 'Cron · daily 02:00', action: 'BackupRunner → S3 snapshot', runs: 90, state: 'r' as const },
-  { id: 'a10', trigger: 'On revenue event', action: 'Webhook → /dashboard/revenue', runs: 481, state: 'gr' as const },
-];
+export const metadata = { title: 'Automatizaciones' };
 
 export default async function AutomationsPage({
   params,
@@ -20,44 +10,100 @@ export default async function AutomationsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const c = await getAutomationCounts();
+
+  // The platform's REAL automated flows. Each run count is the number of
+  // rows the flow wrote in the last 30 days — not a synthetic counter.
+  const flows = [
+    {
+      id: 'mp-webhook',
+      trigger: 'Aviso de pago de Mercado Pago',
+      action: 'Guardar el pago y revisar que sea real',
+      runs: c.payments30d,
+    },
+    {
+      id: 'tier-activate',
+      trigger: 'Pago aprobado',
+      action: 'Activar tu tier o cargar tu pack de tokens',
+      runs: c.paymentsApproved30d,
+    },
+    {
+      id: 'token-packs',
+      trigger: 'Compra de un pack',
+      action: 'Cargar tus tokens extra (token_pack_purchases)',
+      runs: c.tokenPacks30d,
+    },
+    {
+      id: 'welcome',
+      trigger: 'Te registras o ves el saludo de bienvenida',
+      action: 'Regalo de bienvenida y prueba de NexoClip por 7 días',
+      runs: c.welcomeGifts30d,
+    },
+    {
+      id: 'usage-ingest',
+      trigger: 'Un engine reporta su consumo',
+      action: 'Registrar el uso sin duplicarlo (usage_events)',
+      runs: c.usageEvents30d,
+    },
+    {
+      id: 'provisioning',
+      trigger: 'Mejoras tu plan o eliges un engine',
+      action: 'Darte acceso al instante (engine_subscriptions)',
+      runs: c.subscriptions30d,
+    },
+    {
+      id: 'audit',
+      trigger: 'Cambia tu tier, tu rol o tus tokens',
+      action: 'Dejar registro de lo que pasó (audit log)',
+      runs: c.auditEvents30d,
+    },
+  ].sort((a, b) => b.runs - a.runs);
+
+  const activeFlows = flows.filter((f) => f.runs > 0);
+  const totalRuns = flows.reduce((s, f) => s + f.runs, 0);
+
   return (
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Flujos activos</div>
-          <div className="cc-mod-stat-v gr">31</div>
-          <div className="cc-mod-stat-sub">29 healthy · 2 con error</div>
+          <div className="cc-mod-stat-l">Flujos activos (últimos 30 días)</div>
+          <div className="cc-mod-stat-v gr">
+            {activeFlows.length}
+            <small>/ {flows.length}</small>
+          </div>
+          <div className="cc-mod-stat-sub">tareas que la plataforma hace sola</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Ejecuciones 24h</div>
-          <div className="cc-mod-stat-v cy">2,184</div>
-          <div className="cc-mod-stat-sub">Latencia P50: 84ms</div>
+          <div className="cc-mod-stat-l">Veces que corrieron (últimos 30 días)</div>
+          <div className="cc-mod-stat-v cy">{totalRuns.toLocaleString('es-MX')}</div>
+          <div className="cc-mod-stat-sub">acciones que hicieron los flujos</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Errores 24h</div>
-          <div className="cc-mod-stat-v am">7</div>
-          <div className="cc-mod-stat-sub">3 reintentadas con éxito</div>
+          <div className="cc-mod-stat-l">Consumo registrado (últimos 30 días)</div>
+          <div className="cc-mod-stat-v am">{c.usageEvents30d.toLocaleString('es-MX')}</div>
+          <div className="cc-mod-stat-sub">reportes de uso que mandan los engines</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Flujos (top por ejecuciones)</div>
+        <div className="cc-mod-sl">Flujos (ordenados por actividad de los últimos 30 días)</div>
         <div className="cc-mod-list">
-          {AUTOS.sort((a, b) => b.runs - a.runs).map((a) => (
-            <div key={a.id} className="cc-mod-row">
+          {flows.map((f) => (
+            <div key={f.id} className="cc-mod-row">
               <div className="cc-mod-ic">⟳</div>
               <div className="cc-mod-body">
                 <div className="cc-mod-name">
-                  {a.trigger}{' '}
-                  <span className={`cc-mod-badge ${a.state}`}>
-                    {a.state === 'gr' ? 'OK' : a.state === 'am' ? 'Degradado' : 'Error'}
+                  {f.trigger}{' '}
+                  <span className={`cc-mod-badge ${f.runs > 0 ? 'gr' : 'am'}`}>
+                    {f.runs > 0 ? 'Activo' : 'Sin actividad'}
                   </span>
                 </div>
-                <div className="cc-mod-sub">→ {a.action}</div>
+                <div className="cc-mod-sub">→ {f.action}</div>
               </div>
               <div className="cc-mod-right">
-                <b>{a.runs.toLocaleString()}</b>
-                <span>ejecuciones 30d</span>
+                <b>{f.runs.toLocaleString('es-MX')}</b>
+                <span>veces en 30 días</span>
               </div>
             </div>
           ))}

@@ -66,7 +66,7 @@ export function EngineStatusSelect({
         showToast(`<b>Error</b> · ${res.error}`);
         return;
       }
-      showToast(`<b>${engineName}</b> · status → ${next}`);
+      showToast(`<b>${engineName}</b> · estado → ${next}`);
       router.refresh();
     });
   }
@@ -134,7 +134,7 @@ export function EngineRoyaltyRateInput({
       }
       setCents(parsed);
       showToast(
-        `<b>${engineName}</b> · royalty $${(parsed / 100).toLocaleString('es-MX')} / 1M tokens`,
+        `<b>${engineName}</b> · regalía $${(parsed / 100).toLocaleString('es-MX')} / 1M tokens`,
       );
       setEditing(false);
       router.refresh();
@@ -151,7 +151,7 @@ export function EngineRoyaltyRateInput({
       <button
         type="button"
         onClick={startEdit}
-        title="Click para editar la royalty rate"
+        title="Toca para editar la regalía"
         style={{
           padding: '5px 9px',
           borderRadius: 7,
@@ -327,7 +327,7 @@ function CentsChipEditor({
       <button
         type="button"
         onClick={startEdit}
-        title="Click para editar"
+        title="Toca para editar"
         style={{
           padding: '5px 9px',
           borderRadius: 7,
@@ -416,7 +416,7 @@ export function EngineCostRateInput({
       engineName={engineName}
       onSave={changeEngineCostRate}
       suffix="/ 1M"
-      toastVerb="cost rate"
+      toastVerb="costo"
       emptyTone="muted"
       filledTone="amber"
     />
@@ -440,7 +440,7 @@ export function EngineFixedCostInput({
       engineName={engineName}
       onSave={changeEngineFixedMonthlyCost}
       suffix="/ mes"
-      toastVerb="fixed cost"
+      toastVerb="costo fijo"
       emptyTone="muted"
       filledTone="amber"
     />

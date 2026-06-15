@@ -35,10 +35,10 @@ export function TeamTierSelect({ userId, current }: Props) {
       const res = await changeUserTier(userId, next);
       if (!res.ok) {
         setTier(prev);
-        showToast(`<b>Error</b> · ${res.error ?? 'no se pudo cambiar el tier'}`);
+        showToast(`<b>Error</b> · ${res.error ?? 'No pudimos cambiar el plan. Inténtalo de nuevo.'}`);
         return;
       }
-      showToast(`Tier cambiado a <b>${next.replace('_', '-')}</b>`);
+      showToast(`Listo, el plan ahora es <b>${next.replace('_', '-')}</b>`);
       // Refresh the team page so the row reflects the authoritative server
       // value (also re-runs the "paid subscriptions" stat at the top). The
       // target user's other tabs get auto-synced by ProfileSubscriber.

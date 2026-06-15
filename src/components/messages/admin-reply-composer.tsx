@@ -11,7 +11,7 @@ export function AdminReplyComposer({ threadUserId }: { threadUserId: string }) {
   return (
     <MessageComposer
       send={(body) => sendReplyFromAdmin(threadUserId, body)}
-      placeholder="Responde como equipo Nexo. El subscriber lo verá en /app/messages."
+      placeholder="Responde como equipo Nexo. La persona suscrita lo verá en /app/messages."
       buttonLabel="Responder"
     />
   );

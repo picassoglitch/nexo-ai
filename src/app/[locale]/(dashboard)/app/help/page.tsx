@@ -39,8 +39,8 @@ export default async function HelpPage({
             lineHeight: 1.55,
           }}
         >
-          Lo que la mayoría de operadores preguntan los primeros días. Si tu duda no aparece
-          aquí, escríbenos directamente y te respondemos rápido.
+          Esto es lo que casi todos preguntan en sus primeros días. Si tu duda no está
+          aquí, escríbenos directo y te contestamos rápido.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default async function HelpPage({
               Escríbenos directamente
             </div>
             <div style={{ fontSize: 12.5, color: 'var(--cc-txt-3)' }}>
-              Respuesta de un humano en menos de 24 horas hábiles. Sin tickets, sin bots.
+              Te responde una persona real en menos de 24 horas hábiles. Sin tickets, sin bots.
             </div>
           </div>
           <Link

@@ -149,7 +149,7 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Errores críticos</span>
-              <span className="s">Email + push cuando un sistema cae.</span>
+              <span className="s">Te avisamos por email y push cuando algo se cae.</span>
             </div>
             <button
               type="button"
@@ -161,7 +161,7 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Resumen diario</span>
-              <span className="s">Ingresos, jobs y errores del día anterior a las 09:00.</span>
+              <span className="s">Ingresos, tareas y errores del día anterior, a las 09:00.</span>
             </div>
             <button
               type="button"
@@ -173,7 +173,7 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">Eventos de marketing</span>
-              <span className="s">Publicaciones virales o picos de engagement.</span>
+              <span className="s">Cuando una publicación se vuelve viral o sube la interacción.</span>
             </div>
             <button
               type="button"
@@ -191,7 +191,7 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
           <div className="cc-mod-toggle">
             <div className="cc-mod-toggle-text">
               <span className="t">2FA con app autenticadora</span>
-              <span className="s">TOTP obligatorio para roles Admin y Super Admin.</span>
+              <span className="s">El código TOTP es obligatorio para los roles Admin y Super Admin.</span>
             </div>
             <button
               type="button"

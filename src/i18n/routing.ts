@@ -3,7 +3,10 @@ import { createNavigation } from 'next-intl/navigation';
 
 export const routing = defineRouting({
   locales: ['en', 'es'],
-  defaultLocale: 'en',
+  // Mexican Spanish is the default; English-speaking browsers still get 'en'
+  // via next-intl's Accept-Language detection (left on). With 'as-needed',
+  // 'es' serves at the root with no prefix and 'en' is served under /en.
+  defaultLocale: 'es',
   localePrefix: 'as-needed',
 });
 

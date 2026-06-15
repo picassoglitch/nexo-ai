@@ -5,7 +5,7 @@ import { ContactPage } from '@/components/contact/contact-page';
 export const metadata = {
   title: 'Contacto · Nexo AI',
   description:
-    'Escríbenos sobre integraciones, partnerships, demos o cualquier consulta sobre la plataforma.',
+    'Hablemos. Escríbenos sobre integraciones, alianzas, demos o cualquier duda sobre la plataforma.',
 };
 
 export default async function ContactRoute({

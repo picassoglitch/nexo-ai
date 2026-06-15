@@ -19,29 +19,29 @@ export default async function RevenuePage({
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">MRR estimado</div>
+          <div className="cc-mod-stat-l">Ingreso mensual estimado</div>
           <div className="cc-mod-stat-v gr">${Math.round((total / 100) * 30).toLocaleString()}</div>
-          <div className="cc-mod-stat-sub">basado en 30d shadow</div>
+          <div className="cc-mod-stat-sub">proyectado sobre los últimos 30 días</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Ingresos hoy</div>
+          <div className="cc-mod-stat-l">Lo que ganaste hoy</div>
           <div className="cc-mod-stat-v gr">${Math.round(total / 100).toLocaleString()}</div>
-          <div className="cc-mod-stat-sub">+12% vs ayer</div>
+          <div className="cc-mod-stat-sub">+12% más que ayer</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Sistemas con ingreso</div>
+          <div className="cc-mod-stat-l">Sistemas que ya te dan dinero</div>
           <div className="cc-mod-stat-v cy">{revenueEngines.length}</div>
-          <div className="cc-mod-stat-sub">de {engines.length} totales</div>
+          <div className="cc-mod-stat-sub">de {engines.length} en total</div>
         </div>
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Costo IA hoy</div>
+          <div className="cc-mod-stat-l">Lo que te costó la IA hoy</div>
           <div className="cc-mod-stat-v am">$84.20</div>
-          <div className="cc-mod-stat-sub">margen 99.2%</div>
+          <div className="cc-mod-stat-sub">te queda 99.2% de margen</div>
         </div>
       </div>
 
       <div className="cc-mod-section">
-        <div className="cc-mod-sl">Ingresos por sistema</div>
+        <div className="cc-mod-sl">Cuánto te da cada sistema</div>
         <div className="cc-mod-list">
           {revenueEngines.map((e) => {
             const pct = total > 0 ? (e.revenueCents / total) * 100 : 0;

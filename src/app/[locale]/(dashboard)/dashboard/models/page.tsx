@@ -1,16 +1,16 @@
 import { setRequestLocale } from 'next-intl/server';
+import { formatCompact, formatUsdMicros, getModelUsage } from '@/lib/data/ops';
 
-const MODELS = [
-  { id: 'sonnet', ic: '◈', name: 'Claude Sonnet 4.5', provider: 'Anthropic', use: 'Reasoning · agents', cost: '$3.40 in / $15 out', calls: '142k', state: 'gr' as const, label: 'Primary' },
-  { id: 'haiku', ic: '◇', name: 'Claude Haiku', provider: 'Anthropic', use: 'Fast classification', cost: '$0.80 in / $4 out', calls: '418k', state: 'gr' as const, label: 'Active' },
-  { id: '4o', ic: '◆', name: 'GPT-4o', provider: 'OpenAI', use: 'Fallback · multimodal', cost: '$5 in / $15 out', calls: '38k', state: 'gr' as const, label: 'Active' },
-  { id: '4omini', ic: '◇', name: 'GPT-4o-mini', provider: 'OpenAI', use: 'Bulk content gen', cost: '$0.15 in / $0.60 out', calls: '612k', state: 'gr' as const, label: 'Active' },
-  { id: 'whisper', ic: '🎤', name: 'Whisper-large-v3', provider: 'OpenAI', use: 'Caption transcription', cost: '$0.006/min', calls: '8.2k min', state: 'gr' as const, label: 'Active' },
-  { id: 'llama', ic: '🦙', name: 'Llama 3.1 70B', provider: 'Local · Ollama', use: 'Signal reasoning', cost: 'Self-hosted', calls: '24k', state: 'cy' as const, label: 'GPU-02' },
-  { id: 'sdxl', ic: '🎨', name: 'SDXL Turbo', provider: 'Local · Replicate', use: 'Thumbnails', cost: '$0.0035/img', calls: '4.1k', state: 'pu' as const, label: 'Rendering' },
-  { id: 'sora', ic: '🎬', name: 'Sora preview', provider: 'OpenAI', use: 'Clip variants (alpha)', cost: 'Preview tier', calls: '128', state: 'am' as const, label: 'Limited' },
-  { id: 'embed', ic: '▤', name: 'text-embedding-3-large', provider: 'OpenAI', use: 'Lead matching · search', cost: '$0.13 / 1M tokens', calls: '2.1M', state: 'gr' as const, label: 'Active' },
-];
+export const metadata = { title: 'Modelos y medidores' };
+
+// Native-unit suffix per meter kind. New kinds fall back to the raw kind
+// string — migration 0020 dropped the kind whitelist on purpose.
+const KIND_UNIT: Record<string, string> = {
+  'llm.tokens': 'tokens',
+  'transcription.seconds': 'seg',
+  'storage.mb': 'MB',
+  'publish.count': 'publicaciones',
+};
 
 export default async function ModelsPage({
   params,
@@ -20,37 +20,69 @@ export default async function ModelsPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const byProvider = MODELS.reduce<Record<string, typeof MODELS>>((acc, m) => {
-    (acc[m.provider] ||= [] as typeof MODELS).push(m);
-    return acc;
-  }, {});
+  const providers = await getModelUsage();
 
   return (
     <div className="cc-scroll">
-      {Object.entries(byProvider).map(([provider, models]) => (
-        <div key={provider} className="cc-mod-section">
-          <div className="cc-mod-sl">{provider}</div>
-          <div className="cc-mod-list">
-            {models.map((m) => (
-              <div key={m.id} className="cc-mod-row">
-                <div className="cc-mod-ic">{m.ic}</div>
-                <div className="cc-mod-body">
-                  <div className="cc-mod-name">
-                    {m.name} <span className={`cc-mod-badge ${m.state}`}>{m.label}</span>
-                  </div>
-                  <div className="cc-mod-sub">
-                    {m.use} · {m.cost}
-                  </div>
-                </div>
-                <div className="cc-mod-right">
-                  <b>{m.calls}</b>
-                  <span>calls 30d</span>
-                </div>
-              </div>
-            ))}
+      {providers.length === 0 ? (
+        <div className="cc-mod-section">
+          <div className="cc-mod-sl">Proveedores</div>
+          <div
+            style={{
+              padding: '40px 24px',
+              border: '1px dashed var(--cc-line-2)',
+              borderRadius: 'var(--cc-r-l)',
+              textAlign: 'center',
+              color: 'var(--cc-txt-3)',
+              fontSize: 13,
+            }}
+          >
+            Aún no hay uso de modelos en los últimos 30 días.
+            <br />
+            <span
+              style={{
+                color: 'var(--cc-txt-4)',
+                fontSize: 12,
+                fontFamily: 'var(--cc-mono), monospace',
+                marginTop: 6,
+                display: 'inline-block',
+              }}
+            >
+              En cuanto tus engines empiecen a trabajar, vas a ver aquí cuánto consumen, agrupado por proveedor.
+            </span>
           </div>
         </div>
-      ))}
+      ) : (
+        providers.map((p) => (
+          <div key={p.provider} className="cc-mod-section">
+            <div className="cc-mod-sl">
+              {p.provider} · {p.events.toLocaleString('es-MX')} eventos 30d ·{' '}
+              {formatUsdMicros(p.costUsdMicros)}
+            </div>
+            <div className="cc-mod-list">
+              {p.meters.map((m) => (
+                <div key={`${m.kind}-${m.operation ?? ''}`} className="cc-mod-row">
+                  <div className="cc-mod-ic">◈</div>
+                  <div className="cc-mod-body">
+                    <div className="cc-mod-name">
+                      {m.kind}
+                      {m.operation && <span className="cc-mod-badge cy">{m.operation}</span>}
+                    </div>
+                    <div className="cc-mod-sub">
+                      {formatCompact(m.amount)} {KIND_UNIT[m.kind] ?? 'unidades'} ·{' '}
+                      {formatUsdMicros(m.costUsdMicros)} de costo del proveedor
+                    </div>
+                  </div>
+                  <div className="cc-mod-right">
+                    <b>{m.events.toLocaleString('es-MX')}</b>
+                    <span>eventos 30d</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 }

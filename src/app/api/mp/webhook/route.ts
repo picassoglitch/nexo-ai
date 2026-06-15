@@ -23,6 +23,7 @@ import {
   isMercadoPagoConfigured,
 } from '@/lib/payments/mercadopago';
 import { sendEmail } from '@/lib/email/resend';
+import { notify } from '@/lib/notifications/notify';
 import { paymentSuccessTemplate } from '@/lib/email/templates';
 import { TIER_CAPS } from '@/lib/billing/tiers';
 import { provisionAllAccessEngines } from '@/lib/engines/subscriptions';
@@ -188,6 +189,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'db payments insert failed' }, { status: 500 });
   }
 
+  // Feed the command-center notifications. Best-effort (notify never throws);
+  // a rejected/cancelled payment is worth an admin's attention, an approved
+  // one is informational.
+  const amountMajor = (mpPayment.transaction_amount ?? 0).toFixed(2);
+  const currency = mpPayment.currency_id ?? 'USD';
+  if (status === 'rejected' || status === 'cancelled') {
+    await notify({
+      severity: 'warning',
+      title: `Pago ${status === 'rejected' ? 'rechazado' : 'cancelado'} — $${amountMajor} ${currency}`,
+      body: `MP #${String(mpPayment.id ?? paymentId)} · ${isPackPurchase ? `pack ${packIdRaw}` : `tier ${tier}`}`,
+      href: '/dashboard/billing',
+      source: 'mp.webhook',
+    });
+  }
+
   // ── PACK PURCHASE branch: grant tokens + audit, then exit. ────────────
   if (isPackPurchase && status === 'approved') {
     const pack = getTokenPack(packIdRaw!);
@@ -221,6 +237,15 @@ export async function POST(req: Request) {
         already_granted: grantRes.alreadyGranted ?? false,
       },
     });
+    if (!grantRes.alreadyGranted) {
+      await notify({
+        severity: 'info',
+        title: `Pack de tokens acreditado — ${pack.tokens.toLocaleString('es-MX')} tokens`,
+        body: `MP #${String(mpPayment.id ?? paymentId)} · $${amountMajor} ${currency}`,
+        href: '/dashboard/billing',
+        source: 'mp.webhook',
+      });
+    }
     return NextResponse.json({ ok: true, kind: 'pack', tokens: pack.tokens }, { status: 200 });
   }
   if (isPackPurchase) {
@@ -270,6 +295,14 @@ export async function POST(req: Request) {
         amount_cents: Math.round((mpPayment.transaction_amount ?? 0) * 100),
         currency: mpPayment.currency_id ?? 'USD',
       },
+    });
+
+    await notify({
+      severity: 'info',
+      title: `Pago aprobado — tier ${tier} activado`,
+      body: `${(targetBefore?.email as string | null) ?? userId} · MP #${String(mpPayment.id ?? paymentId)} · $${amountMajor} ${currency}`,
+      href: '/dashboard/billing',
+      source: 'mp.webhook',
     });
 
     // Confirmation email — best-effort. If the user's email is missing or

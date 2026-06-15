@@ -25,25 +25,25 @@ export async function changeUserTier(
   newTier: SubscriptionTier,
 ): Promise<ChangeResult> {
   if (!VALID_TIERS.includes(newTier)) {
-    return { ok: false, error: 'Tier inválido' };
+    return { ok: false, error: 'Ese plan no existe.' };
   }
 
   const session = await getSessionUser();
-  if (!session) return { ok: false, error: 'No autenticado' };
+  if (!session) return { ok: false, error: 'Inicia sesión para continuar.' };
 
   const isSelf = targetUserId === session.user.id;
   const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ADMIN';
 
   // Permission gate at the Next.js layer (authoritative — includes env-locked admins).
   if (!isSelf && !isAdmin) {
-    return { ok: false, error: 'Solo admins pueden cambiar el tier de otros' };
+    return { ok: false, error: 'Solo un admin puede cambiar el plan de otra persona.' };
   }
 
   // PARTNER is admin-grant only. A self-promote to PARTNER would bypass the
   // intent (it's a relationship, not a SKU). Block it explicitly so the
   // dropdown can't be hand-rolled by a non-admin to claim partner perks.
   if (newTier === 'PARTNER' && !isAdmin) {
-    return { ok: false, error: 'El tier Partner solo se asigna desde el admin' };
+    return { ok: false, error: 'El plan Partner solo lo asigna un admin.' };
   }
 
   // Use the service-role client so the write bypasses RLS. This is the only
@@ -70,7 +70,7 @@ export async function changeUserTier(
   }
   if (!data || data.length === 0) {
     // No RLS rejection (admin client bypasses it) — this means the id didn't match.
-    return { ok: false, error: 'Usuario no encontrado' };
+    return { ok: false, error: 'No encontramos a ese usuario.' };
   }
 
   // Audit log — distinguishes self-downgrade vs admin-driven change so

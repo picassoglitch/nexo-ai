@@ -25,9 +25,14 @@ export default async function SignInPage({
     // Honor `?next=` so the landing-page pricing CTA flow works:
     // anon clicks "Pasar a Pro" → /sign-in?next=/app/billing → user signs in →
     // lands on /app/billing instead of the generic /account. Only accept
-    // same-origin relative paths so we don't get used as an open redirect.
+    // same-origin relative paths so we don't get used as an open redirect —
+    // including the `/\evil.com` variant (browsers normalize `\` to `/`,
+    // turning it protocol-relative).
     const safeNext =
-      typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')
+      typeof next === 'string' &&
+      next.startsWith('/') &&
+      !next.startsWith('//') &&
+      !next.includes('\\')
         ? next
         : '/account';
     // typedRoutes can't statically know what `next` is — cast through

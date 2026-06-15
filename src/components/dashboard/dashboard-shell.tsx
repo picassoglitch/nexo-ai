@@ -52,7 +52,7 @@ export function DashboardShell({
     for (const [key, value] of Object.entries(PAGE_META)) {
       if (pathname.startsWith(key + '/')) return value;
     }
-    return { title: 'Módulo', sub: 'Sección en construcción.' };
+    return { title: 'Módulo', sub: 'Esta sección sigue en construcción.' };
   })();
 
   return (
@@ -76,7 +76,7 @@ export function DashboardShell({
             <button
               type="button"
               className="cc-mtoggle"
-              aria-label="Menu"
+              aria-label="Abrir menú"
               onClick={() => setMobileSidebarOpen(true)}
             >
               ☰
@@ -98,14 +98,14 @@ export function DashboardShell({
                 <circle cx="11" cy="11" r="7" />
                 <path d="M21 21l-4-4" />
               </svg>
-              <span>Buscar o ejecutar…</span>
+              <span>Busca o ejecuta una acción…</span>
               <kbd>⌘K</kbd>
             </button>
             <button
               type="button"
               className="cc-ibtn"
               title="Notificaciones"
-              onClick={() => showToast('Sin notificaciones nuevas.')}
+              onClick={() => showToast('No tienes notificaciones nuevas.')}
             >
               🔔
             </button>
@@ -121,7 +121,7 @@ export function DashboardShell({
         type="button"
         className="cc-mrail"
         title="Actividad"
-        onClick={() => showToast('Actividad de IA — abre en pantalla completa en build phase')}
+        onClick={() => showToast('Actividad de IA — pronto la verás en pantalla completa')}
       >
         ⚡
       </button>

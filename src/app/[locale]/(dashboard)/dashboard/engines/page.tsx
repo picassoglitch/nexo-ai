@@ -11,7 +11,7 @@ import {
   EngineTierSelect,
 } from '@/components/dashboard/engine-admin-controls';
 
-export const metadata = { title: 'Engines · admin' };
+export const metadata = { title: 'Engines · administración' };
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   active: { label: 'Activo', cls: 'gr' },
@@ -45,24 +45,24 @@ export default async function AdminEnginesPage({
     <div className="cc-scroll">
       <div className="cc-mod-statgrid">
         <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Engines totales</div>
+          <div className="cc-mod-stat-l">Engines en total</div>
           <div className="cc-mod-stat-v gr">{engines.length}</div>
           <div className="cc-mod-stat-sub">en el catálogo</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Activos</div>
           <div className="cc-mod-stat-v gr">{counts.active}</div>
-          <div className="cc-mod-stat-sub">visibles para subscribers en vivo</div>
+          <div className="cc-mod-stat-sub">en vivo para tus subscribers</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Próximamente</div>
           <div className="cc-mod-stat-v">{counts.coming_soon}</div>
-          <div className="cc-mod-stat-sub">teaser visible, sin ejecución</div>
+          <div className="cc-mod-stat-sub">se ven como adelanto, pero todavía no funcionan</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Deprecados</div>
           <div className="cc-mod-stat-v">{counts.deprecated}</div>
-          <div className="cc-mod-stat-sub">se ocultan del catálogo subscriber</div>
+          <div className="cc-mod-stat-sub">ya no salen en el catálogo de subscribers</div>
         </div>
       </div>
 
@@ -76,11 +76,11 @@ export default async function AdminEnginesPage({
             marginBottom: 16,
           }}
         >
-          Gestiona el catálogo de engines visible a los subscribers. Cambia <b>status</b> para
-          mover un engine entre <b>Activo</b> (corre en vivo, aparece en /app/engines),{' '}
-          <b>Próximamente</b> (badge teaser, no ejecuta) o <b>Deprecado</b> (oculto del
-          catálogo). El <b>tier requerido</b> define qué plan necesita el subscriber para
-          activarlo en vivo.
+          Administra el catálogo de engines que ven tus subscribers. Cambia el <b>status</b> para
+          mover un engine entre <b>Activo</b> (en vivo y visible en /app/engines),{' '}
+          <b>Próximamente</b> (se ve como adelanto, pero todavía no funciona) o <b>Deprecado</b> (ya
+          no sale en el catálogo). El <b>tier requerido</b> define qué plan necesita el subscriber
+          para activarlo.
         </p>
 
         <div className="cc-mod-list">
@@ -214,8 +214,8 @@ export default async function AdminEnginesPage({
             paddingLeft: 4,
           }}
         >
-          ▸ Cada cambio se registra en /dashboard/audit con actor + before/after.
-          Crear o eliminar engines se hace por migration (seed file) por ahora.
+          ▸ Cada cambio queda guardado en /dashboard/audit con quién lo hizo y el antes/después.
+          Por ahora, crear o borrar engines se hace por migration (seed file).
         </p>
       </div>
     </div>
