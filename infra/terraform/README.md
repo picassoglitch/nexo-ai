@@ -57,6 +57,21 @@ carry an explicit `validation_alias` in `nexoclip/settings.py`, so they take
 **no** `NEXOCLIP_` prefix. Only the values need to match the hub's
 `CHALYBCLIP_*` vars.
 
+## Adding an agent
+
+One entry in the `engines` map. The module creates the service account, the
+three secrets, the Cloud Run service, and — if the entry asks — a worker
+service and scheduled jobs. Nothing else in this directory changes.
+
+```hcl
+chalybscribe = { display_name = "ChalybScribe" }
+```
+
+`node scripts/new-engine.mjs <slug> "<Name>"` (from the repo root) writes the
+Supabase migration and prints the blocks to paste. The end-to-end path,
+including the new repo, is in
+[`../../docs/infra/adding-an-engine.md`](../../docs/infra/adding-an-engine.md).
+
 ## Bootstrap
 
 State must not live on a laptop — that is the failure mode that caused this

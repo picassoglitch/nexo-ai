@@ -15,7 +15,17 @@ output "artifact_registry" {
 output "secrets_needing_values" {
   description = "Secrets Terraform created empty. Each needs a version before the engines start."
   value = sort(concat(
-    [for s in google_secret_manager_secret.engine : s.secret_id],
+    flatten([for m in module.engine : m.secret_ids]),
     [for s in google_secret_manager_secret.shared : s.secret_id],
   ))
+}
+
+output "worker_urls" {
+  description = "Worker URL per engine that has one. The API is wired to these automatically."
+  value       = { for k, m in module.engine : k => m.worker_url if m.worker_url != null }
+}
+
+output "jobs" {
+  description = "Cloud Run Jobs per engine. Run one on demand with `gcloud run jobs execute <name>`."
+  value       = { for k, m in module.engine : k => m.job_names if length(m.job_names) > 0 }
 }

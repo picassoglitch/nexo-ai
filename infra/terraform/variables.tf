@@ -61,37 +61,112 @@ variable "media_retention_days" {
 
 variable "engines" {
   description = <<-EOT
-    The engines to deploy, keyed by slug. The slug must match engines.slug in
-    Supabase (see migration 0030) — it is the SSO wire value and the subdomain.
+    Every agent, keyed by slug. The slug must match engines.slug in Supabase —
+    it is the SSO wire value, the subdomain, and the hub's env-var prefix.
 
-    image: leave at the placeholder until the real image is pushed to Artifact
-    Registry. Terraform ignores changes to it afterwards so that deploys (via
-    gcloud/CI) are not reverted by the next `terraform apply`.
+    ADDING AN AGENT IS ONE ENTRY HERE. The minimum is `{}`: that gives a
+    public Cloud Run service, a service account, three secrets and a domain
+    mapping. Add `worker` for an engine that does background work, and `jobs`
+    for CLI-entrypoint batch work.
+
+    image: leave at the placeholder until a real image is pushed. Terraform
+    ignores changes to it afterwards, so Cloud Build deploys are not reverted
+    by the next apply.
   EOT
+
   type = map(object({
-    image = optional(string, "us-docker.pkg.dev/cloudrun/container/hello")
-    cpu   = optional(string, "1")
-    # 512Mi is not enough for ChalybClip: the image carries ffmpeg, OpenCV and
-    # a full Playwright Chromium, and undersizing shows up as OOM kills rather
-    # than a clear error. Override per engine for the lighter ones.
+    display_name = optional(string)
+    image        = optional(string, "us-docker.pkg.dev/cloudrun/container/hello")
+    cpu          = optional(string, "1")
+    # Engines that ship ffmpeg, OpenCV or a headless browser need room;
+    # undersizing shows up as OOM kills rather than a clear error.
     memory        = optional(string, "2Gi")
     max_instances = optional(number, 4)
-    # Public because these serve a web UI that signed-in users are redirected
-    # into from the hub's /auth/launch/<slug>.
+    # Public because engines serve a web UI users are redirected into from the
+    # hub's /auth/launch/<slug>.
     public = optional(bool, true)
-  }))
-  default = {
-    chalybclip   = {}
-    chalybobs    = {}
-    chalybcrypto = {}
-  }
 
-  # worker.tf wires the render job and the Drive poll to chalybclip
-  # specifically — it is the only engine with a media pipeline. Catch its
-  # removal here instead of as an unresolved key deep in the graph.
-  validation {
-    condition     = contains(keys(var.engines), "chalybclip")
-    error_message = "engines must include \"chalybclip\": worker.tf attaches the render job and Drive poll to it."
+    env = optional(map(string), {})
+
+    # Project-wide secrets to inject: VAR_NAME => key in local.shared_secrets.
+    shared_secrets = optional(map(string), {})
+
+    # What the engine calls its own three secrets. Defaults are the
+    # convention; override for engines that read different names.
+    secret_env_names = optional(object({
+      admin_token  = optional(string, "ADMIN_TOKEN")
+      sso_secret   = optional(string, "SSO_SECRET")
+      database_url = optional(string, "DATABASE_URL")
+    }), {})
+
+    worker = optional(object({
+      cpu              = optional(string, "2")
+      memory           = optional(string, "4Gi")
+      max_instances    = optional(number, 3)
+      timeout          = optional(string, "3600s")
+      env              = optional(map(string), {})
+      endpoint_env_var = optional(string)
+    }))
+
+    jobs = optional(map(object({
+      command  = optional(list(string))
+      args     = optional(list(string), [])
+      cpu      = optional(string, "1")
+      memory   = optional(string, "2Gi")
+      timeout  = optional(string, "600s")
+      env      = optional(map(string), {})
+      schedule = optional(string)
+      paused   = optional(bool, true)
+    })), {})
+  }))
+
+  default = {
+    chalybclip = {
+      display_name = "ChalybClip"
+      memory       = "2Gi"
+
+      env = {
+        # Cloud Run's filesystem is tmpfs and counts against memory. Scratch
+        # only — durable artifacts go to the media bucket.
+        NEXOCLIP_DEFAULT_OUTPUT_DIR = "/tmp/out"
+      }
+
+      # ChalybClip reads all three WITHOUT its usual NEXOCLIP_ prefix:
+      # settings.py gives each an explicit validation_alias. Only the values
+      # need to match the hub's CHALYBCLIP_* vars.
+      secret_env_names = {
+        admin_token  = "NEXO_AI_ADMIN_TOKEN"
+        sso_secret   = "NEXO_AI_SSO_SECRET"
+        database_url = "DATABASE_URL"
+      }
+
+      shared_secrets = {
+        NEXOCLIP_ZERNIO_API_KEY = "zernio-api-key"
+      }
+
+      # `nexoclip worker` — the kickoff/poll pipeline service.
+      worker = {
+        env              = { NEXOCLIP_ROLE = "worker" }
+        endpoint_env_var = "NEXOCLIP_MODAL_PIPELINE_ENDPOINT_URL"
+      }
+
+      jobs = {
+        # `nexoclip drive poll` is a Typer command, not an HTTP route.
+        # Scheduled every minute per the ingest SLA, but PAUSED: without
+        # --source-dir the command builds the real GoogleDriveClient, which is
+        # not implemented yet and exits 1. Un-pause when it ships.
+        drive-poll = {
+          command  = ["nexoclip"]
+          args     = ["drive", "poll"]
+          schedule = "* * * * *"
+          paused   = true
+          env      = { NEXOCLIP_DEFAULT_OUTPUT_DIR = "/tmp/out" }
+        }
+      }
+    }
+
+    chalybobs    = { display_name = "ChalybOBS" }
+    chalybcrypto = { display_name = "ChalybCrypto" }
   }
 }
 
@@ -106,13 +181,3 @@ variable "enable_domain_mappings" {
   default     = false
 }
 
-variable "enable_drive_poll" {
-  description = <<-EOT
-    Un-pause the Drive poll schedule. Left false because `nexoclip drive poll`
-    without --source-dir builds the real GoogleDriveClient, which is not
-    implemented yet — the command exits 1. Running it every minute before then
-    just produces 1,440 failures a day. Flip once the client ships.
-  EOT
-  type        = bool
-  default     = false
-}
