@@ -7,12 +7,21 @@ cost model.
 
 ## What survived vs. what's gone
 
-| Survived (hosted, untouched) | Gone with the disk |
-| --- | --- |
-| `nexo-ai` on Vercel — site, dashboard, admin, `/api/engines/*` | NexoClip's Postgres: `tenants`, `drive_watches`, `drive_oauth_credentials`, `drive_ingested_files`, job history |
-| Supabase — auth, `profiles`, `engines`, `engine_subscriptions`, payments, usage, audit | NexoOBS's DB + the RTMP relay config |
-| Mercado Pago, Resend, Zernio (external SaaS) | NexoCrypto's DB |
-| The engine source repos on GitHub (`NexoClip`, `NexoOBS`, `nexocrypto`) | Every rendered clip and cached VOD on local disk |
+**Survived** — everything hosted elsewhere:
+
+- `nexo-ai` on Vercel: site, dashboard, admin, `/api/engines/*`.
+- Supabase: auth, `profiles`, `engines`, `engine_subscriptions`, payments,
+  usage, audit.
+- Mercado Pago, Resend and Zernio (external SaaS).
+- The engine source repos on GitHub (`NexoClip`, `NexoOBS`, `nexocrypto`).
+
+**Gone with the disk:**
+
+- NexoClip's Postgres: `tenants`, `drive_watches`, `drive_oauth_credentials`,
+  `drive_ingested_files`, and all job history.
+- NexoOBS's database and the RTMP relay config.
+- NexoCrypto's database.
+- Every rendered clip and cached VOD that lived on local disk.
 
 Two consequences worth being explicit about:
 
@@ -41,15 +50,27 @@ Nothing else in `nexo-ai` needs to change to survive the outage.
 
 Split by workload shape, because the pricing models differ enormously.
 
-| Workload | GCP service | Notes |
-| --- | --- | --- |
-| NexoClip FastAPI, NexoOBS web, NexoCrypto | **Cloud Run**, `--min-instances=0` | Scales to zero; idle cost is $0. Concurrency 80 default is fine for these. |
-| ffmpeg render worker | **Cloud Run Jobs**, triggered via Cloud Tasks or Pub/Sub | Per-second billing, no idle VM, and jobs can run far longer than a request. Do not run renders inside the API service. |
-| Drive change poll (~60 s) | **Cloud Scheduler** → authenticated Cloud Run endpoint | 1-minute granularity is exactly the SLA in `docs/nexoclip_drive_ingest.md`. First 3 jobs/month are free. |
-| VODs, rendered clips | **Cloud Storage** + lifecycle rule | Replaces local disk. Delete rendered clips after N days — they're re-derivable, and storage you never prune is the cost that creeps. |
-| Secrets (`NEXOCLIP_ADMIN_TOKEN`, `*_SSO_SECRET`, Zernio key, Drive token encryption key) | **Secret Manager**, mounted into Cloud Run | Satisfies the encrypted-at-rest requirement for Drive refresh tokens. |
-| Container images | **Artifact Registry** | First 0.5 GB free. Prune old images. |
-| Engine databases | **Stay on Supabase** — a schema or project per engine | Deliberate: the smallest Cloud SQL instance is ~$10-25/mo _each_, and three of them would cost more than the rest of this architecture combined. Revisit only if an engine needs something Supabase can't do. |
+- **NexoClip FastAPI, NexoOBS web, NexoCrypto** → **Cloud Run**,
+  `--min-instances=0`. Scales to zero, so idle cost is $0. The default
+  concurrency of 80 is fine here.
+- **ffmpeg render worker** → **Cloud Run Jobs**, triggered via Cloud Tasks or
+  Pub/Sub. Per-second billing, no idle VM, and a job can run far longer than a
+  request. Do not run renders inside the API service.
+- **Drive change poll (~60 s)** → **Cloud Scheduler** hitting an authenticated
+  Cloud Run endpoint. One-minute granularity is exactly the SLA in
+  `docs/nexoclip_drive_ingest.md`. The first 3 jobs/month are free.
+- **VODs and rendered clips** → **Cloud Storage** with a lifecycle rule.
+  Replaces local disk. Delete rendered clips after N days — they're
+  re-derivable, and storage you never prune is the cost that creeps.
+- **Secrets** (`NEXOCLIP_ADMIN_TOKEN`, `*_SSO_SECRET`, Zernio key, Drive token
+  encryption key) → **Secret Manager**, mounted into Cloud Run. Satisfies the
+  encrypted-at-rest requirement for Drive refresh tokens.
+- **Container images** → **Artifact Registry**. First 0.5 GB free; prune old
+  images.
+- **Engine databases** → **stay on Supabase**, a schema or project per engine.
+  Deliberate: the smallest Cloud SQL instance is ~$10-25/mo _each_, and three of
+  them would cost more than the rest of this architecture combined. Revisit only
+  if an engine needs something Supabase can't do.
 
 ### DNS
 
@@ -125,17 +146,17 @@ reversible with a one-line update.
 
 Steady-state, low volume, on top of the existing Vercel + Supabase bills:
 
-| Item | Approx/month |
-| --- | --- |
-| Cloud Run — 3 services, scale-to-zero, low traffic | $0–10 |
-| Cloud Run Jobs — render worker, per-second | $0–5 at low volume |
-| Cloud Storage — ~100 GB with lifecycle pruning | ~$2–3 |
-| Artifact Registry | ~$1 |
-| Secret Manager + Scheduler + Tasks | ~$1 |
-| Non-video egress | a few $ |
-| **Total, no live streaming** | **~$10–25** |
-| RTMP relay, if self-hosted off GCP | +~€4 flat |
-| RTMP relay, if on GCE | +$15 VM +$3 IP + **egress, uncapped** |
+| Item                                               | Approx/month                          |
+| -------------------------------------------------- | ------------------------------------- |
+| Cloud Run — 3 services, scale-to-zero, low traffic | $0–10                                 |
+| Cloud Run Jobs — render worker, per-second         | $0–5 at low volume                    |
+| Cloud Storage — ~100 GB with lifecycle pruning     | ~$2–3                                 |
+| Artifact Registry                                  | ~$1                                   |
+| Secret Manager + Scheduler + Tasks                 | ~$1                                   |
+| Non-video egress                                   | a few $                               |
+| **Total, no live streaming**                       | **~$10–25**                           |
+| RTMP relay, if self-hosted off GCP                 | +~€4 flat                             |
+| RTMP relay, if on GCE                              | +$15 VM +$3 IP + **egress, uncapped** |
 
 Figures are ballpark — confirm against the GCP pricing calculator for your
 region before committing. The shape of the bill matters more than the exact
