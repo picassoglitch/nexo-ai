@@ -111,11 +111,11 @@ export default async function PrivacyPage({
       <h3>2.4. Contenido que generas en los Engines</h3>
       <ul>
         <li>
-          VODs que subes a NexoClip, clips generados, transcripciones,
+          VODs que subes a ChalybClip, clips generados, transcripciones,
           variantes de captions.
         </li>
         <li>
-          Streams enrutados via NexoStreamManager, layouts guardados, conexiones
+          Streams enrutados via ChalybStreamManager, layouts guardados, conexiones
           OAuth a plataformas de destino (TikTok, YouTube, Twitch, Kick).
         </li>
         <li>
@@ -174,7 +174,7 @@ export default async function PrivacyPage({
           asociada. Anthropic no entrena con estos datos.
         </li>
         <li>
-          <strong>Engines integrados</strong> (NexoClip, NexoStreamManager): ver
+          <strong>Engines integrados</strong> (ChalybClip, ChalybStreamManager): ver
           sección 5.
         </li>
       </ul>

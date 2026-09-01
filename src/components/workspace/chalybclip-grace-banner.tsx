@@ -1,10 +1,10 @@
 'use client';
 
-// Post-trial grace banner. Shown on /app once a FREE user's 7-day NexoClip
-// trial has run out BUT they still have tokens left — we keep NexoClip live
+// Post-trial grace banner. Shown on /app once a FREE user's 7-day ChalybClip
+// trial has run out BUT they still have tokens left — we keep ChalybClip live
 // until those tokens are gone ("sabemos que tu tiempo se acabó, pero nos caes
 // bien"). The live gate itself lives in engineIsLiveForUser via
-// isNexoclipGraceActive; this component is purely the heads-up.
+// isChalybclipGraceActive; this component is purely the heads-up.
 //
 // Dismiss is local/session-only on purpose: there's no "claimed" state to
 // persist — while the grace window holds (tokens > 0) the banner is allowed to
@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import type { Route } from 'next';
 
-export function NexoclipGraceBanner({ tokensRemaining }: { tokensRemaining: number }) {
+export function ChalybclipGraceBanner({ tokensRemaining }: { tokensRemaining: number }) {
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
 
@@ -46,7 +46,7 @@ export function NexoclipGraceBanner({ tokensRemaining }: { tokensRemaining: numb
             marginBottom: 8,
           }}
         >
-          ⏳ Tu prueba de NexoClip terminó
+          ⏳ Tu prueba de ChalybClip terminó
         </div>
         <div
           style={{
@@ -62,7 +62,7 @@ export function NexoclipGraceBanner({ tokensRemaining }: { tokensRemaining: numb
         <div
           style={{ fontSize: 13, color: 'var(--cc-txt-2)', lineHeight: 1.55, maxWidth: '60ch' }}
         >
-          Sigue usando <b style={{ color: 'var(--cc-cyan)' }}>NexoClip</b> en vivo hasta que se te
+          Sigue usando <b style={{ color: 'var(--cc-cyan)' }}>ChalybClip</b> en vivo hasta que se te
           acaben los tokens — te quedan{' '}
           <b style={{ color: 'var(--cc-cyan)' }}>{tokensRemaining.toLocaleString('es-MX')}</b>. ¿Lo
           quieres para siempre, sin que se acabe? Pasa a Pro.

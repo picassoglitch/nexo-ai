@@ -129,9 +129,9 @@ export async function isOverQuota(userId: string): Promise<boolean> {
 }
 
 export interface RecordedEvent {
-  /** Engine slug calling in (e.g. 'nexoclip'). */
+  /** Engine slug calling in (e.g. 'chalybclip'). */
   engineSlug: string;
-  /** Chalyb user id (NexoClip stores this as tenant.external_user_id). */
+  /** Chalyb user id (ChalybClip stores this as tenant.external_user_id). */
   userId: string;
   /** Free-text kind discriminator. Common values: 'llm.tokens',
    *  'transcription.seconds', 'storage.mb', 'publish.count'. The platform

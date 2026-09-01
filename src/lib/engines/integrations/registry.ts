@@ -2,17 +2,17 @@
 // Add a new engine = import its integration module + register here.
 
 import 'server-only';
-import { nexoclipIntegration } from './nexoclip';
-import { nexocryptoIntegration } from './nexocrypto';
-import { nexoobsIntegration } from './nexoobs';
+import { chalybclipIntegration } from './chalybclip';
+import { chalybcryptoIntegration } from './chalybcrypto';
+import { chalybobsIntegration } from './chalybobs';
 import type { EngineIntegration } from './types';
 
 const REGISTRY: Record<string, EngineIntegration> = {
-  [nexoclipIntegration.slug]: nexoclipIntegration,
-  [nexocryptoIntegration.slug]: nexocryptoIntegration,
-  [nexoobsIntegration.slug]: nexoobsIntegration,
-  // NexoStreamManager goes here when its integration file lands:
-  //   [nexostreamIntegration.slug]: nexostreamIntegration,
+  [chalybclipIntegration.slug]: chalybclipIntegration,
+  [chalybcryptoIntegration.slug]: chalybcryptoIntegration,
+  [chalybobsIntegration.slug]: chalybobsIntegration,
+  // ChalybStreamManager goes here when its integration file lands:
+  //   [chalybstreamIntegration.slug]: chalybstreamIntegration,
 };
 
 export function getIntegration(slug: string): EngineIntegration | null {

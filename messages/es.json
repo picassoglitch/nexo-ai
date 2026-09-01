@@ -322,7 +322,7 @@
       "amt": "$0",
       "per": " /siempre",
       "tag": "Crea una cuenta y explora toda la plataforma.",
-      "f1": "NexoClip gratis 7 días",
+      "f1": "ChalybClip gratis 7 días",
       "f2": "50,000 tokens IA de regalo",
       "f3": "Acceso a la comunidad",
       "f4": "Clips con marca de agua · descarga manual",
@@ -337,7 +337,7 @@
       "f1": "Todo lo de Gratis",
       "f2": "1 engine en vivo · tú eliges cuál",
       "f3": "1,000,000 de tokens / mes (se regeneran)",
-      "f4": "NexoClip Pro: sin marca de agua · ~12 streams/mes · 1 brand kit",
+      "f4": "ChalybClip Pro: sin marca de agua · ~12 streams/mes · 1 brand kit",
       "f5": "Comunidad premium",
       "btn": "Pasar a Pro"
     },
@@ -345,12 +345,12 @@
       "name": "VIP",
       "amt": "MXN $2,499",
       "per": " /mes",
-      "tag": "Todo Nexo desbloqueado — IA + Clip, sin límites.",
+      "tag": "Todo Chalyb desbloqueado — IA + Clip, sin límites.",
       "f1": "Todo lo de Pro",
       "f2": "Todos los engines en vivo",
       "f3": "5× los tokens de Pro",
-      "f4": "Paquete completo de streamer de NexoClip",
-      "f5": "Soporte prioritario · el equipo Nexo te ayuda a construir tu idea",
+      "f4": "Paquete completo de streamer de ChalybClip",
+      "f5": "Soporte prioritario · el equipo Chalyb te ayuda a construir tu idea",
       "btn": "Obtener VIP"
     }
   },
@@ -372,7 +372,7 @@
       },
       "engines": {
         "title": "Tus engines",
-        "body": "En «Mis engines» ves, abres y activas tus engines (NexoClip, NexoCrypto y más). «En vivo» = corriendo; «Disponible» = listo para usar con tu plan."
+        "body": "En «Mis engines» ves, abres y activas tus engines (ChalybClip, ChalybCrypto y más). «En vivo» = corriendo; «Disponible» = listo para usar con tu plan."
       },
       "tokens": {
         "title": "Tu balance de tokens",
@@ -388,14 +388,14 @@
       },
       "help": {
         "title": "¿Necesitas ayuda?",
-        "body": "En «Mensajes» hablas directo con el equipo Nexo, y en «Ayuda» encuentras guías y soporte. Estamos para ayudarte."
+        "body": "En «Mensajes» hablas directo con el equipo Chalyb, y en «Ayuda» encuentras guías y soporte. Estamos para ayudarte."
       }
     }
   },
   "academy": {
-    "title": "La red de operadores — <em>Nexo Academy</em>",
-    "p": "La plataforma no son solo herramientas — es una red de operadores. Nexo Academy es la comunidad donde quienes construyen y operan aprenden los sistemas, comparten lo que funciona y ejecutan junto a otros. Niveles Gratis, Premium y VIP, en Skool. Una integración más profunda con esta plataforma ya está en planes.",
-    "btn": "Visitar Nexo Academy →"
+    "title": "La red de operadores — <em>Chalyb Academy</em>",
+    "p": "La plataforma no son solo herramientas — es una red de operadores. Chalyb Academy es la comunidad donde quienes construyen y operan aprenden los sistemas, comparten lo que funciona y ejecutan junto a otros. Niveles Gratis, Premium y VIP, en Skool. Una integración más profunda con esta plataforma ya está en planes.",
+    "btn": "Visitar Chalyb Academy →"
   },
   "contact": {
     "num": "Empezar",
@@ -571,7 +571,7 @@
       "2": { "tag": "Plataforma", "title": "Dashboard operador Chalyb", "body": "La plataforma multi-tenant que estás viendo ahora. Operadores despliegan bots y agentes IA desde una librería compartida." },
       "3": { "tag": "Automatización de contenido", "title": "Infraestructura AI clipping", "body": "Clipping de stream en tiempo real con scoring IA, distribución multi-plataforma, dashboards para creadores." },
       "4": { "tag": "Sistemas de sensores", "title": "Analítica de sensores en tiempo real", "body": "Pipelines de visión y presencia para activaciones — del sensor al dashboard en menos de un segundo." },
-      "5": { "tag": "Telegram + SaaS", "title": "Plataforma NexoPicks", "body": "Plataforma de picks deportivos + bot de Telegram en monorepo Node/TS, Postgres, Redis y razonador con Ollama." }
+      "5": { "tag": "Telegram + SaaS", "title": "Plataforma ChalybPicks", "body": "Plataforma de picks deportivos + bot de Telegram en monorepo Node/TS, Postgres, Redis y razonador con Ollama." }
     }
   },
   "founder": {
@@ -585,11 +585,11 @@
       "badgeLive": "{count} en vivo ahora",
       "badgeIdle": "Tu centro de engines",
       "headingContinue": "Continúa donde lo dejaste",
-      "headingStart": "Empieza con NexoClip",
+      "headingStart": "Empieza con ChalybClip",
       "subContinue": "{name} está corriendo en vivo. Retoma el control cuando quieras.",
       "subStart": "Convierte tus streams en clips virales — el único engine listo para usar ahora mismo.",
       "ctaContinue": "Continuar →",
-      "ctaOpen": "Abrir NexoClip →",
+      "ctaOpen": "Abrir ChalybClip →",
       "ctaDemo": "Ver demo"
     },
     "sections": {
@@ -614,7 +614,7 @@
       "unlock": "Desbloquear con Pro",
       "notify": "Avísame",
       "details": "Ver detalles",
-      "ownerNexo": "by Chalyb",
+      "ownerChalyb": "by Chalyb",
       "ownerBy": "by {owner}",
       "ownerMine": "Tu engine",
       "notifyDone": "Listo — te avisaremos cuando lancemos {name}."
@@ -631,7 +631,7 @@
     },
     "upsell": {
       "title": "Desbloquea más engines con Pro",
-      "sub": "Corre NexoCrypto, NexoOBS y más en vivo con un plan Pro.",
+      "sub": "Corre ChalybCrypto, ChalybOBS y más en vivo con un plan Pro.",
       "cta": "Actualizar a Pro →"
     },
     "caps": {
@@ -653,7 +653,7 @@
       "hint": "Si eres admin: corre 0010_rename_bots_to_engines.sql en Supabase y refresca."
     },
     "marketing": {
-      "nexoclip": {
+      "chalybclip": {
         "tagline": "Convierte tus streams en clips virales, en automático.",
         "bullets": [
           "Detecta los mejores momentos con IA",
@@ -661,13 +661,13 @@
           "Exporta a TikTok, Reels y Shorts"
         ]
       },
-      "nexocrypto": {
+      "chalybcrypto": {
         "tagline": "Señales y automatización de trading cripto 24/7.",
         "bullets": ["Estrategias backtesteadas", "Alertas en tiempo real", "Ejecución sin emociones"]
       },
-      "nexoobs": {
+      "chalybobs": {
         "tagline": "Controla tu transmisión en vivo desde un solo panel.",
-        "bullets": ["Escenas y overlays dinámicos", "Automatización del stream", "Conecta con NexoClip"]
+        "bullets": ["Escenas y overlays dinámicos", "Automatización del stream", "Conecta con ChalybClip"]
       }
     },
     "marketingCat": {
@@ -676,7 +676,7 @@
       "TRADING": "Opera con señales y automatización de IA.",
       "AGENTS": "Agentes de IA que ejecutan tareas por ti.",
       "RESEARCH": "Investigación automatizada con IA.",
-      "INTERNAL": "Herramienta interna de la plataforma Nexo."
+      "INTERNAL": "Herramienta interna de la plataforma Chalyb."
     }
   }
 }

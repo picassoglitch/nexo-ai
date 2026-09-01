@@ -7,7 +7,7 @@ import { LegalPage } from '@/components/legal/legal-page';
 export const metadata = {
   title: 'Términos de servicio',
   description:
-    'Términos y condiciones para usar Chalyb y sus engines (NexoClip, NexoStreamManager y futuros productos).',
+    'Términos y condiciones para usar Chalyb y sus engines (ChalybClip, ChalybStreamManager y futuros productos).',
 };
 
 // force-dynamic so Vercel's CDN never serves a stale 404 from before the
@@ -75,15 +75,15 @@ export default async function TermsPage({
       <h2 id="definiciones">2. Definiciones</h2>
       <ul>
         <li>
-          <strong>Plataforma</strong>: el sitio web <code>nexo-ai.world</code>,
+          <strong>Plataforma</strong>: el sitio web <code>chalyb.com</code>,
           incluyendo el panel de operación (<code>/app</code>), el dashboard
           administrativo (<code>/dashboard</code>), las APIs públicas, y las
           páginas de marketing.
         </li>
         <li>
           <strong>Engine</strong>: cada producto independiente integrado a la
-          Plataforma. Al momento de esta versión: <strong>NexoClip</strong> (generador
-          de clips a partir de streams/VODs) y <strong>NexoStreamManager</strong>
+          Plataforma. Al momento de esta versión: <strong>ChalybClip</strong> (generador
+          de clips a partir de streams/VODs) y <strong>ChalybStreamManager</strong>
           (control central de transmisiones en vivo). Cada Engine se ejecuta en
           infraestructura propia bajo su propia licencia y política de uso.
         </li>
@@ -212,7 +212,7 @@ export default async function TermsPage({
         </li>
       </ul>
       <p>
-        <strong>NexoClip</strong> en particular procesa contenido de video que tú
+        <strong>ChalybClip</strong> en particular procesa contenido de video que tú
         subes o que descargas de fuentes externas. Eres responsable de tener los
         derechos sobre ese contenido (ver Sección 9).
       </p>
@@ -251,8 +251,8 @@ export default async function TermsPage({
       <h2 id="contenido">9. Tu contenido y licencias</h2>
       <p>
         <strong>Tú eres dueño de tu contenido.</strong> No reclamamos propiedad
-        sobre los VODs que subes, los clips que NexoClip genera para ti, los
-        prompts que escribes, ni los streams que enrutas vía NexoStreamManager.
+        sobre los VODs que subes, los clips que ChalybClip genera para ti, los
+        prompts que escribes, ni los streams que enrutas vía ChalybStreamManager.
       </p>
       <p>
         Para operar el servicio, sin embargo, nos otorgas una <strong>licencia

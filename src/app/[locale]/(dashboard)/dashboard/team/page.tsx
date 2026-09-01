@@ -8,7 +8,7 @@ import { TeamInviteForm } from '@/components/dashboard/team-invite-form';
 import { TeamGrantTokens } from '@/components/dashboard/team-grant-tokens';
 import { TeamPromoControl } from '@/components/dashboard/team-promo-control';
 import { TeamRelinkEngine } from '@/components/dashboard/team-relink-engine';
-import { isNexoclipTrialActive, nexoclipTrialDaysLeft } from '@/lib/billing/tiers';
+import { isChalybclipTrialActive, chalybclipTrialDaysLeft } from '@/lib/billing/tiers';
 import { TeamReconcileEngine } from '@/components/dashboard/team-reconcile-engine';
 import { PartnerEngineSelect, type EngineOption } from '@/components/dashboard/partner-engine-select';
 import type { SubscriptionTier, UserRole } from '@/lib/auth/session';
@@ -22,7 +22,7 @@ interface ProfileRow {
   role: UserRole;
   tier: SubscriptionTier;
   token_bonus_balance: number | null;
-  nexoclip_trial_started_at: string | null;
+  chalybclip_trial_started_at: string | null;
   welcome_gift_claimed_at: string | null;
   created_at: string;
 }
@@ -41,7 +41,7 @@ export default async function TeamPage({
   const { data: profilesRaw } = await supabase
     .from('profiles')
     .select(
-      'id, email, full_name, role, tier, token_bonus_balance, nexoclip_trial_started_at, welcome_gift_claimed_at, created_at',
+      'id, email, full_name, role, tier, token_bonus_balance, chalybclip_trial_started_at, welcome_gift_claimed_at, created_at',
     )
     .order('created_at');
   const profiles = (profilesRaw ?? []) as ProfileRow[];
@@ -203,17 +203,17 @@ export default async function TeamPage({
                           bonusBalance={p.token_bonus_balance ?? 0}
                         />
                       )}
-                      {/* Promotions: grant/extend/revoke the NexoClip trial and
+                      {/* Promotions: grant/extend/revoke the ChalybClip trial and
                           reset the welcome banner per user. */}
                       <TeamPromoControl
                         userId={p.id}
                         userName={displayName}
-                        trialActive={isNexoclipTrialActive(p.nexoclip_trial_started_at, nowMs)}
-                        trialDaysLeft={nexoclipTrialDaysLeft(p.nexoclip_trial_started_at, nowMs)}
+                        trialActive={isChalybclipTrialActive(p.chalybclip_trial_started_at, nowMs)}
+                        trialDaysLeft={chalybclipTrialDaysLeft(p.chalybclip_trial_started_at, nowMs)}
                         welcomeClaimed={p.welcome_gift_claimed_at != null}
                       />
                       {/* Re-link control. Forces the integration to
-                          re-provision this user in NexoClip; combined with
+                          re-provision this user in ChalybClip; combined with
                           the engine-side B2 self-healing this reclaims any
                           orphan tenant by email. Always shown — relinking
                           yourself is the most common case (admin's own

@@ -6,7 +6,7 @@ import { Link } from '@/i18n/routing';
 
 // Single focused continuation hero. ONE primary action only:
 //   - has a live/in-progress engine  → "Continuar →" resumes it (by name)
-//   - otherwise                      → "Abrir NexoClip →" (the ready-now engine)
+//   - otherwise                      → "Abrir ChalybClip →" (the ready-now engine)
 // Plus one low-emphasis "Ver demo" text link. The "Actualizar a Pro" upsell
 // lives down in the Pro section now — it no longer competes up here.
 
@@ -23,7 +23,7 @@ export function EngineHero({
 }) {
   const t = useTranslations('engines');
   const primaryHref = (
-    continueEngine ? `/app/engines/${continueEngine.slug}` : '/app/engines/nexoclip'
+    continueEngine ? `/app/engines/${continueEngine.slug}` : '/app/engines/chalybclip'
   ) as Route;
 
   return (
@@ -60,7 +60,7 @@ export function EngineHero({
             {continueEngine ? t('hero.ctaContinue') : t('hero.ctaOpen')}
           </Link>
           <Link
-            href={'/app/engines/nexoclip' as Route}
+            href={'/app/engines/chalybclip' as Route}
             className="text-[13.5px] font-medium text-[var(--cc-txt-2)] underline-offset-4 transition-colors hover:text-[var(--cc-txt)] hover:underline"
           >
             {t('hero.ctaDemo')}

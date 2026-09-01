@@ -102,7 +102,7 @@ export function MessageThread({ messages, viewer, emptyMessage }: Props) {
                   textAlign: fromViewer ? 'right' : 'left',
                 }}
               >
-                {m.sender_role === 'ADMIN' ? 'equipo Nexo · ' : ''}
+                {m.sender_role === 'ADMIN' ? 'equipo Chalyb · ' : ''}
                 {formatTime(m.created_at)}
               </div>
             </div>

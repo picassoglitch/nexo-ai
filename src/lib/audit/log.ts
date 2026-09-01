@@ -24,7 +24,7 @@ export type AuditAction =
   | 'promo.welcome_claim' // user accepted the first-time welcome banner
   | 'promo.welcome_reset' // admin reset a user's welcome banner so it shows again
   | 'promo.trial_grant' // trial started/extended (self-claim or admin grant)
-  | 'promo.trial_revoke'; // admin ended a user's NexoClip trial early
+  | 'promo.trial_revoke'; // admin ended a user's ChalybClip trial early
 
 export interface AuditPayload {
   action: AuditAction;

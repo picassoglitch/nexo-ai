@@ -99,7 +99,7 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
   }
 
   // Templates live in src/lib/email/templates.ts — branded shell with dark
-  // theme, Nexo wordmark, acid-green accents. HTML escaping is handled inside.
+  // theme, Chalyb wordmark, acid-green accents. HTML escaping is handled inside.
   const inbox = contactInboxTemplate({ name, email, subject, message, ip });
   const confirm = contactConfirmTemplate({ name, subject, message });
 

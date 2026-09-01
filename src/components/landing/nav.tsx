@@ -39,7 +39,7 @@ export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
     <nav>
       <div className="logo">
         <FusionLogo id="navMark" triggerHover />
-        NEXO<span style={{ color: 'var(--path)', transition: 'color .4s' }}>AI</span>
+        CHALYB
       </div>
       <div className="nav-right">
         <div className="nav-links">

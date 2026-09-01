@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 // Per-engine tab icon. A file-based icon (src/app/icon.svg) overrides any
 // `metadata.icons` we'd set in generateMetadata, so the only way to give the
-// NexoClip workspace its own favicon is this code-generated icon route, which
+// ChalybClip workspace its own favicon is this code-generated icon route, which
 // receives the dynamic `slug` and branches on it. Every other engine keeps the
 // global Chalyb mark so nothing else regresses.
 
@@ -17,11 +17,11 @@ export default async function Icon({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const isNexoclip = slug === 'nexoclip';
-  const filePath = isNexoclip
-    ? join(process.cwd(), 'public', 'nexoclip-mark.png')
+  const isChalybclip = slug === 'chalybclip';
+  const filePath = isChalybclip
+    ? join(process.cwd(), 'public', 'chalybclip-mark.png')
     : join(process.cwd(), 'src', 'app', 'icon.svg');
-  const mime = isNexoclip ? 'image/png' : 'image/svg+xml';
+  const mime = isChalybclip ? 'image/png' : 'image/svg+xml';
   const data = await readFile(filePath);
   const src = `data:${mime};base64,${data.toString('base64')}`;
 

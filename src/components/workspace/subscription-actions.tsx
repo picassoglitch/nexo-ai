@@ -25,7 +25,7 @@ const TIER_MARKETING: Record<
   FREE: {
     tagline: 'Crea tu cuenta y prueba toda la plataforma gratis.',
     features: [
-      'NexoClip gratis 7 días',
+      'ChalybClip gratis 7 días',
       '50,000 tokens IA de regalo',
       'Acceso a la comunidad',
       'Clips con marca de agua · descarga manual',
@@ -38,7 +38,7 @@ const TIER_MARKETING: Record<
       'Todo lo de Free',
       '1 engine en vivo · tú eliges cuál',
       '1,000,000 de tokens / mes (se regeneran)',
-      'NexoClip Pro: sin marca de agua · ~12 streams/mes · 1 brand kit',
+      'ChalybClip Pro: sin marca de agua · ~12 streams/mes · 1 brand kit',
       'Comunidad premium',
     ],
   },
@@ -57,13 +57,13 @@ const TIER_MARKETING: Record<
     ],
   },
   VIP: {
-    tagline: 'Todo Nexo abierto — IA + Clip, sin límites.',
+    tagline: 'Todo Chalyb abierto — IA + Clip, sin límites.',
     features: [
       'Todo lo de Pro',
       'Todos los engines en vivo',
       '5× los tokens de Pro (5,000,000 / mes)',
-      'Paquete completo de streamer de NexoClip',
-      'Soporte prioritario · el equipo Nexo te ayuda a construir tu idea',
+      'Paquete completo de streamer de ChalybClip',
+      'Soporte prioritario · el equipo Chalyb te ayuda a construir tu idea',
     ],
   },
 };

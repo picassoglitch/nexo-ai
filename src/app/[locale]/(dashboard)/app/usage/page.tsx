@@ -472,7 +472,7 @@ export default async function UsagePage({
             }}
           >
             Los tokens que compras <b>nunca caducan</b> y se usan <b>después</b> de los tokens que
-            ya trae tu plan cada mes. Sirven en todos los engines (NexoClip y los que vengan después).
+            ya trae tu plan cada mes. Sirven en todos los engines (ChalybClip y los que vengan después).
           </p>
           <div className="cc-mod-grid">
             {TOKEN_PACKS.map((pack) => (

@@ -5,15 +5,15 @@
 // domain), so this route mints the engine's signed SSO token and 302s
 // straight into its dashboard — no landing/login bounce.
 //
-// Used by NexoClip's "Transmitir con NexoOBS" button (→ /auth/launch/nexoobs)
-// and NexoOBS's "Get Clips" button (→ /auth/launch/nexoclip). Also the
-// registration funnel target for nexoclip.nexo-ai.world's landing CTAs
-// (/sign-in?next=/auth/launch/nexoclip) — sign-up flows straight back into
-// NexoClip with trial + provisioning handled here in the background.
+// Used by ChalybClip's "Transmitir con ChalybOBS" button (→ /auth/launch/chalybobs)
+// and ChalybOBS's "Get Clips" button (→ /auth/launch/chalybclip). Also the
+// registration funnel target for chalybclip.chalyb.com's landing CTAs
+// (/sign-in?next=/auth/launch/chalybclip) — sign-up flows straight back into
+// ChalybClip with trial + provisioning handled here in the background.
 //
 // Gated to VIP for cross-engine launches (the streaming↔clips perk).
-// NexoClip itself is open to every signed-in user: first-timers get the
-// welcome gift / 7-day trial claimed silently, and NexoClip enforces its
+// ChalybClip itself is open to every signed-in user: first-timers get the
+// welcome gift / 7-day trial claimed silently, and ChalybClip enforces its
 // own tier perks once inside.
 //
 // Under /auth/* so it's excluded from the i18n middleware matcher (no locale
@@ -22,7 +22,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { effectiveTier, NEXOCLIP_TRIAL_SLUG } from '@/lib/billing/tiers';
+import { effectiveTier, CHALYBCLIP_TRIAL_SLUG } from '@/lib/billing/tiers';
 import { provisionEngineAccess } from '@/lib/engines/subscriptions';
 import { getEngineLaunchUrl } from '@/lib/engines/launch-actions';
 import { claimWelcomeGift } from '@/lib/usage/welcome-actions';
@@ -41,15 +41,15 @@ export async function GET(
     );
   }
 
-  // Full-access gate — for cross-engine launches only. NexoClip is exempt:
-  // it's the registration funnel from nexoclip.nexo-ai.world (the landing
-  // links every CTA here via /sign-in?next=/auth/launch/nexoclip), so any
+  // Full-access gate — for cross-engine launches only. ChalybClip is exempt:
+  // it's the registration funnel from chalybclip.chalyb.com (the landing
+  // links every CTA here via /sign-in?next=/auth/launch/chalybclip), so any
   // signed-in user passes through. The platform onboarding happens silently
-  // below (trial claim + provisioning) and NexoClip enforces its own
+  // below (trial claim + provisioning) and ChalybClip enforces its own
   // per-tier perks — the visitor goes straight from sign-up to
-  // NexoClip's /dashboard/start without ever seeing the Chalyb dashboard.
+  // ChalybClip's /dashboard/start without ever seeing the Chalyb dashboard.
   const tier = effectiveTier(session.role, session.tier);
-  if (slug !== NEXOCLIP_TRIAL_SLUG && tier !== 'VIP') {
+  if (slug !== CHALYBCLIP_TRIAL_SLUG && tier !== 'VIP') {
     return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));
   }
 
@@ -68,7 +68,7 @@ export async function GET(
   // supabase/migrations/0028), and every other surface already honours that:
   // cards render "Próximamente" with the launch button disabled. This route
   // is the one path that bypasses those surfaces — the landing CTAs link
-  // /sign-in?next=/auth/launch/nexoclip directly — so without this check a
+  // /sign-in?next=/auth/launch/chalybclip directly — so without this check a
   // brand-new signup gets 302'd into a dead host and sees a browser
   // connection error instead of a handled state. Send them to the engine
   // page, which renders the real status.
@@ -82,27 +82,27 @@ export async function GET(
 
   const engineId = engine.id as string;
 
-  if (slug === NEXOCLIP_TRIAL_SLUG) {
+  if (slug === CHALYBCLIP_TRIAL_SLUG) {
     // Idempotent: first-timers get the welcome gift + 7-day trial started
-    // and a NexoClip tenant provisioned; returning users no-op. The audit
-    // log's `via: nexoclip_landing_launch` marks the user as having
-    // registered through the NexoClip funnel. Never blocks the launch.
+    // and a ChalybClip tenant provisioned; returning users no-op. The audit
+    // log's `via: chalybclip_landing_launch` marks the user as having
+    // registered through the ChalybClip funnel. Never blocks the launch.
     try {
-      await claimWelcomeGift('nexoclip_landing_launch');
+      await claimWelcomeGift('chalybclip_landing_launch');
     } catch (err) {
-      console.warn('[launch] nexoclip welcome claim failed (non-fatal):', err);
+      console.warn('[launch] chalybclip welcome claim failed (non-fatal):', err);
     }
   }
 
   // Ensure the user is provisioned on the target engine (idempotent) so the
-  // launch has an external_user_id to sign into the SSO token. NexoClip
+  // launch has an external_user_id to sign into the SSO token. ChalybClip
   // funnel users are 'manual' (any tier); cross-engine launches keep the
   // VIP seed source.
   try {
     await provisionEngineAccess(
       session.user.id,
       engineId,
-      slug === NEXOCLIP_TRIAL_SLUG ? 'manual' : 'all_access_seed',
+      slug === CHALYBCLIP_TRIAL_SLUG ? 'manual' : 'all_access_seed',
     );
   } catch {
     // Non-fatal — getEngineLaunchUrl will report if access is still missing.

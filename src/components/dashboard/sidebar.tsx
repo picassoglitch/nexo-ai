@@ -36,7 +36,7 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen, unreadMes
       <div className="cc-sb-top">
         <FusionMark size={26} />
         <div className="cc-wm">
-          Nexo<span> AI</span>
+          Chalyb
         </div>
         <span className="cc-env">PROD</span>
       </div>

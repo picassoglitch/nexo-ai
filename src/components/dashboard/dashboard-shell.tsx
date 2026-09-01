@@ -46,7 +46,7 @@ export function DashboardShell({
 
   // Page meta is keyed by exact pathname, but dynamic routes
   // (e.g. /dashboard/engines/[slug]) wouldn't match. Fall back to a prefix
-  // search so /dashboard/engines/nexoclip inherits the /dashboard/engines
+  // search so /dashboard/engines/chalybclip inherits the /dashboard/engines
   // strip while we wait for someone to add slug-specific copy.
   const meta = PAGE_META[pathname] ?? (() => {
     for (const [key, value] of Object.entries(PAGE_META)) {

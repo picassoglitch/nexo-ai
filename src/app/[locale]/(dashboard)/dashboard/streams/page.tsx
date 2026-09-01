@@ -14,7 +14,7 @@ export default async function StreamsPage({
   setRequestLocale(locale);
 
   // Mandatory double-gate (not just the layout's): listObsStreams reads the
-  // NexoOBS tenant tables with the service-role client — RLS can't protect
+  // ChalybOBS tenant tables with the service-role client — RLS can't protect
   // us here, so the page must.
   const session = await getSessionUser();
   if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ADMIN')) {
@@ -33,7 +33,7 @@ export default async function StreamsPage({
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">En vivo ahora</div>
           <div className="cc-mod-stat-v gr">{live.length}</div>
-          <div className="cc-mod-stat-sub">{streams.length} sesiones de NexoOBS en total</div>
+          <div className="cc-mod-stat-sub">{streams.length} sesiones de ChalybOBS en total</div>
         </div>
         <div className="cc-mod-stat">
           <div className="cc-mod-stat-l">Destinos activos</div>
@@ -62,7 +62,7 @@ export default async function StreamsPage({
               fontSize: 13,
             }}
           >
-            Todavía nadie ha creado una sesión de NexoOBS.
+            Todavía nadie ha creado una sesión de ChalybOBS.
           </div>
         ) : (
           <div className="cc-mod-grid cc-mod-grid-2">

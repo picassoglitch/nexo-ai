@@ -9,13 +9,13 @@ import {
   effectiveTier,
   isAdminRole,
   engineIsLiveForUser,
-  isNexoclipTrialActive,
-  isNexoclipGraceActive,
-  nexoclipTrialDaysLeft,
-  NEXOCLIP_TRIAL_SLUG,
+  isChalybclipTrialActive,
+  isChalybclipGraceActive,
+  chalybclipTrialDaysLeft,
+  CHALYBCLIP_TRIAL_SLUG,
 } from '@/lib/billing/tiers';
 import { WelcomeGiftBanner } from '@/components/workspace/welcome-gift-banner';
-import { NexoclipGraceBanner } from '@/components/workspace/nexoclip-grace-banner';
+import { ChalybclipGraceBanner } from '@/components/workspace/chalybclip-grace-banner';
 import { EngineGlyph } from '@/components/workspace/engines/engine-glyph';
 
 export const metadata = { title: 'Tu espacio' };
@@ -52,17 +52,17 @@ export default async function WorkspaceHomePage({
     listEngines().catch(() => []),
   ]);
 
-  // NexoClip trial state (drives the live count + engine badges + spotlight).
+  // ChalybClip trial state (drives the live count + engine badges + spotlight).
   const nowMs = new Date().getTime();
-  const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
-  const trialDaysLeft = nexoclipTrialDaysLeft(session?.nexoclipTrialStartedAt ?? null, nowMs);
+  const trialActive = isChalybclipTrialActive(session?.chalybclipTrialStartedAt ?? null, nowMs);
+  const trialDaysLeft = chalybclipTrialDaysLeft(session?.chalybclipTrialStartedAt ?? null, nowMs);
   // Post-trial grace: trial clock ran out but the FREE user still has PURCHASED
-  // (bonus) tokens — NexoClip stays live until those are spent, then ends for
+  // (bonus) tokens — ChalybClip stays live until those are spent, then ends for
   // good (bonus doesn't regenerate monthly). Only meaningful for FREE.
   const clipBonusTokens = balance && !balance.unlimited ? balance.bonus : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
+    isChalybclipGraceActive(session?.chalybclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
 
   // Per-engine view models — single source for live status across the cards
   // and the "Engines en vivo" count.
@@ -72,7 +72,7 @@ export default async function WorkspaceHomePage({
       const meetsTier = TIER_ORDER[tier] >= TIER_ORDER[engine.tierRequired];
       const isOwnedByMe =
         engine.ownerUserId !== null && engine.ownerUserId === session?.user.id;
-      const isTrial = trialActive && engine.slug === NEXOCLIP_TRIAL_SLUG;
+      const isTrial = trialActive && engine.slug === CHALYBCLIP_TRIAL_SLUG;
       const isLive = engineIsLiveForUser({
         tier,
         engineId: engine.id,
@@ -93,7 +93,7 @@ export default async function WorkspaceHomePage({
   const unlimitedLive = caps.liveEnginesCount === Infinity;
   const liveEngineNames = engineViews.filter((v) => v.isLive).map((v) => v.engine.name);
   const liveSub = trialActive
-    ? `NexoClip · prueba ${trialDaysLeft}d`
+    ? `ChalybClip · prueba ${trialDaysLeft}d`
     : unlimitedLive
       ? 'todos disponibles'
       : liveEngineNames.length > 0
@@ -132,7 +132,7 @@ export default async function WorkspaceHomePage({
   const heroSub = isAdmin
     ? `Tu rol <b style="color:var(--cc-purple)">${role.replace('_', ' ')}</b> te da acceso completo a todos los engines, sin importar tu plan (almacenado: <b>${storedTier.replace('_', '-')}</b>).`
     : trialActive
-      ? `Tu <b style="color:var(--cc-cyan)">prueba de NexoClip Pro</b> está activa — te quedan ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} corriendo en vivo. Mientras, prueba los demás en modo demo.`
+      ? `Tu <b style="color:var(--cc-cyan)">prueba de ChalybClip Pro</b> está activa — te quedan ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} corriendo en vivo. Mientras, prueba los demás en modo demo.`
       : tier === 'FREE'
         ? `Estás en el plan <b style="color:var(--cc-green)">Free</b>. Prueba los engines en modo demo y activa la ejecución en vivo cuando quieras.`
         : tier === 'PRO'
@@ -149,9 +149,9 @@ export default async function WorkspaceHomePage({
           once the user has claimed (server passes the claimed flag). */}
       <WelcomeGiftBanner claimed={session?.welcomeGiftClaimedAt != null} />
 
-      {/* Post-trial grace: NexoClip trial expired but tokens remain — keep them
+      {/* Post-trial grace: ChalybClip trial expired but tokens remain — keep them
           going (and nudge toward Pro). Server-gated on graceActive. */}
-      {graceActive && <NexoclipGraceBanner tokensRemaining={clipBonusTokens} />}
+      {graceActive && <ChalybclipGraceBanner tokensRemaining={clipBonusTokens} />}
 
       <div className="cc-mod-section">
         <h2

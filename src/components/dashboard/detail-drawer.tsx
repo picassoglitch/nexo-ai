@@ -182,7 +182,7 @@ export function DetailDrawer() {
               <div className="cc-sl">Consola</div>
               <div className="cc-logbox">
                 <div className="cc-ll">
-                  <span className="cc-tm">nexo@{bot.slug}</span>{' '}
+                  <span className="cc-tm">chalyb@{bot.slug}</span>{' '}
                   <span className="cc-ms">$ _</span>
                 </div>
               </div>
@@ -271,7 +271,7 @@ export function DetailDrawer() {
                 </div>
                 <div className="cc-prow">
                   <div className="cc-pl">Key</div>
-                  <div className="cc-pv">sk-nexo-••••••••{bot.slug.slice(0, 4)}</div>
+                  <div className="cc-pv">sk-chalyb-••••••••{bot.slug.slice(0, 4)}</div>
                 </div>
                 <div className="cc-prow">
                   <div className="cc-pl">Costo 30 días</div>

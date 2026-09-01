@@ -1,6 +1,6 @@
 // Branded transactional email templates.
 //
-// All templates share a single shell (`wrap()`) that renders the Nexo
+// All templates share a single shell (`wrap()`) that renders the Chalyb
 // header + body + footer with consistent styling. We use inline styles
 // because Gmail strips <style> tags and many clients don't apply external
 // CSS. Dark-mode media query at the top inverts colors automatically in
@@ -43,7 +43,7 @@ function wrap(opts: { title: string; preview: string; body: string }): string {
             <tr>
               <td style="padding:0 28px 24px;">
                 <div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:${INK_PRIMARY};">
-                  NEXO<span style="color:${BRAND_ACCENT};">AI</span>
+                  CHALYB
                 </div>
               </td>
             </tr>
@@ -58,7 +58,7 @@ function wrap(opts: { title: string; preview: string; body: string }): string {
             <!-- Footer -->
             <tr>
               <td style="padding:24px 28px 40px;font-size:11.5px;color:${INK_FAINT};line-height:1.55;font-family:'SF Mono',Menlo,Consolas,monospace;">
-                Chalyb · tu equipo de AI que trabaja solo · <a href="https://nexo-ai.world" style="color:${INK_FAINT};text-decoration:underline;">nexo-ai.world</a>
+                Chalyb · tu equipo de AI que trabaja solo · <a href="https://chalyb.com" style="color:${INK_FAINT};text-decoration:underline;">chalyb.com</a>
                 <br />
                 Si este correo te llegó por error, ignóralo — no tienes que hacer nada.
               </td>
@@ -186,7 +186,7 @@ ${opts.message}
 
 Te respondemos en menos de 24 horas hábiles.
 
-— Chalyb · nexo-ai.world`;
+— Chalyb · chalyb.com`;
 
   return {
     html: wrap({

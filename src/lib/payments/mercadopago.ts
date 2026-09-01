@@ -12,7 +12,7 @@
 //   MERCADOPAGO_PUBLIC_KEY    (optional) — only needed if/when we switch from
 //                                redirect-based checkout to embedded MP Bricks.
 //                                Currently unused — safe to leave set.
-//   NEXT_PUBLIC_APP_URL        — the publicly reachable origin (https://nexo.ai
+//   NEXT_PUBLIC_APP_URL        — the publicly reachable origin (https://chalyb.com
 //                                or http://localhost:3000 for local). Used in
 //                                back_urls and notification_url on the preference.
 //

@@ -16,7 +16,7 @@ export default async function SettingsPage({
     (typeof meta.name === 'string' && meta.name) ||
     session?.user.email?.split('@')[0] ||
     'Operator';
-  const email = session?.user.email ?? 'operator@nexo.ai';
+  const email = session?.user.email ?? 'operator@chalyb.com';
 
   return (
     <div className="cc-scroll">

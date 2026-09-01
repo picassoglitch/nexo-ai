@@ -115,11 +115,11 @@ const FAQ: FaqGroup[] = [
         ),
       },
       {
-        q: '¿Pueden ver mis datos los administradores de Nexo?',
+        q: '¿Pueden ver mis datos los administradores de Chalyb?',
         a: (
           <>
             Solo el rol <b>SUPER_ADMIN</b> de tu organización puede ver tu perfil y tu uso
-            general. El equipo de Nexo no accede a los datos de tu operación (lo que tus sistemas
+            general. El equipo de Chalyb no accede a los datos de tu operación (lo que tus sistemas
             generan). Para soporte técnico, te pedimos permiso explícito antes de revisar
             los registros.
           </>

@@ -6,7 +6,7 @@
 // CLIENT CHOICE:
 //   - RLS server client where admin SELECT policies exist: usage_events,
 //     payments, audit_events, token_pack_purchases, notifications, engines.
-//   - Service-role client ONLY for the NexoOBS tenant tables — those have
+//   - Service-role client ONLY for the ChalybOBS tenant tables — those have
 //     no auth policies on purpose (defense-in-depth lockdown in migration
 //     0023), so the page using listObsStreams() must role-gate explicitly.
 //
@@ -386,9 +386,9 @@ export async function getAutomationCounts(): Promise<AutomationCounts> {
   };
 }
 
-// ── NexoOBS streams (streams page) ───────────────────────────────────────
+// ── ChalybOBS streams (streams page) ───────────────────────────────────────
 //
-// Service-role read: nexoobs_* have no auth RLS policies by design
+// Service-role read: chalybobs_* have no auth RLS policies by design
 // (migration 0023). The page MUST role-gate before calling this.
 
 export interface ObsDestination {
@@ -412,12 +412,12 @@ export async function listObsStreams(): Promise<ObsStream[]> {
   const admin = createAdminClient();
   const [sessionsResult, destinationsResult] = await Promise.all([
     admin
-      .from('nexoobs_sessions')
+      .from('chalybobs_sessions')
       .select('tenant_id, title, is_live, record_enabled, updated_at')
       .order('updated_at', { ascending: false })
       .limit(100),
     admin
-      .from('nexoobs_destinations')
+      .from('chalybobs_destinations')
       .select('tenant_id, platform_id, channel_handle, enabled, status_kind'),
   ]);
   if (sessionsResult.error) {

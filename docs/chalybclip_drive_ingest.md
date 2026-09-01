@@ -1,20 +1,20 @@
-# NexoClip — "Watch a Drive folder" (auto-ingest VODs)
+# ChalybClip — "Watch a Drive folder" (auto-ingest VODs)
 
-Complete build spec for the Google-Drive auto-ingest feature shown on NexoClip's
+Complete build spec for the Google-Drive auto-ingest feature shown on ChalybClip's
 dashboard ("Watch a Drive folder → Connect a Drive folder"). The watcher and the
-video pipeline live in **NexoClip's** repo (FastAPI + worker), not in `nexo-ai`.
+video pipeline live in **ChalybClip's** repo (FastAPI + worker), not in `nexo-ai`.
 This doc is the contract + reference implementation so whoever builds it on the
-NexoClip side has everything.
+ChalybClip side has everything.
 
 `nexo-ai`'s only involvement is two things, both already in place:
 
 1. **Entitlement** — `TIER_CAPS[...].clipDriveAutoIngest` (added in
    `src/lib/billing/tiers.ts`). FREE = false; PRO / PARTNER / VIP = true. The
-   tier is signed into NexoClip's SSO token (`tier` claim), so NexoClip gates the
+   tier is signed into ChalybClip's SSO token (`tier` claim), so ChalybClip gates the
    feature off the same value as every other clip cap.
-2. **Token balance** — NexoClip pre-checks the user's balance before ingesting
-   via the existing `GET /api/engines/nexoclip/usage/balance?external_user_id=…`
-   endpoint, and reports consumption via `POST /api/engines/nexoclip/usage`.
+2. **Token balance** — ChalybClip pre-checks the user's balance before ingesting
+   via the existing `GET /api/engines/chalybclip/usage/balance?external_user_id=…`
+   endpoint, and reports consumption via `POST /api/engines/chalybclip/usage`.
 
 ---
 
@@ -25,7 +25,7 @@ re-list the folder each tick (`files.list` re-scans everything and burns quota).
 
 - On connect: `changes.getStartPageToken` → store as the watch's cursor.
 - Every ~60 s per active watch (cron/worker): `changes.list(pageToken=cursor,
-  includeRemoved=true, supportsAllDrives=true, includeItemsFromAllDrives=true)`.
+includeRemoved=true, supportsAllDrives=true, includeItemsFromAllDrives=true)`.
 - Advance the cursor to the returned `newStartPageToken` only AFTER successfully
   enqueuing the new files.
 
@@ -42,7 +42,7 @@ Per-user OAuth, least privilege:
 
 - Scope: `https://www.googleapis.com/auth/drive.readonly` (read files + metadata).
   Avoid full `drive` scope.
-- Flow: NexoClip "Connect a Drive folder" → Google consent → callback stores the
+- Flow: ChalybClip "Connect a Drive folder" → Google consent → callback stores the
   **refresh token encrypted at rest** (KMS / libsodium; never plaintext, never
   logged). Access tokens are short-lived and refreshed on demand.
 - Folder picker: use the Google Picker API (or paste a folder URL) to capture the
@@ -52,13 +52,13 @@ Per-user OAuth, least privilege:
 
 ---
 
-## 3. Schema (NexoClip DB)
+## 3. Schema (ChalybClip DB)
 
 ```sql
 -- One row per watched folder.
 create table drive_watches (
   id              uuid primary key default gen_random_uuid(),
-  tenant_id       text not null,            -- NexoClip tenant (= nexo-ai user_id)
+  tenant_id       text not null,            -- ChalybClip tenant (= nexo-ai user_id)
   folder_id       text not null,            -- Google Drive folder id
   folder_name     text,
   drive_id        text,                     -- non-null for Shared Drives
@@ -129,7 +129,7 @@ def poll_watch(watch):
             continue
 
         # Token gate: don't drain a busy folder silently.
-        bal = nexo_ai_balance(watch.tenant_id)     # GET .../usage/balance
+        bal = chalyb_balance(watch.tenant_id)     # GET .../usage/balance
         if not bal["unlimited"] and bal["remaining"] <= 0:
             notify_out_of_tokens(watch.tenant_id)  # queue or skip; surface upsell
             continue

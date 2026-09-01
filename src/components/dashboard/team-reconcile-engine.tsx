@@ -3,7 +3,7 @@
 // Bulk-reconcile control for /dashboard/team (B3 of the contemplation plan).
 //
 // Pattern: a small button in the page header that opens a popover with:
-//   1. Engine selector (today: only nexoclip — single option)
+//   1. Engine selector (today: only chalybclip — single option)
 //   2. "Vista previa (dry-run)" button — shows the proposed counts without
 //      hitting the engine. Lets the admin see "this sweep would re-link 47
 //      users" before pulling the trigger.
@@ -23,7 +23,7 @@ import {
 } from '@/lib/engines/reconcile-actions';
 
 const SUPPORTED_ENGINES: Array<{ slug: string; label: string }> = [
-  { slug: 'nexoclip', label: 'NexoClip' },
+  { slug: 'chalybclip', label: 'ChalybClip' },
   // Add more here when integrations register reconciliation support.
 ];
 

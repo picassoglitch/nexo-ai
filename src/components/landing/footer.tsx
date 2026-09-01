@@ -15,8 +15,7 @@ export function LandingFooter() {
         <div className="footer-brand">
           <div className="logo">
             <FusionLogo id="footMark" />
-            NEXO
-            <span style={{ color: 'var(--path)', transition: 'color .4s' }}>AI</span>
+            CHALYB
           </div>
           <p>{tFooter('brand')}</p>
         </div>
@@ -34,7 +33,7 @@ export function LandingFooter() {
           <a href="#earn-world">{tFooter('bots')}</a>
           <a href="#earn-world">{tFooter('pricing')}</a>
           <a href="#contact">{tFooter('signin')}</a>
-          <a href="#earn-world">Nexo Academy</a>
+          <a href="#earn-world">Chalyb Academy</a>
         </div>
         <div className="footer-col">
           <h6>{tFooter('connect')}</h6>
@@ -45,7 +44,7 @@ export function LandingFooter() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© 2026 Chalyb — nexo-ai.world</p>
+        <p>© 2026 Chalyb — chalyb.com</p>
         <div className="socials">
           {/* Real legal pages — required public URLs for OAuth provider apps
               (Google, Mercado Pago, etc.) and consumer-law compliance in MX.

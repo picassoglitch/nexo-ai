@@ -9,9 +9,9 @@ import { listEngines } from '@/lib/data/engines';
 import { getTokenBalance } from '@/lib/usage/tokens';
 import {
   engineIsLiveForUser,
-  isNexoclipTrialActive,
-  isNexoclipGraceActive,
-  NEXOCLIP_TRIAL_SLUG,
+  isChalybclipTrialActive,
+  isChalybclipGraceActive,
+  CHALYBCLIP_TRIAL_SLUG,
   effectiveTier,
   isAdminRole,
 } from '@/lib/billing/tiers';
@@ -22,7 +22,7 @@ import {
 import { EngineLaunchButton } from '@/components/workspace/engine-launch-button';
 import { EngineReprovisionButton } from '@/components/workspace/engine-reprovision-button';
 
-// Dynamic title: tab reads "NexoClip · Chalyb", "NexoStreamManager · Chalyb", etc.
+// Dynamic title: tab reads "ChalybClip · Chalyb", "ChalybStreamManager · Chalyb", etc.
 export async function generateMetadata({
   params,
 }: {
@@ -41,7 +41,7 @@ export async function generateMetadata({
 //   - Coming-soon                      → notify-me panel
 //   - Deprecated                       → 404 (deprecated engines are hidden from catalog)
 //
-// Real engine UIs (NexoClip's clip editor, StreamManager's dashboard) plug in
+// Real engine UIs (ChalybClip's clip editor, StreamManager's dashboard) plug in
 // here when those products ship. For v1 we render the metadata + the right
 // CTA for the user's state, with a "Build phase" placeholder for the actual
 // interface.
@@ -73,9 +73,9 @@ export default async function EngineWorkspacePage({
   const engine = engines.find((e) => e.slug === slug);
   if (!engine || engine.status === 'deprecated') notFound();
 
-  // NexoClip has a real brand lockup — show it as a hero banner and drop the
+  // ChalybClip has a real brand lockup — show it as a hero banner and drop the
   // generic emoji icon box from the header (the lockup already brands the page).
-  const isNexoclip = engine.slug === NEXOCLIP_TRIAL_SLUG;
+  const isChalybclip = engine.slug === CHALYBCLIP_TRIAL_SLUG;
 
   const role = session.role;
   const storedTier = session.tier;
@@ -86,23 +86,23 @@ export default async function EngineWorkspacePage({
   // always-live (additive to any selected_engine_id they may also have).
   const isOwnedByMe =
     engine.ownerUserId !== null && engine.ownerUserId === session.user.id;
-  // NexoClip 7-day trial grants live access regardless of tier — it bypasses
-  // both the tier-required gate and the selection gate (NexoClip only). After
-  // the trial, FREE users keep NexoClip live in "grace" while tokens remain.
+  // ChalybClip 7-day trial grants live access regardless of tier — it bypasses
+  // both the tier-required gate and the selection gate (ChalybClip only). After
+  // the trial, FREE users keep ChalybClip live in "grace" while tokens remain.
   const nowMs = new Date().getTime();
-  const trialActive = isNexoclipTrialActive(session.nexoclipTrialStartedAt, nowMs);
+  const trialActive = isChalybclipTrialActive(session.chalybclipTrialStartedAt, nowMs);
   const clipBonusTokens =
-    tier === 'FREE' && engine.slug === NEXOCLIP_TRIAL_SLUG
+    tier === 'FREE' && engine.slug === CHALYBCLIP_TRIAL_SLUG
       ? await getTokenBalance(session.user.id)
           .then((b) => (b.unlimited ? 0 : b.bonus))
           .catch(() => 0)
       : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session.nexoclipTrialStartedAt, nowMs, clipBonusTokens);
-  // NexoClip is "unlocked" (live, bypassing tier/selection) under either the
+    isChalybclipGraceActive(session.chalybclipTrialStartedAt, nowMs, clipBonusTokens);
+  // ChalybClip is "unlocked" (live, bypassing tier/selection) under either the
   // trial or the post-trial grace window.
-  const clipUnlocked = (trialActive || graceActive) && engine.slug === NEXOCLIP_TRIAL_SLUG;
+  const clipUnlocked = (trialActive || graceActive) && engine.slug === CHALYBCLIP_TRIAL_SLUG;
   const isLive = engineIsLiveForUser({
     tier,
     engineId: engine.id,
@@ -152,10 +152,10 @@ export default async function EngineWorkspacePage({
         </Link>
       </div>
 
-      {/* NexoClip brand hero — full lockup. The logo's own dark background
+      {/* ChalybClip brand hero — full lockup. The logo's own dark background
           (#03040b) matches the banner fill, so the square reads as a floating
           mark rather than a pasted tile. */}
-      {isNexoclip && (
+      {isChalybclip && (
         <div
           style={{
             marginBottom: 24,
@@ -168,8 +168,8 @@ export default async function EngineWorkspacePage({
           }}
         >
           <Image
-            src="/nexoclip-logo.png"
-            alt="NexoClip — clips virales para streamers"
+            src="/chalybclip-logo.png"
+            alt="ChalybClip — clips virales para streamers"
             width={240}
             height={240}
             priority
@@ -188,7 +188,7 @@ export default async function EngineWorkspacePage({
           flexWrap: 'wrap',
         }}
       >
-        {!isNexoclip && (
+        {!isChalybclip && (
           <div
             style={{
               fontSize: 44,
@@ -672,7 +672,7 @@ function AccessPanel({
                 >
                   Si esto falla: (1) verifica que {engineName} esté corriendo en su URL;
                   (2) que <code>{`${engineName.toUpperCase().replace(/[^A-Z0-9]/g, '')}_ADMIN_TOKEN`}</code>{' '}
-                  en Vercel coincida con <code>NEXO_AI_ADMIN_TOKEN</code> en {engineName};{' '}
+                  en Vercel coincida con <code>CHALYB_ADMIN_TOKEN</code> en {engineName};{' '}
                   (3) que la URL en <code>engines.admin_api_base</code> apunte al endpoint
                   correcto. El log del dev server (busca <code>[engine_subs]</code>) muestra
                   el error exacto.

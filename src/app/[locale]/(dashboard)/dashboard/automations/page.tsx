@@ -37,7 +37,7 @@ export default async function AutomationsPage({
     {
       id: 'welcome',
       trigger: 'Te registras o ves el saludo de bienvenida',
-      action: 'Regalo de bienvenida y prueba de NexoClip por 7 días',
+      action: 'Regalo de bienvenida y prueba de ChalybClip por 7 días',
       runs: c.welcomeGifts30d,
     },
     {

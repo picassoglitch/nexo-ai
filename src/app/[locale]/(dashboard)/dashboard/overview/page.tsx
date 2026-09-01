@@ -349,7 +349,7 @@ function EmptyEngines() {
           display: 'inline-block',
         }}
       >
-        Si acabas de correr las migraciones, hay 2 activos (NexoClip, NexoStreamManager) y 4
+        Si acabas de correr las migraciones, hay 2 activos (ChalybClip, ChalybStreamManager) y 4
         próximamente — los ves en{' '}
         <Link
           href={'/dashboard/engines' as Route}

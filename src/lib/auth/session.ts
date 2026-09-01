@@ -35,10 +35,10 @@ export interface SessionUser {
   /** Which engine the user has chosen to run LIVE (PRO tier only).
    *  Backed by profiles.selected_engine_id (was selected_bot_id pre-migration 0010). */
   selectedEngineId: string | null;
-  /** Start of the NexoClip 7-day live trial, or null. Backed by
-   *  profiles.nexoclip_trial_started_at (migration 0025). Read by the
-   *  live-execution gating — see isNexoclipTrialActive in lib/billing/tiers. */
-  nexoclipTrialStartedAt: string | null;
+  /** Start of the ChalybClip 7-day live trial, or null. Backed by
+   *  profiles.chalybclip_trial_started_at (migration 0025). Read by the
+   *  live-execution gating — see isChalybclipTrialActive in lib/billing/tiers. */
+  chalybclipTrialStartedAt: string | null;
   /** When the user accepted the first-time welcome banner, or null (banner
    *  still pending). Backed by profiles.welcome_gift_claimed_at (migration 0025). */
   welcomeGiftClaimedAt: string | null;
@@ -64,7 +64,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const { data: profile } = await supabase
     .from('profiles')
     .select(
-      'role, tier, org_id, selected_engine_id, nexoclip_trial_started_at, welcome_gift_claimed_at',
+      'role, tier, org_id, selected_engine_id, chalybclip_trial_started_at, welcome_gift_claimed_at',
     )
     .eq('id', user.id)
     .maybeSingle();
@@ -77,7 +77,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     tier,
     orgId: (profile?.org_id as string | null) ?? null,
     selectedEngineId: (profile?.selected_engine_id as string | null) ?? null,
-    nexoclipTrialStartedAt: (profile?.nexoclip_trial_started_at as string | null) ?? null,
+    chalybclipTrialStartedAt: (profile?.chalybclip_trial_started_at as string | null) ?? null,
     welcomeGiftClaimedAt: (profile?.welcome_gift_claimed_at as string | null) ?? null,
   };
 }

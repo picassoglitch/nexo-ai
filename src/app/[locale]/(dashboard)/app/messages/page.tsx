@@ -49,7 +49,7 @@ export default async function SubscriberMessagesPage({
           borderRadius: 'var(--cc-r-l)',
         }}
       >
-        <h3 style={{ fontSize: 14, marginBottom: 4 }}>Habla directo con el equipo Nexo</h3>
+        <h3 style={{ fontSize: 14, marginBottom: 4 }}>Habla directo con el equipo Chalyb</h3>
         <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', lineHeight: 1.5 }}>
           Este chat llega directo a nosotros. Escríbenos para ideas, fallas que
           encontraste, propuestas de colaboración o lo que prefieras no mandar por correo.

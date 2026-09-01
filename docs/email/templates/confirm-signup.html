@@ -7,7 +7,7 @@
     {{ .ConfirmationURL }} — full confirm link (already includes site_url + token)
     {{ .Email }}            — recipient
     {{ .Token }}            — 6-digit OTP (we don't show it; link-based flow)
-    {{ .SiteURL }}          — your nexo-ai.world
+    {{ .SiteURL }}          — your chalyb.com
 
   Style mirrors src/lib/email/templates.ts (dark navy bg, acid-green accent,
   system fonts, inline styles only — Gmail strips <style>).
@@ -32,7 +32,7 @@
             <tr>
               <td style="padding:0 28px 24px;">
                 <div style="font-size:16px;font-weight:700;letter-spacing:-0.01em;color:#f4f3ee;">
-                  NEXO<span style="color:#c6f24e;">AI</span>
+                  CHALYB
                 </div>
               </td>
             </tr>
@@ -65,7 +65,7 @@
             </tr>
             <tr>
               <td style="padding:24px 28px 40px;font-size:11.5px;color:#6c6d7c;line-height:1.55;font-family:'SF Mono',Menlo,Consolas,monospace;">
-                Chalyb · operación AI autónoma · <a href="https://nexo-ai.world" style="color:#6c6d7c;text-decoration:underline;">nexo-ai.world</a>
+                Chalyb · operación AI autónoma · <a href="https://chalyb.com" style="color:#6c6d7c;text-decoration:underline;">chalyb.com</a>
                 <br />
                 Te enviamos este correo a {{ .Email }} porque te registraste hace unos segundos.
               </td>

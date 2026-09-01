@@ -30,8 +30,8 @@ export const runtime = 'nodejs';
 // a shared `lib/engines/bearer.ts` helper is fine if it grows past 3
 // engines but premature today.
 const ENGINE_BEARER_ENV: Record<string, string> = {
-  nexoclip: 'NEXOCLIP_ADMIN_TOKEN',
-  // nexostream: 'NEXOSTREAM_ADMIN_TOKEN',   // when it ships
+  chalybclip: 'CHALYBCLIP_ADMIN_TOKEN',
+  // chalybstream: 'CHALYBSTREAM_ADMIN_TOKEN',   // when it ships
 };
 
 function constantTimeEqual(a: string, b: string): boolean {

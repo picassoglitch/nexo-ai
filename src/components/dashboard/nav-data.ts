@@ -33,7 +33,7 @@ export const NAV: NavGroup[] = [
       { id: 'queues', href: '/dashboard/queues', ic: '≡', label: 'Queues', ct: '7' },
     ],
   },
-  // "Contenido" group removed — clips/publishing/uploads are NexoClip-internal
+  // "Contenido" group removed — clips/publishing/uploads are ChalybClip-internal
   // features, not platform-admin concerns. Same reason "Clients" got removed
   // from Organización: Chalyb is a SaaS, not an agency with client engagements.
   {
@@ -195,7 +195,7 @@ export const PAGE_META: Record<string, { title: string; sub: string }> = {
   },
   '/app/engines': {
     title: 'Mis engines',
-    sub: 'NexoClip, NexoStreamManager y próximos productos — disponibles en tu tier actual.',
+    sub: 'ChalybClip, ChalybStreamManager y próximos productos — disponibles en tu tier actual.',
   },
   '/app/history': {
     title: 'Historial',

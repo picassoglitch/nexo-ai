@@ -18,20 +18,20 @@ import {
 // Mapped by slug, with a neutral fallback for any engine we haven't styled yet.
 // Color comes from the parent via `currentColor`, so the card tints per state.
 //
-// NexoClip is the exception: it has a real brand mark (public/nexoclip-mark.png),
+// ChalybClip is the exception: it has a real brand mark (public/chalybclip-mark.png),
 // so we render the logo tile filling the parent box instead of a lucide glyph.
 // The mark carries its own dark background, so the parent's tint shows only as a
 // thin frame. The parent box must be `relative` (and is square + overflow-hidden)
 // for the `fill` image to lay out correctly.
 
 const BY_SLUG: Record<string, LucideIcon> = {
-  nexocrypto: CandlestickChart,
-  nexotrade: TrendingUp,
-  nexoobs: Video,
-  nexostream: Radio,
-  nexobot: Bot,
-  nexopicks: Target,
-  nexorealtor: Home,
+  chalybcrypto: CandlestickChart,
+  chalybtrade: TrendingUp,
+  chalybobs: Video,
+  chalybstream: Radio,
+  chalybbot: Bot,
+  chalybpicks: Target,
+  chalybrealtor: Home,
 };
 
 export function EngineGlyph({
@@ -43,10 +43,10 @@ export function EngineGlyph({
   size?: number;
   className?: string;
 }) {
-  if (slug === 'nexoclip') {
+  if (slug === 'chalybclip') {
     return (
       <Image
-        src="/nexoclip-mark.png"
+        src="/chalybclip-mark.png"
         alt=""
         aria-hidden
         fill

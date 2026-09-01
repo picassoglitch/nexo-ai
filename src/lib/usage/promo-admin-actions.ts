@@ -5,20 +5,20 @@
 // layout revalidate).
 //
 // Three levers, all writing to profiles (migration 0025):
-//   - grantNexoclipTrial : start a fresh 7-day NexoClip live trial (now()).
+//   - grantChalybclipTrial : start a fresh 7-day ChalybClip live trial (now()).
 //                          Re-granting resets the clock to a full 7 days.
-//   - revokeNexoclipTrial : end the trial immediately (nexoclip_trial_started_at = NULL).
+//   - revokeChalybclipTrial : end the trial immediately (chalybclip_trial_started_at = NULL).
 //   - resetWelcomeGift    : clear welcome_gift_claimed_at so the welcome banner
 //                           shows again on the user's next /app visit.
 //
-// Trial length is fixed at NEXOCLIP_TRIAL_DAYS (the helper that gates live
+// Trial length is fixed at CHALYBCLIP_TRIAL_DAYS (the helper that gates live
 // access is duration-fixed); "modifying" a promotion = granting again (extends
 // to a fresh window) or revoking.
 
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSessionUser } from '@/lib/auth/session';
-import { isAdminRole, NEXOCLIP_TRIAL_SLUG } from '@/lib/billing/tiers';
+import { isAdminRole, CHALYBCLIP_TRIAL_SLUG } from '@/lib/billing/tiers';
 import { provisionEngineAccess } from '@/lib/engines/subscriptions';
 import { logAudit } from '@/lib/audit/log';
 
@@ -67,8 +67,8 @@ async function authorize(
   };
 }
 
-/** Start (or extend, by resetting to a fresh window) a user's NexoClip trial. */
-export async function grantNexoclipTrial(
+/** Start (or extend, by resetting to a fresh window) a user's ChalybClip trial. */
+export async function grantChalybclipTrial(
   targetUserId: string,
   reason: string | null = null,
 ): Promise<PromoResult> {
@@ -78,7 +78,7 @@ export async function grantNexoclipTrial(
   const nowIso = new Date().toISOString();
   const { error: updErr } = await auth.admin
     .from('profiles')
-    .update({ nexoclip_trial_started_at: nowIso })
+    .update({ chalybclip_trial_started_at: nowIso })
     .eq('id', targetUserId);
   if (updErr) return { ok: false, error: updErr.message };
 
@@ -87,13 +87,13 @@ export async function grantNexoclipTrial(
     const { data: engine } = await auth.admin
       .from('engines')
       .select('id')
-      .eq('slug', NEXOCLIP_TRIAL_SLUG)
+      .eq('slug', CHALYBCLIP_TRIAL_SLUG)
       .maybeSingle();
     if (engine?.id) {
       await provisionEngineAccess(targetUserId, engine.id as string, 'admin_grant');
     }
   } catch (err) {
-    console.warn('[promo] nexoclip trial provisioning failed (non-fatal):', err);
+    console.warn('[promo] chalybclip trial provisioning failed (non-fatal):', err);
   }
 
   await logAudit({
@@ -102,16 +102,16 @@ export async function grantNexoclipTrial(
     actorEmail: auth.actorEmail,
     targetUserId,
     targetEmail: auth.targetEmail,
-    after: { nexoclip_trial_started_at: nowIso },
-    metadata: { reason, via: 'team_page', engine: NEXOCLIP_TRIAL_SLUG },
+    after: { chalybclip_trial_started_at: nowIso },
+    metadata: { reason, via: 'team_page', engine: CHALYBCLIP_TRIAL_SLUG },
   });
 
   revalidatePath('/[locale]', 'layout');
   return { ok: true, trialStartedAt: nowIso };
 }
 
-/** End a user's NexoClip trial immediately. */
-export async function revokeNexoclipTrial(
+/** End a user's ChalybClip trial immediately. */
+export async function revokeChalybclipTrial(
   targetUserId: string,
   reason: string | null = null,
 ): Promise<PromoResult> {
@@ -120,7 +120,7 @@ export async function revokeNexoclipTrial(
 
   const { error: updErr } = await auth.admin
     .from('profiles')
-    .update({ nexoclip_trial_started_at: null })
+    .update({ chalybclip_trial_started_at: null })
     .eq('id', targetUserId);
   if (updErr) return { ok: false, error: updErr.message };
 
@@ -130,8 +130,8 @@ export async function revokeNexoclipTrial(
     actorEmail: auth.actorEmail,
     targetUserId,
     targetEmail: auth.targetEmail,
-    after: { nexoclip_trial_started_at: null },
-    metadata: { reason, via: 'team_page', engine: NEXOCLIP_TRIAL_SLUG },
+    after: { chalybclip_trial_started_at: null },
+    metadata: { reason, via: 'team_page', engine: CHALYBCLIP_TRIAL_SLUG },
   });
 
   revalidatePath('/[locale]', 'layout');

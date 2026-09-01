@@ -3,8 +3,8 @@
 // CONFIGURATION:
 //   RESEND_API_KEY      — your Resend API key (re_...).
 //                         Get from https://resend.com/api-keys
-//   RESEND_FROM_EMAIL   — verified sender, e.g. "Chalyb <noreply@nexo-ai.world>".
-//                         The production default below assumes nexo-ai.world is
+//   RESEND_FROM_EMAIL   — verified sender, e.g. "Chalyb <noreply@chalyb.com>".
+//                         The production default below assumes chalyb.com is
 //                         verified at Resend (DNS records green). If you're
 //                         still in sandbox, override with onboarding@resend.dev
 //                         (Resend's sandbox sender, limited to your own email).
@@ -39,12 +39,12 @@ function getResend(): Resend {
   return cached;
 }
 
-// Production default — nexo-ai.world is verified at Resend. Keep this in
+// Production default — chalyb.com is verified at Resend. Keep this in
 // sync with the sender set in Supabase Dashboard → Auth → SMTP so the
 // "From" header looks identical across server-sent + auth-sent emails.
 // Pre-domain-verification you can override via RESEND_FROM_EMAIL env var
 // (set to "onboarding@resend.dev" for the sandbox limited-to-you mode).
-const DEFAULT_FROM = 'Chalyb <noreply@nexo-ai.world>';
+const DEFAULT_FROM = 'Chalyb <noreply@chalyb.com>';
 
 export function getFromAddress(): string {
   return process.env.RESEND_FROM_EMAIL ?? DEFAULT_FROM;

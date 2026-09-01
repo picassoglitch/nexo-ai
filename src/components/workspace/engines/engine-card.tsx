@@ -50,7 +50,7 @@ function OwnerCaption({ vm }: { vm: EngineVM }) {
   const label = vm.isOwnedByMe
     ? t('ownerMine')
     : vm.isPlatformOwned
-      ? t('ownerNexo')
+      ? t('ownerChalyb')
       : t('ownerBy', { owner: vm.ownerLabel });
   return (
     <span

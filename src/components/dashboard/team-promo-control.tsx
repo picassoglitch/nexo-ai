@@ -2,7 +2,7 @@
 
 // Inline promotions control for /dashboard/team rows. Lets an admin grant,
 // extend, or revoke the onboarding promos per user:
-//   - NexoClip 7-day live trial  (grant / reset to fresh 7d / end now)
+//   - ChalybClip 7-day live trial  (grant / reset to fresh 7d / end now)
 //   - first-time welcome banner   (reset so it shows again)
 //
 // Same popover pattern as team-grant-tokens.tsx (absolute div, click-outside /
@@ -13,15 +13,15 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/dashboard/store';
 import {
-  grantNexoclipTrial,
-  revokeNexoclipTrial,
+  grantChalybclipTrial,
+  revokeChalybclipTrial,
   resetWelcomeGift,
 } from '@/lib/usage/promo-admin-actions';
 
 interface Props {
   userId: string;
   userName: string;
-  /** Whether the NexoClip trial is currently active (computed server-side). */
+  /** Whether the ChalybClip trial is currently active (computed server-side). */
   trialActive: boolean;
   /** Whole days left on the trial (0 when inactive). */
   trialDaysLeft: number;
@@ -84,7 +84,7 @@ export function TeamPromoControl({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        title="Gestionar promociones (prueba NexoClip · bienvenida)"
+        title="Gestionar promociones (prueba ChalybClip · bienvenida)"
         style={{
           padding: '6px 10px',
           borderRadius: 7,
@@ -131,10 +131,10 @@ export function TeamPromoControl({
             Promociones · {firstName}
           </div>
 
-          {/* NexoClip trial */}
+          {/* ChalybClip trial */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ fontSize: 12, color: 'var(--cc-txt-2)' }}>
-              Prueba NexoClip ·{' '}
+              Prueba ChalybClip ·{' '}
               {trialActive ? (
                 <b style={{ color: 'var(--cc-cyan)' }}>{trialDaysLeft}d restantes</b>
               ) : (
@@ -146,8 +146,8 @@ export function TeamPromoControl({
                 type="button"
                 onClick={() =>
                   run(
-                    grantNexoclipTrial,
-                    `Prueba NexoClip activada (7d) para <b>${firstName}</b>.`,
+                    grantChalybclipTrial,
+                    `Prueba ChalybClip activada (7d) para <b>${firstName}</b>.`,
                   )
                 }
                 disabled={pending}
@@ -160,8 +160,8 @@ export function TeamPromoControl({
                   type="button"
                   onClick={() =>
                     run(
-                      revokeNexoclipTrial,
-                      `Prueba NexoClip terminada para <b>${firstName}</b>.`,
+                      revokeChalybclipTrial,
+                      `Prueba ChalybClip terminada para <b>${firstName}</b>.`,
                     )
                   }
                   disabled={pending}

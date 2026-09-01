@@ -35,7 +35,7 @@ const HIST_LEN = 14;
 //   rev      → SUM(payments.amount_cents)/100 with status='approved'
 //              AND created_at::date = today
 //   streams  → COUNT(DISTINCT user_id) usage_events today
-//              (now labeled "Usuarios hoy" — no NexoClip live-stream
+//              (now labeled "Usuarios hoy" — no ChalybClip live-stream
 //              count available cross-system yet)
 //   queue    → SUM(usage_events.amount) today
 //              (now labeled "Tokens hoy" — no queue/backpressure concept

@@ -1,10 +1,10 @@
 // Engine usage reporting endpoint.
 //
 // POST /api/engines/{slug}/usage
-//   Auth: Bearer engine admin token (e.g. NEXOCLIP_ADMIN_TOKEN).
+//   Auth: Bearer engine admin token (e.g. CHALYBCLIP_ADMIN_TOKEN).
 //         The token identifies WHICH engine is reporting; the URL slug must
 //         match the slug the token belongs to (defense-in-depth so a leaked
-//         NexoStream token can't write usage on NexoClip's behalf).
+//         ChalybStream token can't write usage on ChalybClip's behalf).
 //   Body: {
 //     external_user_id: string,   // Chalyb user id (matches profiles.id)
 //     events: [
@@ -47,8 +47,8 @@ export const runtime = 'nodejs';
 // the bearer tokens each engine integration uses outbound. Adding a new
 // engine = add a row here + the matching env var.
 const ENGINE_BEARER_ENV: Record<string, string> = {
-  nexoclip: 'NEXOCLIP_ADMIN_TOKEN',
-  // nexostream: 'NEXOSTREAM_ADMIN_TOKEN',   // when it ships
+  chalybclip: 'CHALYBCLIP_ADMIN_TOKEN',
+  // chalybstream: 'CHALYBSTREAM_ADMIN_TOKEN',   // when it ships
 };
 
 function constantTimeEqual(a: string, b: string): boolean {

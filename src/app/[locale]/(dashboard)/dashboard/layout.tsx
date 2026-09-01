@@ -65,7 +65,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect('/app');
   }
 
-  const email = session?.user.email ?? 'operator@nexo.ai';
+  const email = session?.user.email ?? 'operator@chalyb.com';
   const meta = session?.user.user_metadata ?? {};
   const fullName =
     (typeof meta.full_name === 'string' && meta.full_name) ||

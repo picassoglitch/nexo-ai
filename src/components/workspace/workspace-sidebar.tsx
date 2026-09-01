@@ -42,9 +42,7 @@ export function WorkspaceSidebar({
     <aside className={`cc-sb${mobileOpen ? ' open' : ''}`}>
       <div className="cc-sb-top">
         <FusionMark size={26} />
-        <div className="cc-wm">
-          Nexo<span> AI</span>
-        </div>
+        <div className="cc-wm">Chalyb</div>
         <span className="cc-env">{tierLabel}</span>
       </div>
 

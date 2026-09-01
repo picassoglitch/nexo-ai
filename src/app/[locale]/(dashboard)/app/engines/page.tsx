@@ -5,8 +5,8 @@ import { CATS, type EngineCategory } from '@/lib/data/types';
 import { getTokenBalance } from '@/lib/usage/tokens';
 import {
   engineIsLiveForUser,
-  isNexoclipTrialActive,
-  isNexoclipGraceActive,
+  isChalybclipTrialActive,
+  isChalybclipGraceActive,
   TIER_CAPS,
   effectiveTier,
   isAdminRole,
@@ -56,10 +56,10 @@ export default async function MyEnginesPage({
   const selectedEngineId = session?.selectedEngineId ?? null;
   const caps = TIER_CAPS[tier];
 
-  // NexoClip trial (7-day) + post-trial grace (bonus tokens) — both let a FREE
-  // user run NexoClip live. Mirror of the home/detail surfaces.
+  // ChalybClip trial (7-day) + post-trial grace (bonus tokens) — both let a FREE
+  // user run ChalybClip live. Mirror of the home/detail surfaces.
   const nowMs = new Date().getTime();
-  const trialActive = isNexoclipTrialActive(session?.nexoclipTrialStartedAt ?? null, nowMs);
+  const trialActive = isChalybclipTrialActive(session?.chalybclipTrialStartedAt ?? null, nowMs);
   // Real token balance for the user — drives the post-trial grace check AND the
   // "Tokens IA" capability card (so it reflects allocation + any bonus, not a
   // hardcoded plan figure).
@@ -69,7 +69,7 @@ export default async function MyEnginesPage({
   const clipBonusTokens = balance && !balance.unlimited ? balance.bonus : 0;
   const graceActive =
     tier === 'FREE' &&
-    isNexoclipGraceActive(session?.nexoclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
+    isChalybclipGraceActive(session?.chalybclipTrialStartedAt ?? null, nowMs, clipBonusTokens);
 
   // Marketing copy is localized in messages (engines.marketing*). Resolve it
   // here so the EngineVM carries plain strings across the RSC boundary.
@@ -141,7 +141,7 @@ export default async function MyEnginesPage({
         ownerLabel: isPlatformOwned
           ? 'Chalyb'
           : engine.ownerDisplayName || engine.ownerEmail?.split('@')[0] || 'Partner',
-        featured: engine.slug === 'nexoclip' && engine.status === 'active',
+        featured: engine.slug === 'chalybclip' && engine.status === 'active',
         canSelectLive: tier === 'PRO' && engine.status === 'active' && meetsTier,
         isSelectedLive: engine.id === selectedEngineId,
       } satisfies EngineVM;
@@ -191,7 +191,7 @@ export default async function MyEnginesPage({
             <div className="flex flex-wrap gap-x-10 gap-y-4">
               {[
                 {
-                  // Real count live right now (includes the NexoClip trial/grace),
+                  // Real count live right now (includes the ChalybClip trial/grace),
                   // not the static plan cap — matches the hero's "N en vivo ahora".
                   k: t('caps.liveEngines'),
                   v: caps.liveEnginesCount === Infinity ? '∞' : String(liveCount),

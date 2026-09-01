@@ -92,7 +92,7 @@ export function EarnWorld() {
             <div className="dot" />
             <div className="dot" />
             <div className="dot" />
-            <div className="dash-url">app.nexo-ai.world/dashboard</div>
+            <div className="dash-url">app.chalyb.com/dashboard</div>
           </div>
           <div className="dash-body">
             <div className="dash-row">
@@ -213,7 +213,7 @@ export function EarnWorld() {
           <h4 dangerouslySetInnerHTML={{ __html: tAcademy.raw('title') as string }} />
           <p>{tAcademy('p')}</p>
         </div>
-        {/* "Nexo Academy" CTA — anchors to the contact section. Academy
+        {/* "Chalyb Academy" CTA — anchors to the contact section. Academy
             doesn't have its own product page yet, the contact form is the
             qualified-lead entry point. */}
         <a

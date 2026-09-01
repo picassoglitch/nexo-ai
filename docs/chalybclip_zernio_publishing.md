@@ -1,7 +1,7 @@
-# NexoClip — Publishing via Zernio (replaces upload-post)
+# ChalybClip — Publishing via Zernio (replaces upload-post)
 
 Build spec for swapping the clip-publishing backend from **upload-post** to
-**Zernio** (`https://zernio.com/api/v1`). Publishing lives in **NexoClip's** repo
+**Zernio** (`https://zernio.com/api/v1`). Publishing lives in **ChalybClip's** repo
 (it renders + posts clips); `nexo-ai` stays vendor-agnostic. This doc is the
 contract + reference implementation.
 
@@ -25,14 +25,14 @@ TikTok/IG apps (likely avoids running your own TikTok Content-Posting audit).
 - Base URL `https://zernio.com/api/v1`; header `Authorization: Bearer sk_…`.
 - Store `ZERNIO_API_KEY` server-side only (never client). One key per
   environment; scope every call by `profileId`. Rotate on leak.
-- SDKs (Node/Python), CLI, and an MCP server exist — use the SDK in NexoClip's
+- SDKs (Node/Python), CLI, and an MCP server exist — use the SDK in ChalybClip's
   backend rather than hand-rolling HTTP.
 
 ---
 
-## 1. Map a NexoClip tenant → a Zernio profile
+## 1. Map a ChalybClip tenant → a Zernio profile
 
-A Zernio **profile** = a container of social accounts = **one NexoClip user**.
+A Zernio **profile** = a container of social accounts = **one ChalybClip user**.
 
 - On first publish-setup for a tenant: `POST /profiles { name, description }` →
   store `profile._id` on the tenant (`tenants.zernio_profile_id`). Idempotent:
@@ -43,7 +43,7 @@ A Zernio **profile** = a container of social accounts = **one NexoClip user**.
 
 ---
 
-## 2. Connect social accounts (white-label, from inside NexoClip)
+## 2. Connect social accounts (white-label, from inside ChalybClip)
 
 Gate on `clipConnectSocials` (read from the SSO tier). FREE users never see the
 connect button.
@@ -54,6 +54,7 @@ connect button.
    `account.connected` webhook (or `GET /accounts?profileId=<id>`).
 
 Notes:
+
 - Platforms: Instagram, TikTok, YouTube, X, Facebook, LinkedIn, Threads,
   Pinterest, Reddit, Snapchat, Telegram, Google Business. **Bluesky** uses an
   app password (collect handle + app password, not OAuth).
@@ -66,7 +67,7 @@ Notes:
 
 ## 3. Publish a clip (video)
 
-Three steps (NexoClip already has the rendered clip on disk/CDN):
+Three steps (ChalybClip already has the rendered clip on disk/CDN):
 
 1. `POST /v1/media/presign` → `{ uploadUrl, publicUrl }`.
 2. `PUT` the rendered clip bytes to `uploadUrl`.
@@ -74,10 +75,12 @@ Three steps (NexoClip already has the rendered clip on disk/CDN):
    ```jsonc
    {
      "content": "caption + #hashtags",
-     "platforms": [{ "platform": "tiktok", "accountId": "acc_…" },
-                   { "platform": "instagram", "accountId": "acc_…" }],
+     "platforms": [
+       { "platform": "tiktok", "accountId": "acc_…" },
+       { "platform": "instagram", "accountId": "acc_…" },
+     ],
      "mediaItems": [{ "type": "video", "url": "<publicUrl>" }],
-     "publishNow": true                 // OR "scheduledFor" + "timezone"
+     "publishNow": true, // OR "scheduledFor" + "timezone"
    }
    ```
    Response: `post._id`, `post.status`, and `post.results[]` with
@@ -85,11 +88,11 @@ Three steps (NexoClip already has the rendered clip on disk/CDN):
 
 ### Per-platform video specs (verified from Zernio docs)
 
-| Platform | Max size | Duration | Format / codec | Resolution / aspect | Caption |
-|---|---|---|---|---|---|
-| **TikTok** | 4 GB | 3 s – 10 min | MP4/MOV/WebM · H.264 | 1080×1920 · 9:16 · 30 fps | 2,200 |
-| **IG Reels** | 300 MB (auto-compresses above) | 3–90 s | MP4/MOV · H.264 | 1080×1920 · 9:16 | 2,200 |
-| **YT Shorts** | 256 GB (channel limits apply) | ≤ 3 min | MP4/MOV/WebM… | 1080×1920 · 9:16 | title 100 / desc 5,000 |
+| Platform      | Max size                       | Duration     | Format / codec       | Resolution / aspect       | Caption                |
+| ------------- | ------------------------------ | ------------ | -------------------- | ------------------------- | ---------------------- |
+| **TikTok**    | 4 GB                           | 3 s – 10 min | MP4/MOV/WebM · H.264 | 1080×1920 · 9:16 · 30 fps | 2,200                  |
+| **IG Reels**  | 300 MB (auto-compresses above) | 3–90 s       | MP4/MOV · H.264      | 1080×1920 · 9:16          | 2,200                  |
+| **YT Shorts** | 256 GB (channel limits apply)  | ≤ 3 min      | MP4/MOV/WebM…        | 1080×1920 · 9:16          | title 100 / desc 5,000 |
 
 **The single render preset that posts to all three:** MP4, **H.264, 1080×1920
 (9:16), ≤ 90 s, ≤ 300 MB, 30 fps, caption ≤ 2,200**. Render the master clip to
@@ -109,7 +112,7 @@ for `daily limit exceeded` errors with a 24 h retry/backoff, and surface a clear
 
 - One-off: `scheduledFor` (ISO) + `timezone` on `POST /posts` → `status:scheduled`.
 - Recurring slots: `POST /queue { profileId, accountIds, time, timezone,
-  daysOfWeek[] }`; assign posts to fill the next open slot. Good for "auto-post
+daysOfWeek[] }`; assign posts to fill the next open slot. Good for "auto-post
   every weekday 9am".
 - Gate scheduling/auto-publish behind `clipAutoPublish` (VIP). PRO = connect +
   manual one-click publish; VIP = + hands-off scheduling.
@@ -123,6 +126,7 @@ Register `POST /webhooks/settings { url, events[] }`. Verify every delivery:
 respond 2xx within 5s (retries w/ backoff, 7 attempts).
 
 Subscribe to:
+
 - `post.published` / `post.failed` / `post.partial` → update clip status + store
   `postUrl`s; surface failures to the user.
 - `account.disconnected` → mark the local account revoked, prompt reconnect,
@@ -136,7 +140,7 @@ Subscribe to:
 - Publishing itself isn't token-metered the way rendering is, but tie the
   connect/publish UI to tier (`clipConnectSocials`) so Free can't incur Zernio
   cost.
-- **Zernio billing is per connected account/month** (first 2 free *org-wide*;
+- **Zernio billing is per connected account/month** (first 2 free _org-wide_;
   then $6 → $3 → $1 graduated). Each user connecting TikTok+IG+YT = 3 billable
   accounts. Track connected-account count as a COGS line; consider a per-tenant
   cap (e.g. PRO ≤ N accounts) and reclaim accounts when a tenant downgrades or
@@ -161,7 +165,7 @@ Subscribe to:
 
 ## 8. Acceptance
 
-- A PRO/VIP tenant connects TikTok/IG/YT from inside NexoClip without leaving the
+- A PRO/VIP tenant connects TikTok/IG/YT from inside ChalybClip without leaving the
   app; `account.connected` arrives; the account shows in their UI.
 - Publishing a clip returns live `postUrl`s; `post.published` webhook fires.
 - VIP can schedule a clip for a future time / recurring slot; PRO cannot.
@@ -171,14 +175,14 @@ Subscribe to:
 
 ---
 
-## 9. NexoClip-side reference — schema & endpoints
+## 9. ChalybClip-side reference — schema & endpoints
 
-What NexoClip owns. Zernio is the upstream; these are NexoClip's own DB tables +
-the routes its frontend calls. All routes resolve `tenant_id` from the NexoClip
+What ChalybClip owns. Zernio is the upstream; these are ChalybClip's own DB tables +
+the routes its frontend calls. All routes resolve `tenant_id` from the ChalybClip
 session and read entitlements (`clipConnectSocials`, `clipAutoPublish`) from the
 SSO `tier` claim.
 
-### DB (NexoClip)
+### DB (ChalybClip)
 
 ```sql
 alter table tenants add column if not exists zernio_profile_id text;  -- one Zernio profile per tenant
@@ -217,16 +221,16 @@ create table clip_publish_targets (
 );
 ```
 
-### NexoClip routes (its backend → Zernio)
+### ChalybClip routes (its backend → Zernio)
 
-| Method | Route | Gate | Does |
-|---|---|---|---|
-| `POST` | `/api/social/profile` | connect | Ensure `zernio_profile_id` (idempotent `POST /profiles`). |
-| `GET`  | `/api/social/accounts` | connect | List the tenant's `social_accounts`. |
-| `POST` | `/api/social/connect` | `clipConnectSocials` | Body `{platform}` → `GET /connect/{platform}?profileId` → return `authUrl`. |
-| `DELETE` | `/api/social/accounts/:id` | connect | Disconnect on Zernio; mark local `revoked`. |
-| `POST` | `/api/clips/:clipId/publish` | `clipConnectSocials` (+ `clipAutoPublish` if `scheduledFor` set) | presign → PUT clip → `POST /posts`; write `clip_publishes` + targets. |
-| `POST` | `/api/webhooks/zernio` | — (HMAC) | Verify `X-Zernio-Signature`, dedup `payload.id`; update publishes (`post.*`) + accounts (`account.disconnected`). |
+| Method   | Route                        | Gate                                                             | Does                                                                                                              |
+| -------- | ---------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `POST`   | `/api/social/profile`        | connect                                                          | Ensure `zernio_profile_id` (idempotent `POST /profiles`).                                                         |
+| `GET`    | `/api/social/accounts`       | connect                                                          | List the tenant's `social_accounts`.                                                                              |
+| `POST`   | `/api/social/connect`        | `clipConnectSocials`                                             | Body `{platform}` → `GET /connect/{platform}?profileId` → return `authUrl`.                                       |
+| `DELETE` | `/api/social/accounts/:id`   | connect                                                          | Disconnect on Zernio; mark local `revoked`.                                                                       |
+| `POST`   | `/api/clips/:clipId/publish` | `clipConnectSocials` (+ `clipAutoPublish` if `scheduledFor` set) | presign → PUT clip → `POST /posts`; write `clip_publishes` + targets.                                             |
+| `POST`   | `/api/webhooks/zernio`       | — (HMAC)                                                         | Verify `X-Zernio-Signature`, dedup `payload.id`; update publishes (`post.*`) + accounts (`account.disconnected`). |
 
 ### Publish handler (pseudocode)
 

@@ -13,9 +13,9 @@ const INTEGRATIONS: Array<{ name: string; detail: string; envKeys: string[][] }>
   { name: 'Mercado Pago', detail: 'pagos · webhooks', envKeys: [['MERCADOPAGO_ACCESS_TOKEN', 'MP_ACCESS_TOKEN']] },
   { name: 'Resend', detail: 'email transaccional', envKeys: [['RESEND_API_KEY']] },
   { name: 'Anthropic (admin)', detail: 'billing/costos Claude', envKeys: [['ANTHROPIC_ADMIN_KEY']] },
-  { name: 'NexoClip', detail: 'engine · SSO + admin API', envKeys: [['NEXOCLIP_ADMIN_TOKEN'], ['NEXOCLIP_SSO_SECRET']] },
-  { name: 'NexoCrypto', detail: 'engine · SSO + admin API', envKeys: [['NEXOCRYPTO_ADMIN_TOKEN'], ['NEXOCRYPTO_SSO_SECRET']] },
-  { name: 'NexoOBS', detail: 'engine · SSO + admin API', envKeys: [['NEXOOBS_ADMIN_TOKEN'], ['NEXOOBS_SSO_SECRET']] },
+  { name: 'ChalybClip', detail: 'engine · SSO + admin API', envKeys: [['CHALYBCLIP_ADMIN_TOKEN'], ['CHALYBCLIP_SSO_SECRET']] },
+  { name: 'ChalybCrypto', detail: 'engine · SSO + admin API', envKeys: [['CHALYBCRYPTO_ADMIN_TOKEN'], ['CHALYBCRYPTO_SSO_SECRET']] },
+  { name: 'ChalybOBS', detail: 'engine · SSO + admin API', envKeys: [['CHALYBOBS_ADMIN_TOKEN'], ['CHALYBOBS_SSO_SECRET']] },
 ];
 
 function isConfigured(envKeys: string[][]): boolean {
