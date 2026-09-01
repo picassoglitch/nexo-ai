@@ -2,8 +2,8 @@
 
 // Dependency-free canvas confetti burst. Mounts a fixed, click-through
 // full-screen canvas, rains ~140 particles under gravity for ~2.4s, then the
-// parent unmounts it. No external lib (gsap is available if a richer effect is
-// ever wanted) — this keeps the bundle untouched.
+// parent unmounts it. No external animation lib — this keeps the bundle
+// untouched.
 
 import { useEffect, useRef } from 'react';
 

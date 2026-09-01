@@ -1,71 +1,39 @@
-'use client';
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import { LogoMark } from './logo-mark';
+import { ACCOUNT, REGISTER, SIGN_IN } from './links';
 
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { FusionLogo } from './fusion-logo';
-import { usePath, type Path } from './use-path';
-
-function scrollToId(id: string) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
-}
-
-export function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const t = useTranslations('nav');
-  const tAccount = useTranslations('auth.account');
-  const { setPath } = usePath();
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, navKey: string | null) => {
-    e.preventDefault();
-    if (navKey && navKey !== 'proof') {
-      setPath(navKey as Path, { scroll: false });
-    }
-    const target =
-      navKey === 'proof'
-        ? 'proof'
-        : navKey === 'client'
-          ? 'client-world'
-          : navKey === 'partner'
-            ? 'partner-world'
-            : navKey === 'earn'
-              ? 'earn-world'
-              : 'contact';
-    // Defer scroll until after React + Next.js has committed the reordered DOM.
-    // rAF alone isn't enough — the URL-driven re-render takes 100-150ms in dev.
-    setTimeout(() => scrollToId(target), 180);
-  };
+// Public site header. Two destinations only — log in, or create an account.
+// No section anchors: the landing is short enough to scroll, and every route
+// off this page is the auth surface.
+export async function LandingNav({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const t = await getTranslations('home.nav');
 
   return (
-    <nav>
-      <div className="logo">
-        <FusionLogo id="navMark" triggerHover />
-        NEXO<span style={{ color: 'var(--path)', transition: 'color .4s' }}>AI</span>
-      </div>
-      <div className="nav-right">
-        <div className="nav-links">
-          <a href="#proof" onClick={(e) => handleNavClick(e, 'proof')}>
-            {t('proof')}
-          </a>
-          <a href="#client-world" onClick={(e) => handleNavClick(e, 'client')}>
-            {t('client')}
-          </a>
-          <a href="#partner-world" onClick={(e) => handleNavClick(e, 'partner')}>
-            {t('partner')}
-          </a>
-          <a href="#earn-world" onClick={(e) => handleNavClick(e, 'earn')}>
-            {t('earn')}
-          </a>
+    <nav className="site-nav">
+      <Link href="/" className="logo" aria-label="Nexo AI">
+        <LogoMark size={26} />
+        <span>
+          NEXO<span className="logo-accent">AI</span>
+        </span>
+      </Link>
+
+      {isAuthenticated ? (
+        <div className="site-nav-actions">
+          <Link href={ACCOUNT} className="btn btn-primary btn-sm">
+            {t('account')}
+          </Link>
         </div>
-        {isAuthenticated ? (
-          <Link href="/dashboard" className="nav-cta">
-            {tAccount('title')}
+      ) : (
+        <div className="site-nav-actions">
+          <Link href={SIGN_IN} className="nav-link">
+            {t('signIn')}
           </Link>
-        ) : (
-          <Link href="/sign-in" className="nav-cta">
-            {t('cta')}
+          <Link href={REGISTER} className="btn btn-primary btn-sm">
+            {t('register')}
           </Link>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }

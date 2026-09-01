@@ -1,62 +1,44 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
-import type { Route } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { FusionLogo } from './fusion-logo';
+import { LogoMark } from './logo-mark';
+import { CONTACT, PRIVACY, REGISTER, SIGN_IN, TERMS } from './links';
 
-export function LandingFooter() {
-  const tFooter = useTranslations('footer');
-  const tNav = useTranslations('nav');
+export async function LandingFooter() {
+  const t = await getTranslations('home.footer');
+  const tNav = await getTranslations('home.nav');
 
   return (
-    <footer>
-      <div className="footer-top">
-        <div className="footer-brand">
+    <footer className="site-footer">
+      <div className="site-footer-inner">
+        <div className="site-footer-brand">
           <div className="logo">
-            <FusionLogo id="footMark" />
-            NEXO
-            <span style={{ color: 'var(--path)', transition: 'color .4s' }}>AI</span>
+            <LogoMark size={24} />
+            <span>
+              NEXO<span className="logo-accent">AI</span>
+            </span>
           </div>
-          <p>{tFooter('brand')}</p>
+          <p>{t('brand')}</p>
         </div>
-        <div className="footer-col">
-          <h6>{tFooter('build')}</h6>
-          <a href="#client-world">{tNav('client')}</a>
-          <a href="#partner-world">{tNav('partner')}</a>
-          <a href="#proof">{tFooter('track')}</a>
-          {/* Dedicated contact form page — separate from the inline section
-              on the landing, useful as a shareable link. */}
-          <Link href={'/contacto' as Route}>{tFooter('contact')}</Link>
+
+        <div className="site-footer-col">
+          <h2>{t('product')}</h2>
+          <Link href={REGISTER}>{tNav('register')}</Link>
+          <Link href={SIGN_IN}>{tNav('signIn')}</Link>
+          {/* Contact + legal are the only non-auth links on the public site:
+              the legal pages are required public URLs for the Google OAuth app
+              and MX consumer law, and contact is the pre-account support path. */}
+          <Link href={CONTACT}>{t('contact')}</Link>
         </div>
-        <div className="footer-col">
-          <h6>{tFooter('earn')}</h6>
-          <a href="#earn-world">{tFooter('bots')}</a>
-          <a href="#earn-world">{tFooter('pricing')}</a>
-          <a href="#contact">{tFooter('signin')}</a>
-          <a href="#earn-world">Nexo Academy</a>
-        </div>
-        <div className="footer-col">
-          <h6>{tFooter('connect')}</h6>
-          <a href="#">Kick</a>
-          <a href="#">Instagram</a>
-          <a href="#">TikTok</a>
-          <a href="#">LinkedIn</a>
+
+        <div className="site-footer-col">
+          <h2>{t('legal')}</h2>
+          <Link href={PRIVACY}>{t('privacy')}</Link>
+          <Link href={TERMS}>{t('terms')}</Link>
         </div>
       </div>
-      <div className="footer-bottom">
-        <p>© 2026 Nexo AI — nexo-ai.world</p>
-        <div className="socials">
-          {/* Real legal pages — required public URLs for OAuth provider apps
-              (Google, Mercado Pago, etc.) and consumer-law compliance in MX.
-              Routes live under /legal/ because the CDN-cached 404 on /terms
-              and /privacy from before the routes existed never cleared even
-              after manual purge — the /legal/ prefix gives them fresh cache
-              keys that Vercel's edge has never seen. */}
-          <Link href={'/legal/privacy' as Route}>{tFooter('privacy')}</Link>
-          <Link href={'/legal/terms' as Route}>{tFooter('terms')}</Link>
-          <a href="#">{tFooter('status')}</a>
-        </div>
+
+      <div className="site-footer-bottom">
+        <p>{t('rights')}</p>
       </div>
     </footer>
   );
