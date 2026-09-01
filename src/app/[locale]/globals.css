@@ -29,6 +29,7 @@
   --bg: #06070b;
   --bg-2: #0b0d14;
   --panel: #101320;
+  --panel-2: #151930;
   --ink: #f4f3ee;
   --ink-dim: #b9b9c4;
   --ink-faint: #6c6d7c;
@@ -64,18 +65,66 @@ a { color: inherit; text-decoration: none; }
 
 @keyframes blink { 50% { opacity: .3; } }
 
+/* ============ MOTION ============
+   Three ingredients, deliberately small: a staggered entrance on the hero,
+   a fade-up as sections scroll in, and hover micro-interactions. Everything
+   uses opacity/transform only, so it stays on the compositor.
+   `--ease` is the same curve throughout — that consistency is most of what
+   makes motion read as designed rather than decorative. */
+:root { --ease: cubic-bezier(.16, 1, .3, 1); }
+
+@keyframes lp-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes lp-drift {
+  0%, 100% { transform: translate3d(-4%, 0, 0) scale(1); }
+  50%      { transform: translate3d(4%, -3%, 0) scale(1.12); }
+}
+
+/* Scroll reveal. <RevealOnScroll/> adds `.is-in`; the <noscript> block on the
+   landing unhides these when JS never runs. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  /* One list for every animated property on a reveal target. `transform` is the
+     reveal itself (slow, staggered); `translate` is the hover lift (quick, no
+     delay). Keeping them on separate properties is what lets both coexist —
+     a second `transition` declaration in a component rule would replace this
+     one entirely and kill the stagger. */
+  transition:
+    opacity .75s var(--ease) calc(var(--i, 0) * 90ms),
+    transform .75s var(--ease) calc(var(--i, 0) * 90ms),
+    translate .3s var(--ease),
+    border-color .3s var(--ease),
+    background-color .3s var(--ease),
+    box-shadow .3s var(--ease);
+}
+[data-reveal].is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Motion off, content on — never leave anything mid-animation. */
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  [data-reveal], .lp-hero > * { opacity: 1 !important; transform: none !important; }
+  .lp-card:hover, .lp-plan:hover { translate: none; }
+  .lp-glow { display: none; }
+}
+
 /* ============ BUTTONS (shared: landing, contact, legal) ============ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 14px 24px; border-radius: 100px; border: 1px solid transparent;
   font-family: var(--font-display); font-size: 15px; font-weight: 600;
   letter-spacing: -0.01em; line-height: 1; cursor: pointer;
-  transition: background .2s, color .2s, border-color .2s, transform .2s;
+  transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease),
+              transform .25s var(--ease), box-shadow .25s var(--ease);
 }
 .btn-primary { background: var(--acid); color: #06070b; }
-.btn-primary:hover { background: #d4ff5f; transform: translateY(-1px); }
+.btn-primary:hover { background: #d4ff5f; transform: translateY(-2px); box-shadow: 0 12px 28px -14px var(--acid); }
+.btn:active { transform: translateY(0) scale(.985); transition-duration: .08s; }
 .btn-ghost { border-color: var(--line-bright); color: var(--ink); background: transparent; }
-.btn-ghost:hover { border-color: var(--ink); background: rgba(255, 255, 255, 0.04); }
+.btn-ghost:hover { border-color: var(--ink); background: rgba(255, 255, 255, 0.05); transform: translateY(-2px); }
 .btn-sm { padding: 10px 18px; font-size: 14px; }
 .btn-block { width: 100%; }
 
@@ -106,10 +155,28 @@ a { color: inherit; text-decoration: none; }
 /* ============ LANDING ============ */
 .lp { position: relative; }
 .lp-hero {
+  position: relative;
   max-width: var(--shell); margin: 0 auto;
   padding: clamp(56px, 11vh, 104px) 24px clamp(48px, 8vh, 80px);
   text-align: center;
 }
+/* Soft brand-coloured light behind the headline. Low alpha and a 22s drift —
+   present enough to feel alive, slow enough that you never catch it moving. */
+.lp-glow {
+  position: absolute; left: 50%; top: -10%;
+  width: min(900px, 120%); aspect-ratio: 1; margin-left: min(-450px, -60%);
+  border-radius: 50%; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(198, 242, 78, 0.13) 0%, rgba(91, 61, 245, 0.10) 35%, transparent 68%);
+  filter: blur(30px);
+  animation: lp-drift 22s ease-in-out infinite;
+}
+/* Entrance: each hero element rises 90ms after the one above it. */
+.lp-hero > *:not(.lp-glow) { position: relative; z-index: 1; opacity: 0; animation: lp-rise .85s var(--ease) forwards; }
+.lp-hero > .lp-badge   { animation-delay: .05s; }
+.lp-hero > h1          { animation-delay: .14s; }
+.lp-hero > .lp-lead    { animation-delay: .23s; }
+.lp-hero > .lp-actions { animation-delay: .32s; }
+.lp-hero > .lp-note    { animation-delay: .41s; }
 .lp-badge {
   display: inline-block; font-family: var(--font-mono); font-size: 11px;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--acid);
@@ -144,9 +211,10 @@ a { color: inherit; text-decoration: none; }
   display: flex; flex-direction: column; gap: 10px;
   padding: 26px 24px; border: 1px solid var(--line); border-radius: 16px;
   background: var(--panel);
-  transition: border-color .2s, transform .2s;
 }
-.lp-card:hover { border-color: var(--acid); transform: translateY(-2px); }
+.lp-card:hover { border-color: var(--acid); translate: 0 -4px; background-color: var(--panel-2); }
+.lp-arrow { display: inline-block; transition: transform .3s var(--ease); }
+.lp-card:hover .lp-arrow { transform: translateX(5px); }
 .lp-card h3 { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
 .lp-card p { font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); flex: 1; }
 .lp-card-go { font-size: 14px; font-weight: 600; color: var(--acid); }
@@ -159,6 +227,8 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-mono); font-size: 16px; font-weight: 700;
   margin-bottom: 14px;
 }
+.lp-step-n { transition: transform .5s var(--ease) calc(var(--i, 0) * 90ms + 120ms); transform: scale(.6); }
+[data-reveal].is-in .lp-step-n { transform: scale(1); }
 .lp-step h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
 .lp-step p { font-size: 14.5px; line-height: 1.6; color: var(--ink-dim); max-width: 32ch; margin: 0 auto; }
 
@@ -167,7 +237,9 @@ a { color: inherit; text-decoration: none; }
   padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px;
   background: var(--panel);
 }
-.lp-plan-featured { border-color: var(--acid); }
+.lp-plan:hover { translate: 0 -4px; border-color: var(--line-bright); }
+.lp-plan-featured { border-color: var(--acid); box-shadow: 0 24px 60px -40px var(--acid); }
+.lp-plan-featured:hover { border-color: var(--acid); }
 .lp-plan-badge {
   position: absolute; top: -11px; left: 24px;
   background: var(--acid); color: #06070b; border-radius: 100px;
