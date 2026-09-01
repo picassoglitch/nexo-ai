@@ -1,0 +1,8 @@
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+# Real values live here — never commit. terraform.tfvars.example is the template.
+terraform.tfvars
+*.auto.tfvars

@@ -1,0 +1,28 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+
+project_id = "chalyb-prod"
+region     = "us-central1"
+domain     = "chalyb.com"
+
+# From `gcloud billing accounts list`. Leave empty to skip the budget alert,
+# but set it if you can — video egress is the one line item here that can run
+# away unnoticed.
+billing_account   = "" # e.g. "01ABCD-2345EF-6789GH"
+budget_amount_usd = 50
+
+budget_alert_emails = ["picassoglitch@gmail.com"]
+
+# Rendered clips are re-derivable; keeping them forever is pure cost.
+media_retention_days = 30
+
+# Leave false and put Cloudflare in front of the run.app URLs unless the
+# domain is already verified for this account in Google Search Console.
+enable_domain_mappings = false
+
+# Uncomment once real images are in Artifact Registry. Until then every engine
+# runs Google's hello container, which is enough to prove the wiring works.
+# engines = {
+#   chalybclip   = { image = "us-central1-docker.pkg.dev/chalyb-prod/engines/chalybclip:v1", cpu = "2", memory = "1Gi" }
+#   chalybobs    = {}
+#   chalybcrypto = {}
+# }
