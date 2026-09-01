@@ -69,9 +69,12 @@ variable "engines" {
     gcloud/CI) are not reverted by the next `terraform apply`.
   EOT
   type = map(object({
-    image         = optional(string, "us-docker.pkg.dev/cloudrun/container/hello")
-    cpu           = optional(string, "1")
-    memory        = optional(string, "512Mi")
+    image = optional(string, "us-docker.pkg.dev/cloudrun/container/hello")
+    cpu   = optional(string, "1")
+    # 512Mi is not enough for ChalybClip: the image carries ffmpeg, OpenCV and
+    # a full Playwright Chromium, and undersizing shows up as OOM kills rather
+    # than a clear error. Override per engine for the lighter ones.
+    memory        = optional(string, "2Gi")
     max_instances = optional(number, 4)
     # Public because these serve a web UI that signed-in users are redirected
     # into from the hub's /auth/launch/<slug>.
@@ -98,6 +101,17 @@ variable "enable_domain_mappings" {
     to be verified in Google Search Console for the calling account first, and
     domain mapping is not available in every region. Leave false when putting
     Cloudflare in front of the run.app URLs instead, which is the simpler path.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "enable_drive_poll" {
+  description = <<-EOT
+    Un-pause the Drive poll schedule. Left false because `nexoclip drive poll`
+    without --source-dir builds the real GoogleDriveClient, which is not
+    implemented yet — the command exits 1. Running it every minute before then
+    just produces 1,440 failures a day. Flip once the client ships.
   EOT
   type        = bool
   default     = false

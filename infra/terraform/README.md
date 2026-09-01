@@ -16,19 +16,46 @@ this is the executable half.
 
 ## What it creates
 
-|                              |                                                                               |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| Cloud Run service per engine | `chalybclip`, `chalybobs`, `chalybcrypto` — scale to zero, so idle cost is $0 |
-| Cloud Run Job                | the ffmpeg render worker, 2 vCPU, 1 h timeout                                 |
-| Cloud Scheduler              | the Drive change poll, every minute, OIDC-authenticated                       |
-| Cloud Storage                | one media bucket, private, with lifecycle pruning                             |
-| Artifact Registry            | one Docker repo with a cleanup policy                                         |
-| Secret Manager               | empty secret containers — **values are never in Terraform**                   |
-| Service accounts             | one per engine plus one each for the worker and scheduler                     |
-| Budget alert                 | at 50 / 90 / 100% of the monthly budget                                       |
+|                              |                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| Cloud Run service per engine | `chalybclip`, `chalybobs`, `chalybcrypto` — scale to zero, so idle cost is $0      |
+| Cloud Run service            | `chalybclip-worker` — the pipeline worker, internal-only, **CPU always allocated** |
+| Cloud Run Job                | `drive-poll`, running `nexoclip drive poll`                                        |
+| Cloud Scheduler              | triggers the poll job every minute — **paused by default**, see below              |
+| Cloud Storage                | one media bucket, private, with lifecycle pruning                                  |
+| Artifact Registry            | one Docker repo with a cleanup policy                                              |
+| Secret Manager               | empty secret containers — **values are never in Terraform**                        |
+| Service accounts             | one per engine plus one each for the worker and scheduler                          |
+| Budget alert                 | at 50 / 90 / 100% of the monthly budget                                            |
 
 Each engine gets its own service account, granted accessor on only its own
 secrets, so a compromise of one engine does not expose another's.
+
+## Shapes verified against the application
+
+`worker.tf` was corrected after reading picassoglitch/nexoclip. Both halves
+were originally inverted, and both would have failed silently rather than
+loudly:
+
+- **The pipeline worker is a service, not a job.** `nexoclip worker` serves
+  the kickoff/poll HTTP contract `ModalJobDispatcher` already speaks. It runs
+  with `cpu_idle = false`, which is load-bearing: the worker answers the
+  kickoff POST immediately and does the work in an asyncio task, so with
+  Cloud Run's default throttling CPU is withdrawn the instant that response is
+  sent and the pipeline freezes mid-job with no error at all.
+- **The Drive poll is a job, not an endpoint.** `nexoclip drive poll` is a
+  Typer command with no route in front of it.
+
+The poll's **schedule is paused** (`enable_drive_poll = false`). Without
+`--source-dir` that command builds the real `GoogleDriveClient`, which is not
+implemented yet and exits 1 — a one-minute schedule would produce 1,440
+failures a day and bury real alerts. Flip the variable once the client ships.
+
+Engine secret env vars are named for what the engine reads, not what the hub
+calls them: `DATABASE_URL`, `NEXO_AI_ADMIN_TOKEN` and `NEXO_AI_SSO_SECRET` all
+carry an explicit `validation_alias` in `nexoclip/settings.py`, so they take
+**no** `NEXOCLIP_` prefix. Only the values need to match the hub's
+`CHALYBCLIP_*` vars.
 
 ## Bootstrap
 

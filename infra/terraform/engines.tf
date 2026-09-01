@@ -14,18 +14,36 @@ module "engine" {
 
   media_bucket = google_storage_bucket.media.name
 
-  env = {
-    MEDIA_BUCKET = google_storage_bucket.media.name
-    ENGINE_SLUG  = each.key
-    PUBLIC_URL   = "https://${each.key}.${var.domain}"
-  }
+  env = merge(
+    {
+      NEXOCLIP_OBJECT_STORAGE_BUCKET = google_storage_bucket.media.name
+      NEXOCLIP_DEFAULT_OUTPUT_DIR    = "/tmp/out"
+      ENGINE_SLUG                    = each.key
+      PUBLIC_URL                     = "https://${each.key}.${var.domain}"
+    },
+    # ChalybClip dispatches pipeline runs to its worker over the kickoff/poll
+    # contract ModalJobDispatcher already speaks — the worker is just another
+    # host answering it, so no dispatcher code changes.
+    each.key != "chalybclip" ? {} : {
+      NEXOCLIP_MODAL_PIPELINE_ENDPOINT_URL = google_cloud_run_v2_service.worker.uri
+    },
+  )
 
-  # Names must match what the engine reads. The hub's side of these is in
-  # .env.local.example (CHALYB<SLUG>_ADMIN_TOKEN / _SSO_SECRET).
+  # Names are what the ENGINE reads, which is not what the hub calls them.
+  # Verified against picassoglitch/nexoclip nexoclip/settings.py: all three
+  # carry an explicit validation_alias, so they are read WITHOUT the
+  # NEXOCLIP_ prefix that the rest of that Settings class uses.
+  #
+  # Only the VALUES have to match the hub's CHALYB<SLUG>_ADMIN_TOKEN /
+  # CHALYB<SLUG>_SSO_SECRET — the names differ by side, which is fine.
+  #
+  # These still say NEXO_AI because the engine repo has not been rebranded;
+  # only the hub has. Renaming the aliases is a follow-up, and both sides
+  # must move in the same deploy.
   secret_env = {
-    CHALYB_ADMIN_TOKEN = google_secret_manager_secret.engine["${each.key}-admin-token"].secret_id
-    CHALYB_SSO_SECRET  = google_secret_manager_secret.engine["${each.key}-sso-secret"].secret_id
-    DATABASE_URL       = google_secret_manager_secret.engine["${each.key}-database-url"].secret_id
+    NEXO_AI_ADMIN_TOKEN = google_secret_manager_secret.engine["${each.key}-admin-token"].secret_id
+    NEXO_AI_SSO_SECRET  = google_secret_manager_secret.engine["${each.key}-sso-secret"].secret_id
+    DATABASE_URL        = google_secret_manager_secret.engine["${each.key}-database-url"].secret_id
   }
 }
 
