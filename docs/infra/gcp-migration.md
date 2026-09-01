@@ -53,12 +53,17 @@ Split by workload shape, because the pricing models differ enormously.
 - **ChalybClip FastAPI, ChalybOBS web, ChalybCrypto** → **Cloud Run**,
   `--min-instances=0`. Scales to zero, so idle cost is $0. The default
   concurrency of 80 is fine here.
-- **ffmpeg render worker** → **Cloud Run Jobs**, triggered via Cloud Tasks or
-  Pub/Sub. Per-second billing, no idle VM, and a job can run far longer than a
-  request. Do not run renders inside the API service.
-- **Drive change poll (~60 s)** → **Cloud Scheduler** hitting an authenticated
-  Cloud Run endpoint. One-minute granularity is exactly the SLA in
-  `docs/chalybclip_drive_ingest.md`. The first 3 jobs/month are free.
+- **ffmpeg render worker** → a second **Cloud Run service** running
+  `nexoclip worker`, with CPU always allocated. Corrected after reading the
+  application: the worker speaks a kickoff/poll HTTP contract, so it is a
+  service, not a batch job. CPU-always is not tuning — the work happens in an
+  asyncio task after the kickoff response, which Cloud Run's default
+  throttling would freeze. Renders still do not run in the API service.
+- **Drive change poll (~60 s)** → **Cloud Scheduler** triggering a **Cloud Run
+  Job** that runs `nexoclip drive poll`. It is a CLI command, not an endpoint.
+  One-minute granularity is exactly the SLA in
+  `docs/chalybclip_drive_ingest.md`. Shipped paused: the real
+  `GoogleDriveClient` is not implemented yet and the command exits 1.
 - **VODs and rendered clips** → **Cloud Storage** with a lifecycle rule.
   Replaces local disk. Delete rendered clips after N days — they're
   re-derivable, and storage you never prune is the cost that creeps.
