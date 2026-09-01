@@ -18,7 +18,7 @@ import {
   type EngineVM,
 } from '@/components/workspace/engines/engine-config';
 
-// Browser tab → "Mis engines · Nexo AI" (template in [locale]/layout.tsx).
+// Browser tab → "Mis engines · Chalyb" (template in [locale]/layout.tsx).
 export const metadata = { title: 'Mis engines' };
 
 // PARTNER ranks alongside PRO for tier-required gates (same level of access).
@@ -139,7 +139,7 @@ export default async function MyEnginesPage({
         isPlatformOwned,
         isOwnedByMe,
         ownerLabel: isPlatformOwned
-          ? 'Nexo AI'
+          ? 'Chalyb'
           : engine.ownerDisplayName || engine.ownerEmail?.split('@')[0] || 'Partner',
         featured: engine.slug === 'nexoclip' && engine.status === 'active',
         canSelectLive: tier === 'PRO' && engine.status === 'active' && meetsTier,

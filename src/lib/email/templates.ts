@@ -58,7 +58,7 @@ function wrap(opts: { title: string; preview: string; body: string }): string {
             <!-- Footer -->
             <tr>
               <td style="padding:24px 28px 40px;font-size:11.5px;color:${INK_FAINT};line-height:1.55;font-family:'SF Mono',Menlo,Consolas,monospace;">
-                Nexo AI · tu equipo de AI que trabaja solo · <a href="https://nexo-ai.world" style="color:${INK_FAINT};text-decoration:underline;">nexo-ai.world</a>
+                Chalyb · tu equipo de AI que trabaja solo · <a href="https://nexo-ai.world" style="color:${INK_FAINT};text-decoration:underline;">nexo-ai.world</a>
                 <br />
                 Si este correo te llegó por error, ignóralo — no tienes que hacer nada.
               </td>
@@ -122,7 +122,7 @@ export function contactInboxTemplate(opts: {
     </p>
   `;
 
-  const text = `Nuevo mensaje de contacto · Nexo AI
+  const text = `Nuevo mensaje de contacto · Chalyb
 
 De: ${opts.name} <${opts.email}>
 Asunto: ${opts.subject}
@@ -186,11 +186,11 @@ ${opts.message}
 
 Te respondemos en menos de 24 horas hábiles.
 
-— Nexo AI · nexo-ai.world`;
+— Chalyb · nexo-ai.world`;
 
   return {
     html: wrap({
-      title: 'Recibimos tu mensaje · Nexo AI',
+      title: 'Recibimos tu mensaje · Chalyb',
       preview: `Tu mensaje "${opts.subject}" llegó. Respondemos en menos de 24h.`,
       body,
     }),
@@ -261,11 +261,11 @@ ID de pago: ${opts.paymentId}
 
 Ver mi cuenta: ${opts.appUrl}/app/billing
 
-— Nexo AI`;
+— Chalyb`;
 
   return {
     html: wrap({
-      title: `Tu plan ${opts.tier} está activo · Nexo AI`,
+      title: `Tu plan ${opts.tier} está activo · Chalyb`,
       preview: `Mercado Pago confirmó tu pago. Plan ${opts.tier} activado.`,
       body,
     }),

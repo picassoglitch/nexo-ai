@@ -322,7 +322,7 @@ export async function POST(req: Request) {
       });
       void sendEmail({
         to: userEmail,
-        subject: `Tu plan ${TIER_CAPS[confirmedTier].label} está activo · Nexo AI`,
+        subject: `Tu plan ${TIER_CAPS[confirmedTier].label} está activo · Chalyb`,
         html: tmpl.html,
         text: tmpl.text,
       }).catch((err) => {

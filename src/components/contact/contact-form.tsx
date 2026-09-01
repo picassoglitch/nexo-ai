@@ -145,7 +145,7 @@ export function ContactForm({ pane = 'client' }: Props = {}) {
           minLength={10}
           maxLength={5000}
           rows={6}
-          placeholder="Cuéntanos qué buscas resolver con Nexo AI."
+          placeholder="Cuéntanos qué buscas resolver con Chalyb."
         />
       </div>
 

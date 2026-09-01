@@ -7,7 +7,7 @@ import { LegalPage } from '@/components/legal/legal-page';
 export const metadata = {
   title: 'Aviso de privacidad',
   description:
-    'Cómo Nexo AI recopila, usa y protege tus datos personales. Cumplimiento con LFPDPPP (México).',
+    'Cómo Chalyb recopila, usa y protege tus datos personales. Cumplimiento con LFPDPPP (México).',
 };
 
 // force-dynamic so Vercel's CDN never serves a stale 404 from before the
@@ -53,7 +53,7 @@ export default async function PrivacyPage({
       </div>
 
       <p>
-        Este aviso de privacidad describe cómo <strong>Nexo AI</strong> recopila,
+        Este aviso de privacidad describe cómo <strong>Chalyb</strong> recopila,
         usa, almacena y protege tus datos personales, en cumplimiento con la{' '}
         <strong>Ley Federal de Protección de Datos Personales en Posesión de los
         Particulares (LFPDPPP)</strong>, su Reglamento, y los Lineamientos del INAI.
@@ -61,7 +61,7 @@ export default async function PrivacyPage({
 
       <h2 id="responsable">1. Responsable del tratamiento</h2>
       <p>
-        <strong>Nexo AI</strong>, con sede operativa en México, es el responsable
+        <strong>Chalyb</strong>, con sede operativa en México, es el responsable
         del tratamiento de tus datos personales. Para ejercer cualquier derecho o
         hacer preguntas sobre este aviso, escríbenos a través de{' '}
         <Link href={'/contacto' as Route}>/contacto</Link>.
@@ -181,11 +181,11 @@ export default async function PrivacyPage({
 
       <h2 id="engines">5. Datos enviados a los Engines</h2>
       <p>
-        Cuando activas un Engine, Nexo AI crea una cuenta para ti en él. Le
+        Cuando activas un Engine, Chalyb crea una cuenta para ti en él. Le
         enviamos:
       </p>
       <ul>
-        <li>Tu user_id de Nexo AI (identificador opaco).</li>
+        <li>Tu user_id de Chalyb (identificador opaco).</li>
         <li>Tu correo electrónico.</li>
         <li>Tu nombre de display.</li>
         <li>Tu tier actual (free / pro / vip) — para que el engine sepa qué funciones habilitarte.</li>
@@ -278,7 +278,7 @@ export default async function PrivacyPage({
       <h2 id="transferencias">9. Transferencias internacionales</h2>
       <p>
         Algunos de nuestros proveedores (Supabase, Vercel, Resend, Anthropic)
-        operan desde Estados Unidos. Al usar Nexo AI <strong>autorizas las
+        operan desde Estados Unidos. Al usar Chalyb <strong>autorizas las
         transferencias internacionales necesarias</strong> para que el servicio
         funcione.
       </p>
@@ -310,7 +310,7 @@ export default async function PrivacyPage({
 
       <h2 id="menores">11. Menores de edad</h2>
       <p>
-        Nexo AI no está dirigido a menores de 18 años. No recopilamos
+        Chalyb no está dirigido a menores de 18 años. No recopilamos
         deliberadamente datos de menores. Si descubrimos que tenemos datos de un
         menor sin autorización paterna o tutorial, los borramos inmediatamente.
         Si eres padre/madre/tutor y crees que tu menor a cargo nos proporcionó

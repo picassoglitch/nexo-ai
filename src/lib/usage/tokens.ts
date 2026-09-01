@@ -131,7 +131,7 @@ export async function isOverQuota(userId: string): Promise<boolean> {
 export interface RecordedEvent {
   /** Engine slug calling in (e.g. 'nexoclip'). */
   engineSlug: string;
-  /** Nexo AI user id (NexoClip stores this as tenant.external_user_id). */
+  /** Chalyb user id (NexoClip stores this as tenant.external_user_id). */
   userId: string;
   /** Free-text kind discriminator. Common values: 'llm.tokens',
    *  'transcription.seconds', 'storage.mb', 'publish.count'. The platform
@@ -152,7 +152,7 @@ export interface RecordedEvent {
   metadata?: Record<string, unknown>;
   /** Optional: underlying provider that incurred the cost
    *  ('anthropic' | 'openai' | 'assemblyai' | ...). Stored for per-provider
-   *  rollups; engines are free to add new values without a Nexo AI deploy. */
+   *  rollups; engines are free to add new values without a Chalyb deploy. */
   provider?: string;
   /** Optional: real provider cost in USD micros (1e-6 USD). $0.111 → 111000.
    *  Stored but NOT yet deducted from the token balance — quota math still

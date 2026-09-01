@@ -1,7 +1,7 @@
 // GET /auth/launch/<slug>
 //
 // Cross-app SSO launcher. Lets one engine link to another while keeping the
-// session: the user is already authenticated at Nexo-AI (cookie on this
+// session: the user is already authenticated at Chalyb (cookie on this
 // domain), so this route mints the engine's signed SSO token and 302s
 // straight into its dashboard — no landing/login bounce.
 //
@@ -47,7 +47,7 @@ export async function GET(
   // signed-in user passes through. The platform onboarding happens silently
   // below (trial claim + provisioning) and NexoClip enforces its own
   // per-tier perks — the visitor goes straight from sign-up to
-  // NexoClip's /dashboard/start without ever seeing the Nexo AI dashboard.
+  // NexoClip's /dashboard/start without ever seeing the Chalyb dashboard.
   const tier = effectiveTier(session.role, session.tier);
   if (slug !== NEXOCLIP_TRIAL_SLUG && tier !== 'VIP') {
     return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));

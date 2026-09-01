@@ -6,7 +6,7 @@ import { join } from 'node:path';
 // `metadata.icons` we'd set in generateMetadata, so the only way to give the
 // NexoClip workspace its own favicon is this code-generated icon route, which
 // receives the dynamic `slug` and branches on it. Every other engine keeps the
-// global Nexo AI mark so nothing else regresses.
+// global Chalyb mark so nothing else regresses.
 
 export const size = { width: 64, height: 64 };
 export const contentType = 'image/png';

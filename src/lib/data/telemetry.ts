@@ -241,8 +241,8 @@ export async function tickRail() {
 // real event rather than the same one. Wraps around when exhausted.
 
 const FALLBACK_ACTS: Array<[EngineStateCode, string, string, string]> = [
-  ['g', 'Plataforma lista', 'Nexo AI', 'cero usage hoy'],
-  ['c', 'Esperando primera llamada', 'Nexo AI', 'engines listos'],
+  ['g', 'Plataforma lista', 'Chalyb', 'cero usage hoy'],
+  ['c', 'Esperando primera llamada', 'Chalyb', 'engines listos'],
 ];
 
 let recentEventsCache: ActivityEvent[] = [];
@@ -280,7 +280,7 @@ async function refreshRecentEvents(): Promise<void> {
       id: `audit-${row.id}`,
       kind: action.includes('revoke') || action.includes('failed') ? 'r' : 'g',
       title,
-      engine: 'Nexo AI',
+      engine: 'Chalyb',
       meta: (row.target_email as string | null) ?? (row.actor_email as string | null) ?? '',
       time: at.slice(11, 16),
     });

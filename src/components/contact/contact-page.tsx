@@ -74,7 +74,7 @@ function ContactInner({ isAuthenticated }: { isAuthenticated: boolean }) {
                 maxWidth: '56ch',
               }}
             >
-              ¿Quieres una demo, integrar algo, sumarte como partner o saber cómo Nexo AI puede
+              ¿Quieres una demo, integrar algo, sumarte como partner o saber cómo Chalyb puede
               poner orden en tu operación? Escríbenos y te respondemos en menos de 24 horas hábiles.
             </p>
           </div>

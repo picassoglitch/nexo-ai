@@ -25,7 +25,7 @@ type SubscriptionSource =
 /** Create/reactivate a single engine subscription for a user.
  *
  *  Two-step:
- *    1. Upsert the Nexo AI side row in engine_subscriptions.
+ *    1. Upsert the Chalyb side row in engine_subscriptions.
  *    2. If the engine `requires_provisioning`, call its integration client to
  *       create the user inside the external engine, then update the row with
  *       external_user_id + external_credentials.

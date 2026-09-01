@@ -8,12 +8,12 @@ in the subject too (rarely useful, but legal).
 
 | Template | Subject |
 |---|---|
-| Confirm signup | `Confirma tu cuenta en Nexo AI` |
-| Invite user | `Te invitaron a Nexo AI` |
-| Magic link | `Tu link de acceso a Nexo AI` |
-| Change email address | `Confirma tu nuevo correo en Nexo AI` |
-| Reset password | `Restablece tu contraseña en Nexo AI` |
-| Reauthentication | `Tu código de verificación de Nexo AI` |
+| Confirm signup | `Confirma tu cuenta en Chalyb` |
+| Invite user | `Te invitaron a Chalyb` |
+| Magic link | `Tu link de acceso a Chalyb` |
+| Change email address | `Confirma tu nuevo correo en Chalyb` |
+| Reset password | `Restablece tu contraseña en Chalyb` |
+| Reauthentication | `Tu código de verificación de Chalyb` |
 
 The subject ↔ HTML body pairing is what the recipient sees first in their
 inbox preview. The HTML templates assume these subjects and don't repeat

@@ -1,4 +1,4 @@
-# Nexo AI
+# Chalyb
 
 A technology team and AI automation platform. HQ in Mexico City.
 

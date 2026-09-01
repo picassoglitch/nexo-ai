@@ -78,7 +78,7 @@ export function WelcomeGiftBanner({ claimed }: { claimed: boolean }) {
             marginBottom: 8,
           }}
         >
-          🎁 Bienvenido a Nexo AI
+          🎁 Bienvenido a Chalyb
         </div>
         <div
           style={{

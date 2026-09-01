@@ -78,7 +78,7 @@ export async function createTokenPackCheckout(
       items: [
         {
           id: `pack-${pack.id}`,
-          title: `Nexo AI · ${pack.label}`,
+          title: `Chalyb · ${pack.label}`,
           quantity: 1,
           unit_price: pack.amountCents / 100,
           currency_id: 'MXN',
@@ -90,7 +90,7 @@ export async function createTokenPackCheckout(
         failure: `${appUrl}/app/usage?status=failure`,
         pending: `${appUrl}/app/usage?status=pending`,
       },
-      statement_descriptor: 'NEXO AI TOKENS',
+      statement_descriptor: 'CHALYB TOKENS',
       metadata: {
         user_id: session.user.id,
         pack_id: pack.id,

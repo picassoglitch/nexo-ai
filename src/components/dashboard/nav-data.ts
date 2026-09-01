@@ -35,7 +35,7 @@ export const NAV: NavGroup[] = [
   },
   // "Contenido" group removed — clips/publishing/uploads are NexoClip-internal
   // features, not platform-admin concerns. Same reason "Clients" got removed
-  // from Organización: Nexo AI is a SaaS, not an agency with client engagements.
+  // from Organización: Chalyb is a SaaS, not an agency with client engagements.
   {
     grp: 'Inteligencia',
     items: [

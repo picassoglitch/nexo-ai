@@ -1,4 +1,4 @@
-// REAL Nexo AI brand mark — copy-verbatim from the prototype.
+// REAL Chalyb brand mark — copy-verbatim from the prototype.
 // N-path stroked in green + 6 node circles (4 corners green, 2 inner cyan).
 // Do NOT redraw this. Do NOT add/remove circles. This IS the brand.
 
@@ -8,7 +8,7 @@ export function FusionMark({ size = 26, className }: { size?: number; className?
       viewBox="0 0 200 200"
       width={size}
       height={size}
-      aria-label="Nexo AI"
+      aria-label="Chalyb"
       className={className}
     >
       <path

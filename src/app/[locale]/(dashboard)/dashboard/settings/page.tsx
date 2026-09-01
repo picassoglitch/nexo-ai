@@ -47,7 +47,7 @@ export default async function SettingsPage({
         <div className="cc-mod-form">
           <div className="cc-mod-field">
             <label>Nombre de la org</label>
-            <input type="text" defaultValue="Nexo AI (demo)" disabled />
+            <input type="text" defaultValue="Chalyb (demo)" disabled />
           </div>
           <div className="cc-mod-field">
             <label>Idioma principal</label>

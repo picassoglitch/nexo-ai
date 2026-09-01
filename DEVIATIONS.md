@@ -1,6 +1,6 @@
 # Command Center — Deviations from spec / prototype
 
-Honest engineering log for the Nexo AI Command Center build at `/dashboard`. One line per deviation: what changed, why, and whether it needs your decision (`⚠ NEEDS ALDO`).
+Honest engineering log for the Chalyb Command Center build at `/dashboard`. One line per deviation: what changed, why, and whether it needs your decision (`⚠ NEEDS ALDO`).
 
 ---
 

@@ -91,9 +91,9 @@ export interface Engine {
   externalUrl: string | null;
   /** How the "Open engine" CTA opens the thing. */
   integrationMode: EngineIntegrationMode;
-  /** Base URL for Nexo AI's admin-side API calls into this engine. */
+  /** Base URL for Chalyb's admin-side API calls into this engine. */
   adminApiBase: string | null;
-  /** When true, Nexo AI provisions a tenant in the engine on first activation. */
+  /** When true, Chalyb provisions a tenant in the engine on first activation. */
   requiresProvisioning: boolean;
   /** Partner who owns this engine (null = platform-owned default). The
    *  marketplace shows a "by Partner X" attribution chip on owned engines,

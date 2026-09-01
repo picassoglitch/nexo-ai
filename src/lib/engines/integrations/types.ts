@@ -7,7 +7,7 @@ import type { SubscriptionTier } from '@/lib/auth/session';
 import type { Engine } from '@/lib/data/types';
 
 export interface ProvisionInput {
-  /** Nexo AI user id — stable, primary key for cross-system identification. */
+  /** Chalyb user id — stable, primary key for cross-system identification. */
   userId: string;
   /** User's email — engines typically need this for their own user record. */
   email: string;
@@ -83,7 +83,7 @@ export interface EngineIntegration {
    *  rather than creating a duplicate. */
   provision(input: ProvisionInput): Promise<ProvisionResult>;
 
-  /** Called when the user clicks "Abrir engine →". Returns the URL Nexo AI
+  /** Called when the user clicks "Abrir engine →". Returns the URL Chalyb
    *  should redirect/window.open to, including any signed auth token. */
   buildLaunchUrl(input: LaunchTokenInput): Promise<LaunchTokenResult>;
 

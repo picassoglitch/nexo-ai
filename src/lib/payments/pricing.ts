@@ -23,7 +23,7 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPrice | null> = {
     // Round 4-digit pricing is the SaaS convention here, not strict USD conversion.
     amountCents: 74900,
     currency: 'MXN',
-    description: 'Nexo AI · Plan Pro · 1 sistema en vivo',
+    description: 'Chalyb · Plan Pro · 1 sistema en vivo',
   },
   // PARTNER is admin-granted, not sold via checkout. Keep at null so the
   // MP preference builder skips it and any /subscription page knows there's
@@ -33,7 +33,7 @@ export const TIER_PRICING: Record<SubscriptionTier, TierPrice | null> = {
     // MXN $2,499.00 = 249,900 centavos.
     amountCents: 249900,
     currency: 'MXN',
-    description: 'Nexo AI · Plan VIP · todos los sistemas en vivo',
+    description: 'Chalyb · Plan VIP · todos los sistemas en vivo',
   },
 };
 

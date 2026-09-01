@@ -66,7 +66,7 @@ export async function pauseOtherActiveEngines(
     const externalUserId = (row.external_user_id as string | null) ?? '';
 
     // Step 1: flip our DB row to paused FIRST so even if the outbound call
-    // fails, the rest of Nexo AI (workspace UI, future quota checks) sees
+    // fails, the rest of Chalyb (workspace UI, future quota checks) sees
     // the user as not-active on this engine.
     await admin
       .from('engine_subscriptions')

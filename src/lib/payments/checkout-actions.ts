@@ -92,7 +92,7 @@ export async function createTierCheckout(targetTier: SubscriptionTier): Promise<
         failure: `${appUrl}/app/subscription?status=failure`,
         pending: `${appUrl}/app/billing?status=pending`,
       },
-      statement_descriptor: 'NEXO AI',
+      statement_descriptor: 'CHALYB',
       metadata: {
         user_id: session.user.id,
         target_tier: targetTier,

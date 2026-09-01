@@ -8,7 +8,7 @@ import { MessageComposer } from '@/components/messages/message-composer';
 
 export const metadata = { title: 'Mensajes' };
 
-// Subscriber-side conversation with the Nexo AI admin team.
+// Subscriber-side conversation with the Chalyb admin team.
 //
 // One thread per user. We auto-mark the thread as read on page load so the
 // unread badge in the sidebar drops to 0 as soon as the page renders — there

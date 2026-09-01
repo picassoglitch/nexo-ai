@@ -22,7 +22,7 @@ import {
 import { EngineLaunchButton } from '@/components/workspace/engine-launch-button';
 import { EngineReprovisionButton } from '@/components/workspace/engine-reprovision-button';
 
-// Dynamic title: tab reads "NexoClip · Nexo AI", "NexoStreamManager · Nexo AI", etc.
+// Dynamic title: tab reads "NexoClip · Chalyb", "NexoStreamManager · Chalyb", etc.
 export async function generateMetadata({
   params,
 }: {
@@ -115,11 +115,11 @@ export default async function EngineWorkspacePage({
     graceActive,
   });
   const isComingSoon = engine.status === 'coming_soon';
-  // Every engine gets a chip. Platform-owned (no partner_id) → "by Nexo AI"
+  // Every engine gets a chip. Platform-owned (no partner_id) → "by Chalyb"
   // muted; partner-owned → "by [name]" purple.
   const isPlatformOwned = engine.ownerUserId === null;
   const ownerLabel = isPlatformOwned
-    ? 'Nexo AI'
+    ? 'Chalyb'
     : engine.ownerDisplayName ||
       engine.ownerEmail?.split('@')[0] ||
       'Partner';

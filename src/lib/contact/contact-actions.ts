@@ -115,7 +115,7 @@ export async function submitContactForm(formData: FormData): Promise<ContactResu
   // successful because the lead made it to the inbox (the important half).
   await sendEmail({
     to: email,
-    subject: 'Recibimos tu mensaje · Nexo AI',
+    subject: 'Recibimos tu mensaje · Chalyb',
     html: confirm.html,
     text: confirm.text,
   });

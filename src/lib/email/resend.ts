@@ -3,7 +3,7 @@
 // CONFIGURATION:
 //   RESEND_API_KEY      — your Resend API key (re_...).
 //                         Get from https://resend.com/api-keys
-//   RESEND_FROM_EMAIL   — verified sender, e.g. "Nexo AI <noreply@nexo-ai.world>".
+//   RESEND_FROM_EMAIL   — verified sender, e.g. "Chalyb <noreply@nexo-ai.world>".
 //                         The production default below assumes nexo-ai.world is
 //                         verified at Resend (DNS records green). If you're
 //                         still in sandbox, override with onboarding@resend.dev
@@ -44,7 +44,7 @@ function getResend(): Resend {
 // "From" header looks identical across server-sent + auth-sent emails.
 // Pre-domain-verification you can override via RESEND_FROM_EMAIL env var
 // (set to "onboarding@resend.dev" for the sandbox limited-to-you mode).
-const DEFAULT_FROM = 'Nexo AI <noreply@nexo-ai.world>';
+const DEFAULT_FROM = 'Chalyb <noreply@nexo-ai.world>';
 
 export function getFromAddress(): string {
   return process.env.RESEND_FROM_EMAIL ?? DEFAULT_FROM;

@@ -45,7 +45,7 @@ export function LandingFooter() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© 2026 Nexo AI — nexo-ai.world</p>
+        <p>© 2026 Chalyb — nexo-ai.world</p>
         <div className="socials">
           {/* Real legal pages — required public URLs for OAuth provider apps
               (Google, Mercado Pago, etc.) and consumer-law compliance in MX.

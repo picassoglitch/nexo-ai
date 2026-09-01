@@ -1,11 +1,11 @@
 {
   "meta": {
-    "title": "Nexo AI — A technology team and AI automation platform",
+    "title": "Chalyb — A technology team and AI automation platform",
     "description": "We build products for clients, partner with founders, and operate intelligent systems."
   },
   "auth": {
     "signIn": {
-      "title": "Sign in to Nexo AI",
+      "title": "Sign in to Chalyb",
       "subtitle": "Continue with your Google account to access the platform.",
       "googleButton": "Continue with Google",
       "googleFastNote": "Fastest way to start",
@@ -119,7 +119,7 @@
     "earn": {
       "num": "/03 — Platform",
       "title": "Operate the systems",
-      "body": "Run bots and AI agents from the Nexo AI library — trading, content, scraping, ops automation — with live monitoring and a community of operators alongside you. Free to start.",
+      "body": "Run bots and AI agents from the Chalyb library — trading, content, scraping, ops automation — with live monitoring and a community of operators alongside you. Free to start.",
       "go": "Open the platform"
     }
   },
@@ -130,7 +130,7 @@
   "proof": {
     "num": "The foundation",
     "title": "One team. <em>Three ways</em> to work with us.",
-    "desc": "Nexo AI is a technology team and an AI automation platform. Founder-led, built by a real team. The numbers below are what we run today.",
+    "desc": "Chalyb is a technology team and an AI automation platform. Founder-led, built by a real team. The numbers below are what we run today.",
     "stat1": "AWS accounts under architecture",
     "stat2": "DSS governance at enterprise scale",
     "stat3": "Production systems shipped",
@@ -148,7 +148,7 @@
     "tag": "For clients",
     "num": "Build it for me",
     "title": "You bring the brief. <em>We ship the build.</em>",
-    "desc": "For businesses with a clear need and a budget. The Nexo AI team designs, builds and launches platforms, apps and AI-driven systems — ready to run and grow."
+    "desc": "For businesses with a clear need and a budget. The Chalyb team designs, builds and launches platforms, apps and AI-driven systems — ready to run and grow."
   },
   "process": {
     "1": {
@@ -228,11 +228,11 @@
     "tag": "For partners",
     "num": "Partner up with me",
     "title": "Got the idea, <em>not the tech?</em>",
-    "desc": "Plenty of smart people have good ideas and no way to build them. The Nexo AI partnership hub closes that gap — you bring the vision, we bring the team and the engineering.",
+    "desc": "Plenty of smart people have good ideas and no way to build them. The Chalyb partnership hub closes that gap — you bring the vision, we bring the team and the engineering.",
     "hero": {
       "title": "You don't need a budget. <em>You need a builder.</em>",
       "p1": "This isn't a client job — it's a partnership. If you have a real idea and the drive to push it, but not the budget to hire a dev team, this is the door. We look at it together, and if it's a fit, we build it together.",
-      "p2": "Nexo AI becomes your technical partner for the project — design, architecture, build and launch — and we share in what it becomes."
+      "p2": "Chalyb becomes your technical partner for the project — design, architecture, build and launch — and we share in what it becomes."
     }
   },
   "pv": {
@@ -278,7 +278,7 @@
     "tag": "For earners",
     "num": "Use the bots",
     "title": "Sign in. Deploy a system. <em>Scale on demand.</em>",
-    "desc": "Automate operations, content and workflows through AI-driven agents. The Nexo AI platform hosts a growing library of bots and intelligent systems, with a community of operators running them alongside you.",
+    "desc": "Automate operations, content and workflows through AI-driven agents. The Chalyb platform hosts a growing library of bots and intelligent systems, with a community of operators running them alongside you.",
     "cta": "Create your account"
   },
   "bots": {
@@ -363,7 +363,7 @@
     "done": "Got it",
     "steps": {
       "welcome": {
-        "title": "Welcome to Nexo AI",
+        "title": "Welcome to Chalyb",
         "body": "This is your workspace. Here's the essentials in a minute — you can see it later or close it anytime."
       },
       "nav": {
@@ -527,7 +527,7 @@
       "AI systems —",
       "<em>built for real businesses.</em>"
     ],
-    "lead": "Nexo AI is a technology team and an AI-driven automation platform. We build products for clients, partner with founders who have ideas but no tech team, and operate a growing library of bots and intelligent agents.",
+    "lead": "Chalyb is a technology team and an AI-driven automation platform. We build products for clients, partner with founders who have ideas but no tech team, and operate a growing library of bots and intelligent agents.",
     "contactH3": "Choose how you want to <em>work with us.</em>",
     "contactP": "Pick the path that fits — and we start the right conversation from the first message.",
     "ctaSub": "Hire the team, partner on an idea, or operate the platform — start where it fits."
@@ -568,7 +568,7 @@
     "desc": "Systems we're running or launching right now. Public builds, live in production.",
     "items": {
       "1": { "tag": "Trading", "title": "Quantor Polybot", "body": "A Polymarket trading system — Ollama-driven signals, a FastAPI dashboard and a SQLite trade log, live in production." },
-      "2": { "tag": "Platform", "title": "Nexo AI operator dashboard", "body": "The platform you're looking at right now. Operators run bots and AI agents from a shared library." },
+      "2": { "tag": "Platform", "title": "Chalyb operator dashboard", "body": "The platform you're looking at right now. Operators run bots and AI agents from a shared library." },
       "3": { "tag": "Content automation", "title": "AI clipping infrastructure", "body": "Real-time stream clipping with AI scoring, posting across platforms and dashboards built for creators." },
       "4": { "tag": "Sensor systems", "title": "Real-time sensor analytics", "body": "Presence-sensing and vision pipelines for activations — results in under a second, from sensor to dashboard." },
       "5": { "tag": "Telegram + SaaS", "title": "NexoPicks sports platform", "body": "A local sports picks and Telegram bot platform on a Node/TS monorepo, with Postgres, Redis and an Ollama reasoner." }
@@ -614,7 +614,7 @@
       "unlock": "Unlock with Pro",
       "notify": "Notify me",
       "details": "View details",
-      "ownerNexo": "by Nexo AI",
+      "ownerNexo": "by Chalyb",
       "ownerBy": "by {owner}",
       "ownerMine": "Your engine",
       "notifyDone": "Done — we'll let you know when {name} launches."

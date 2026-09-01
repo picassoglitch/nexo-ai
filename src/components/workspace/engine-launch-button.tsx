@@ -12,7 +12,7 @@ interface Props {
   engineId: string;
   engineName: string;
   label: string;
-  /** When true (default), opens in a new tab so the user stays on Nexo AI.
+  /** When true (default), opens in a new tab so the user stays on Chalyb.
    *  When false, navigates in the same tab. */
   newTab?: boolean;
 }
@@ -38,7 +38,7 @@ export function EngineLaunchButton({ engineId, engineName, label, newTab = true 
       }
       if (newTab) {
         // window.open with a "noopener noreferrer" stand-in keeps the engine
-        // from getting a window.opener handle back into Nexo AI's tab.
+        // from getting a window.opener handle back into Chalyb's tab.
         window.open(result.url, '_blank', 'noopener,noreferrer');
       } else {
         window.location.href = result.url;

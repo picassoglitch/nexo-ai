@@ -6,7 +6,7 @@
 //         match the slug the token belongs to (defense-in-depth so a leaked
 //         NexoStream token can't write usage on NexoClip's behalf).
 //   Body: {
-//     external_user_id: string,   // Nexo AI user id (matches profiles.id)
+//     external_user_id: string,   // Chalyb user id (matches profiles.id)
 //     events: [
 //       {
 //         provider?: 'anthropic' | 'assemblyai' | ...,   // T4 contract
@@ -26,7 +26,7 @@
 //   NOTE on validation: `kind` is free-text (loose regex check below) —
 //   the platform deliberately does NOT whitelist values. Engines can add
 //   new meters (transcription.seconds, vision.frames, embedding.tokens,
-//   ...) without a coordinated Nexo AI deploy. See migration 0020.
+//   ...) without a coordinated Chalyb deploy. See migration 0020.
 //
 // Engines call this AFTER every LLM call (or batched every N seconds). The
 // returned balance lets the engine decide whether to keep spending or pause
@@ -101,7 +101,7 @@ interface PostBody {
 // Loose format check for kind + provider. Lowercase letters, digits, dots
 // and underscores; must start with a letter; capped length so callers can't
 // stuff arbitrary blobs into the column. Whitelisting values would mean
-// every new meter requires a Nexo AI deploy — see migration 0020.
+// every new meter requires a Chalyb deploy — see migration 0020.
 const KIND_RE = /^[a-z][a-z0-9_.]{0,63}$/;
 const PROVIDER_RE = /^[a-z][a-z0-9_.-]{0,63}$/;
 

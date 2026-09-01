@@ -43,7 +43,7 @@ export const EXPORT_QUALITY_RANK: Record<ClipExportQuality, number> = {
 export type CommunityAccess = 'free' | 'premium';
 
 export interface TierCapabilities {
-  // ── Nexo AI ───────────────────────────────────────────────────────────
+  // ── Chalyb ───────────────────────────────────────────────────────────
   /** How many engines the user can run in LIVE execution (not simulation).
    *  FREE = 0 (all simulation only).
    *  PRO = 1 (the engine they pick via profiles.selected_engine_id).

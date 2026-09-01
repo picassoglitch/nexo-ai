@@ -101,7 +101,7 @@ export const nexoclipIntegration: EngineIntegration = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // We use Nexo AI's user_id as the external_user_id on NexoClip's side
+          // We use Chalyb's user_id as the external_user_id on NexoClip's side
           // so the link is bidirectional + we can detect duplicates cleanly.
           external_user_id: userId,
           email,

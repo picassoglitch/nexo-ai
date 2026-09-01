@@ -4,7 +4,7 @@
 // Same SSO contract NexoClip + NexoCrypto use: provision a tenant, get back
 // tenant_id + api_token, then sign an HMAC launch token for SSO redirect.
 //
-// REQUIRED ENV VARS (this side — set in Nexo-AI's .env.local + Vercel):
+// REQUIRED ENV VARS (this side — set in Chalyb's .env.local + Vercel):
 //   NEXOOBS_ADMIN_TOKEN  Bearer NexoOBS's /api/admin/* endpoints accept.
 //                          NEVER expose to clients.
 //   NEXOOBS_SSO_SECRET   HMAC secret shared with NexoOBS — used to sign the

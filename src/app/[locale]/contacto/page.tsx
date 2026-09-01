@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { ContactPage } from '@/components/contact/contact-page';
 
 export const metadata = {
-  title: 'Contacto · Nexo AI',
+  title: 'Contacto · Chalyb',
   description:
     'Hablemos. Escríbenos sobre integraciones, alianzas, demos o cualquier duda sobre la plataforma.',
 };

@@ -37,7 +37,7 @@ but recommended.
    | Field | Value |
    |---|---|
    | **Sender email** | `noreply@nexo-ai.world` |
-   | **Sender name** | `Nexo AI` |
+   | **Sender name** | `Chalyb` |
    | **Host** | `smtp.resend.com` |
    | **Port** | `465` |
    | **Username** | `resend` |
@@ -47,7 +47,7 @@ but recommended.
 4. **Save**
 
 That's it for routing. Every auth email from now on will leave Supabase's
-backend → hit Resend's SMTP → arrive at the user with `From: Nexo AI <noreply@nexo-ai.world>`.
+backend → hit Resend's SMTP → arrive at the user with `From: Chalyb <noreply@nexo-ai.world>`.
 
 ## Step 3 — Customize the email body templates
 
@@ -109,7 +109,7 @@ a roaming session.
 
 1. Use an incognito browser → go to `/sign-in` → request a password reset on
    a real email you own
-2. Check your inbox — the email should come from `Nexo AI <noreply@nexo-ai.world>`
+2. Check your inbox — the email should come from `Chalyb <noreply@nexo-ai.world>`
    and look like the branded template (dark theme + acid green accent)
 3. If it lands in spam: most likely you skipped DKIM verification at Resend
    (Step 0). Open Resend → Domains → check that all 3 records (SPF/DKIM/DMARC)

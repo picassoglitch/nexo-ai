@@ -7,7 +7,7 @@ import { LegalPage } from '@/components/legal/legal-page';
 export const metadata = {
   title: 'Términos de servicio',
   description:
-    'Términos y condiciones para usar Nexo AI y sus engines (NexoClip, NexoStreamManager y futuros productos).',
+    'Términos y condiciones para usar Chalyb y sus engines (NexoClip, NexoStreamManager y futuros productos).',
 };
 
 // force-dynamic so Vercel's CDN never serves a stale 404 from before the
@@ -45,7 +45,7 @@ export default async function TermsPage({
           <li><a href="#engines">Engines y productos integrados</a></li>
           <li><a href="#uso">Uso aceptable</a></li>
           <li><a href="#contenido">Tu contenido y licencias</a></li>
-          <li><a href="#propiedad">Propiedad intelectual de Nexo AI</a></li>
+          <li><a href="#propiedad">Propiedad intelectual de Chalyb</a></li>
           <li><a href="#disponibilidad">Disponibilidad del servicio</a></li>
           <li><a href="#responsabilidad">Limitación de responsabilidad</a></li>
           <li><a href="#terminacion">Suspensión y terminación</a></li>
@@ -56,8 +56,8 @@ export default async function TermsPage({
       </div>
 
       <p>
-        Bienvenido a Nexo AI. Estos términos de servicio (los &laquo;Términos&raquo;) son un
-        acuerdo entre tú (el &laquo;Usuario&raquo;) y <strong>Nexo AI</strong>,
+        Bienvenido a Chalyb. Estos términos de servicio (los &laquo;Términos&raquo;) son un
+        acuerdo entre tú (el &laquo;Usuario&raquo;) y <strong>Chalyb</strong>,
         operado desde México. Al crear una cuenta, comprar una suscripción o usar
         cualquiera de nuestros productos, aceptas estos Términos en su totalidad.
         Si no estás de acuerdo, no uses el servicio.
@@ -65,7 +65,7 @@ export default async function TermsPage({
 
       <h2 id="aceptacion">1. Aceptación de los términos</h2>
       <p>
-        El acceso a Nexo AI y a los Engines está condicionado a tu aceptación de
+        El acceso a Chalyb y a los Engines está condicionado a tu aceptación de
         estos Términos. Cada vez que iniciamos un cambio sustancial, te avisamos
         por correo y publicamos la versión actualizada en esta página al menos{' '}
         <strong>14 días naturales</strong> antes de que entren en vigor. Si sigues
@@ -193,7 +193,7 @@ export default async function TermsPage({
       <h2 id="engines">7. Engines y productos integrados</h2>
       <p>
         Cada Engine es un producto independiente que opera bajo su propia
-        licencia y reglas técnicas. Cuando activas un Engine desde Nexo AI:
+        licencia y reglas técnicas. Cuando activas un Engine desde Chalyb:
       </p>
       <ul>
         <li>
@@ -201,13 +201,13 @@ export default async function TermsPage({
           los mostramos al momento de la primera activación.
         </li>
         <li>
-          Nexo AI provisiona una cuenta para ti en el Engine y mantiene la
+          Chalyb provisiona una cuenta para ti en el Engine y mantiene la
           sincronización del tier (Free / Pro / VIP).
         </li>
         <li>
           La ejecución de jobs (clips, transmisiones, llamadas a IA) la realiza
           la infraestructura del Engine. Los logs, fallas o disputas técnicas
-          relacionadas con esa ejecución se atienden a través de Nexo AI, que
+          relacionadas con esa ejecución se atienden a través de Chalyb, que
           coordina con el operador del Engine.
         </li>
       </ul>
@@ -218,7 +218,7 @@ export default async function TermsPage({
       </p>
 
       <h2 id="uso">8. Uso aceptable</h2>
-      <p>NO PUEDES usar Nexo AI ni los Engines para:</p>
+      <p>NO PUEDES usar Chalyb ni los Engines para:</p>
       <ul>
         <li>Actividades ilegales bajo la ley mexicana o de tu jurisdicción.</li>
         <li>
@@ -234,7 +234,7 @@ export default async function TermsPage({
           cuotas y límites técnicos.
         </li>
         <li>
-          Revender el acceso a Nexo AI o a un Engine sin autorización escrita
+          Revender el acceso a Chalyb o a un Engine sin autorización escrita
           previa.
         </li>
         <li>
@@ -280,9 +280,9 @@ export default async function TermsPage({
         (hasta 90 días).
       </p>
 
-      <h2 id="propiedad">10. Propiedad intelectual de Nexo AI</h2>
+      <h2 id="propiedad">10. Propiedad intelectual de Chalyb</h2>
       <p>
-        El nombre, logo, código fuente, diseño, y la lógica de Nexo AI y de los
+        El nombre, logo, código fuente, diseño, y la lógica de Chalyb y de los
         Engines son propiedad de sus respectivos titulares. Tu suscripción te
         otorga el derecho de <strong>usar</strong> el servicio, no de copiarlo,
         redistribuirlo, descompilarlo, ni crear obras derivadas.
@@ -290,7 +290,7 @@ export default async function TermsPage({
 
       <h2 id="disponibilidad">11. Disponibilidad del servicio</h2>
       <p>
-        Hacemos nuestro mejor esfuerzo por mantener Nexo AI y los Engines
+        Hacemos nuestro mejor esfuerzo por mantener Chalyb y los Engines
         disponibles 24/7, pero <strong>no garantizamos uptime contractual</strong>.
         Podemos tener:
       </p>
@@ -320,7 +320,7 @@ export default async function TermsPage({
       </p>
       <ul>
         <li>
-          Nexo AI provee el servicio &laquo;tal cual&raquo; (<em>as-is</em>), sin
+          Chalyb provee el servicio &laquo;tal cual&raquo; (<em>as-is</em>), sin
           garantías expresas o implícitas más allá de las que la ley exige.
         </li>
         <li>
@@ -330,7 +330,7 @@ export default async function TermsPage({
         </li>
         <li>
           Nuestra responsabilidad total acumulada por cualquier reclamo está
-          limitada al monto que tú pagaste a Nexo AI durante los{' '}
+          limitada al monto que tú pagaste a Chalyb durante los{' '}
           <strong>12 meses inmediatamente anteriores</strong> al evento que da
           origen al reclamo.
         </li>

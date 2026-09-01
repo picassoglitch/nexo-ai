@@ -22,12 +22,12 @@ export async function generateMetadata({
   const safeLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
   const messages = (await import(`../../../messages/${safeLocale}.json`)).default;
   // Title template: pages that export `metadata: { title: 'Engines' }` will
-  // render as "Engines · Nexo AI" in the browser tab. Pages without a title
+  // render as "Engines · Chalyb" in the browser tab. Pages without a title
   // fall back to the locale-level meta.title (the marketing tagline).
   return {
     title: {
       default: messages.meta.title,
-      template: '%s · Nexo AI',
+      template: '%s · Chalyb',
     },
     description: messages.meta.description,
   };
