@@ -53,6 +53,35 @@ export async function GET(
     return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));
   }
 
+  const admin = createAdminClient();
+  const { data: engine } = await admin
+    .from('engines')
+    .select('id, status')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (!engine) {
+    return NextResponse.redirect(new URL('/app/engines', origin));
+  }
+
+  // Only `active` engines are actually serving. `coming_soon` / `deprecated`
+  // means the backend isn't reachable (not launched yet, or offline — see
+  // supabase/migrations/0028), and every other surface already honours that:
+  // cards render "Próximamente" with the launch button disabled. This route
+  // is the one path that bypasses those surfaces — the landing CTAs link
+  // /sign-in?next=/auth/launch/nexoclip directly — so without this check a
+  // brand-new signup gets 302'd into a dead host and sees a browser
+  // connection error instead of a handled state. Send them to the engine
+  // page, which renders the real status.
+  //
+  // Checked BEFORE provisioning on purpose: provisionEngineAccess() POSTs to
+  // the engine's admin_api_base, so skipping it also avoids hanging the
+  // request on a dead backend until the socket times out.
+  if (engine.status !== 'active') {
+    return NextResponse.redirect(new URL(`/app/engines/${slug}`, origin));
+  }
+
+  const engineId = engine.id as string;
+
   if (slug === NEXOCLIP_TRIAL_SLUG) {
     // Idempotent: first-timers get the welcome gift + 7-day trial started
     // and a NexoClip tenant provisioned; returning users no-op. The audit
@@ -64,17 +93,6 @@ export async function GET(
       console.warn('[launch] nexoclip welcome claim failed (non-fatal):', err);
     }
   }
-
-  const admin = createAdminClient();
-  const { data: engine } = await admin
-    .from('engines')
-    .select('id')
-    .eq('slug', slug)
-    .maybeSingle();
-  if (!engine) {
-    return NextResponse.redirect(new URL('/app/engines', origin));
-  }
-  const engineId = engine.id as string;
 
   // Ensure the user is provisioned on the target engine (idempotent) so the
   // launch has an external_user_id to sign into the SSO token. NexoClip
