@@ -47,23 +47,7 @@ export function EngineLaunchButton({ engineId, engineName, label, newTab = true 
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending}
-      style={{
-        background: 'var(--cc-green)',
-        color: '#070809',
-        padding: '11px 22px',
-        borderRadius: 9,
-        border: 'none',
-        fontFamily: 'inherit',
-        fontSize: 14,
-        fontWeight: 600,
-        cursor: pending ? 'wait' : 'pointer',
-        opacity: pending ? 0.7 : 1,
-      }}
-    >
+    <button type="button" className="ws-btn ws-btn-primary" onClick={onClick} disabled={pending}>
       {pending ? 'Abriendo…' : label}
     </button>
   );

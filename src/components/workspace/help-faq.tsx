@@ -22,7 +22,7 @@ const FAQ: FaqGroup[] = [
           <>
             <b>Free</b> te deja probar todos los sistemas en modo simulación, sin tarjeta de
             crédito. <b>Pro</b> activa <b>UN</b> sistema en ejecución real — tú eliges cuál
-            desde tu lista de bots. <b>VIP</b> activa los 16 sistemas en vivo y te da los
+            desde Mis engines. <b>VIP</b> activa los 16 sistemas en vivo y te da los
             límites de uso más altos. El admin puede cambiarte de plan desde su panel sin pasar
             por la página de pago.
           </>
@@ -32,7 +32,7 @@ const FAQ: FaqGroup[] = [
         q: '¿Cómo cambio mi plan?',
         a: (
           <>
-            Desde <b>/app/subscription</b>, haz clic en el botón del plan al que quieres
+            Desde <b>Tu plan</b>, haz clic en el botón del plan al que quieres
             cambiar. Si subes (Free → Pro o Pro → VIP), te redirigimos a Mercado Pago
             para procesar el pago. Si bajas a Free, el cambio se aplica inmediato sin cargo. Tu
             plan anterior sigue activo hasta el final del período facturado.
@@ -43,7 +43,7 @@ const FAQ: FaqGroup[] = [
         q: '¿Puedo cancelar en cualquier momento?',
         a: (
           <>
-            Sí. Desde <b>/app/subscription</b>, abajo de las tarjetas de plan hay un botón
+            Sí. Desde <b>Tu plan</b>, abajo de las tarjetas de plan hay un botón
             &laquo;Cancelar suscripción&raquo;. Mantienes tu plan vigente hasta el final del
             período que ya pagaste; después bajas automáticamente a Free. No te cobramos nada
             adicional.
@@ -55,7 +55,7 @@ const FAQ: FaqGroup[] = [
         a: (
           <>
             Mercado Pago confirma el pago en segundos a minutos. Tu plan se activa
-            automáticamente vía webhook cuando MP nos notifica. Revisa <b>/app/billing</b> para
+            automáticamente vía webhook cuando MP nos notifica. Revisa <b>Pagos y facturas</b> para
             ver el estado del pago — si dice <b>Aprobado</b>, tu tier ya está activo. Si dice{' '}
             <b>Pendiente</b> y pagaste en efectivo (OXXO, ticket), espera a que el comercio
             procese.
@@ -71,7 +71,7 @@ const FAQ: FaqGroup[] = [
         q: 'En Pro, ¿puedo cambiar cuál sistema corre en vivo?',
         a: (
           <>
-            Sí, cuantas veces quieras. Ve a <b>/app/engines</b> y haz clic en{' '}
+            Sí, cuantas veces quieras. Ve a <b>Mis engines</b> y haz clic en{' '}
             <b>Activar en vivo</b> en el sistema que prefieras. El sistema que estaba en vivo
             antes vuelve automáticamente a simulación. No hay penalización por cambiar.
           </>
@@ -81,9 +81,9 @@ const FAQ: FaqGroup[] = [
         q: '¿Qué hace cada sistema?',
         a: (
           <>
-            Cada uno está descrito en <b>/app/engines</b>: lee la categoría y descripción debajo
+            Cada uno está descrito en <b>Mis engines</b>: lee la categoría y descripción debajo
             del nombre. Para una explicación más a fondo con ejemplos reales, escríbenos a
-            través de <b>/contacto</b> y te mandamos un resumen.
+            través de <b>Mensajes</b> y te mandamos un resumen.
           </>
         ),
       },
@@ -107,9 +107,9 @@ const FAQ: FaqGroup[] = [
         q: '¿Cómo activo autenticación de dos factores (2FA)?',
         a: (
           <>
-            Desde <b>/app/settings</b> &raquo; sección Seguridad &raquo; Activar 2FA. Recomendamos
+            Desde <b>Tu cuenta</b> &raquo; sección Seguridad &raquo; Activar 2FA. Recomendamos
             usar una app como Authy o 1Password en vez de SMS. Si pierdes acceso al
-            authenticator, escríbenos a través de <b>/contacto</b> y validamos tu identidad
+            authenticator, escríbenos por <b>Mensajes</b> y validamos tu identidad
             manualmente.
           </>
         ),
@@ -129,8 +129,8 @@ const FAQ: FaqGroup[] = [
         q: '¿Cómo cierro mi cuenta?',
         a: (
           <>
-            Cancela primero tu suscripción desde <b>/app/subscription</b> (te deja en Free) y
-            luego escríbenos a <b>/contacto</b> pidiendo el borrado de cuenta. Eliminamos
+            Cancela primero tu suscripción desde <b>Tu plan</b> (te deja en Free) y
+            luego escríbenos por <b>Mensajes</b> pidiendo el borrado de cuenta. Eliminamos
             tu perfil, tus ejecuciones y tus pagos en menos de 7 días, conforme a tu derecho a
             la portabilidad de datos.
           </>
@@ -146,7 +146,7 @@ const FAQ: FaqGroup[] = [
         a: (
           <>
             Sí, para clientes en México emitimos CFDI 4.0. Después de tu primer pago en Pro o
-            VIP, escríbenos vía <b>/contacto</b> con tu RFC + razón social y la generamos
+            VIP, escríbenos por <b>Mensajes</b> con tu RFC + razón social y la generamos
             dentro de los siguientes 3 días hábiles. Para otros países, emitimos una factura
             estándar en PDF.
           </>
@@ -193,82 +193,29 @@ export function HelpFaq() {
   return (
     <>
       {FAQ.map((group, gi) => (
-        <div key={group.title} className="cc-mod-section">
-          <div className="cc-mod-sl">{group.title}</div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid var(--cc-line)',
-              borderRadius: 'var(--cc-r-l)',
-              overflow: 'hidden',
-            }}
-          >
+        <div key={group.title} className="ws-section">
+          <div className="ws-sl">{group.title}</div>
+          <div className="ws-list">
             {group.items.map((item, ii) => {
               const key = `${gi}-${ii}`;
               const isOpen = open.has(key);
               return (
-                <div
-                  key={key}
-                  style={{
-                    borderBottom: ii < group.items.length - 1 ? '1px solid var(--cc-line-soft)' : 'none',
-                    background: 'var(--cc-panel)',
-                  }}
-                >
+                <div key={key} className="ws-faq-item">
                   <button
                     type="button"
+                    className="ws-faq-q"
                     onClick={() => toggle(key)}
                     aria-expanded={isOpen}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '16px 20px',
-                      border: 'none',
-                      background: 'transparent',
-                      color: 'var(--cc-txt)',
-                      fontFamily: 'inherit',
-                      fontSize: 13.5,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 14,
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--cc-hover)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                    }}
                   >
-                    <span
-                      style={{
-                        fontFamily: 'var(--cc-mono), monospace',
-                        fontSize: 11,
-                        color: isOpen ? 'var(--cc-green)' : 'var(--cc-txt-4)',
-                        flexShrink: 0,
-                        width: 16,
-                        transition: 'transform 0.2s, color 0.2s',
-                        transform: isOpen ? 'rotate(90deg)' : 'rotate(0)',
-                      }}
-                    >
+                    {/* Rotation and colour are CSS-driven off aria-expanded —
+                        this used to be a pair of onMouseEnter/onMouseLeave
+                        handlers rewriting inline styles on every hover. */}
+                    <span className="ws-faq-caret" aria-hidden="true">
                       ▸
                     </span>
-                    <span style={{ flex: 1 }}>{item.q}</span>
+                    <span>{item.q}</span>
                   </button>
-                  {isOpen && (
-                    <div
-                      style={{
-                        padding: '0 22px 18px 50px',
-                        fontSize: 13,
-                        color: 'var(--cc-txt-3)',
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {item.a}
-                    </div>
-                  )}
+                  {isOpen && <div className="ws-faq-a">{item.a}</div>}
                 </div>
               );
             })}

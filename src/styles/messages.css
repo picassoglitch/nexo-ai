@@ -1,0 +1,105 @@
+/*
+  Message thread + composer.
+
+  These two components are shared between the subscriber workspace (/app,
+  `ws-` system) and the admin command center (/dashboard, `cc-` system), so
+  the styles can't live in either stylesheet. Every value resolves through a
+  fallback chain — workspace token, then command-center token, then a literal
+  — which lets one rule serve both shells and keeps the components free of the
+  inline styles they used to carry.
+*/
+
+.msg-empty {
+  padding: 44px 20px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ws-ink-3, var(--cc-txt-3, #7c7d8b));
+  border: 1px dashed var(--ws-line-2, var(--cc-line-2, rgba(255, 255, 255, 0.16)));
+  border-radius: var(--ws-r-l, var(--cc-r-l, 14px));
+}
+
+.msg-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+}
+.msg-line { display: flex; }
+.msg-line.mine { justify-content: flex-end; }
+
+.msg-bubble {
+  max-width: 78%;
+  padding: 11px 14px;
+  border: 1px solid var(--ws-line, var(--cc-line, rgba(255, 255, 255, 0.09)));
+  border-radius: 14px 14px 14px 4px;
+  background: var(--ws-panel-2, var(--cc-panel-2, #141827));
+  color: var(--ws-ink, var(--cc-txt, #f4f3ee));
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.msg-line.mine .msg-bubble {
+  border-radius: 14px 14px 4px 14px;
+  border-color: var(--ws-acid-line, rgba(158, 234, 58, 0.35));
+  background: var(--ws-acid-soft, var(--cc-green-g, rgba(158, 234, 58, 0.18)));
+}
+.msg-meta {
+  margin-top: 7px;
+  font-family: var(--ws-mono, var(--cc-mono, ui-monospace)), monospace;
+  font-size: 10.5px;
+  color: var(--ws-ink-3, var(--cc-txt-4, #7c7d8b));
+}
+.msg-line.mine .msg-meta { text-align: right; }
+
+.msg-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--ws-line, var(--cc-line, rgba(255, 255, 255, 0.09)));
+  border-radius: var(--ws-r-l, var(--cc-r-l, 14px));
+  background: var(--ws-panel, var(--cc-panel, #0e1018));
+}
+.msg-composer textarea {
+  width: 100%;
+  min-height: 74px;
+  max-height: 220px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ws-ink, var(--cc-txt, #f4f3ee));
+  background: var(--ws-bg-2, var(--cc-bg-1, #0a0c13));
+  border: 1px solid var(--ws-line, var(--cc-line, rgba(255, 255, 255, 0.09)));
+  border-radius: var(--ws-r, var(--cc-r, 10px));
+  resize: vertical;
+  transition: border-color .2s;
+}
+.msg-composer textarea:focus {
+  outline: none;
+  border-color: var(--ws-acid, var(--cc-green, #c6f24e));
+}
+.msg-composer textarea::placeholder { color: var(--ws-ink-3, var(--cc-txt-3, #7c7d8b)); }
+.msg-composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.msg-count {
+  font-family: var(--ws-mono, var(--cc-mono, ui-monospace)), monospace;
+  font-size: 10.5px;
+  color: var(--ws-ink-3, var(--cc-txt-4, #7c7d8b));
+}
+.msg-count.over { color: var(--ws-red, var(--cc-red, #ff6b6b)); }
+.msg-send {
+  padding: 9px 17px;
+  border: none;
+  border-radius: var(--ws-r, var(--cc-r, 10px));
+  background: var(--ws-acid, var(--cc-green, #c6f24e));
+  color: #06070b;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter .18s, opacity .18s;
+}
+.msg-send:hover:not(:disabled) { filter: brightness(1.06); }
+.msg-send:disabled { opacity: .45; cursor: not-allowed; }

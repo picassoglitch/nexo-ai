@@ -20,9 +20,13 @@ interface Props {
    *  pass their setMobileSidebarOpen. Optional — desktop sidebar doesn't
    *  need it. */
   onBeforeNav?: () => void;
+  /** Icon-button class from the caller's design system. The admin shell
+   *  passes its `cc-cog`; the subscriber workspace passes `ws-icon-btn
+   *  danger`, which carries its own destructive hover state. */
+  className?: string;
 }
 
-export function SidebarSignOut({ onBeforeNav }: Props) {
+export function SidebarSignOut({ onBeforeNav, className = 'cc-cog' }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -50,18 +54,10 @@ export function SidebarSignOut({ onBeforeNav }: Props) {
       type="button"
       onClick={handleSignOut}
       disabled={loading}
-      className="cc-cog"
+      className={className}
       title={loading ? 'Cerrando sesión…' : 'Cerrar sesión'}
       aria-label="Cerrar sesión"
-      style={{
-        // Inline override of .cc-cog so the logout icon reads as a
-        // destructive (red-ish) action without needing a new global class.
-        // On hover we go fuller red. On disabled (during the round-trip
-        // to Supabase) we dim so the user knows the click registered.
-        color: loading ? 'var(--cc-txt-4)' : 'var(--cc-red, #f87171)',
-        cursor: loading ? 'wait' : 'pointer',
-        opacity: loading ? 0.6 : 1,
-      }}
+      style={{ cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.6 : 1 }}
     >
       {/* ⏻ is the standard power/exit glyph. Reads cleanly at the same
           ~14px size that .cc-cog uses for the gear. */}

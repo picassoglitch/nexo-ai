@@ -197,7 +197,7 @@ export function WorkspaceTour() {
             height: rect.height + RING_PAD * 2,
             borderRadius: 12,
             boxShadow: '0 0 0 9999px rgba(3,4,7,0.74)',
-            border: '2px solid var(--cc-green)',
+            border: '2px solid var(--ws-acid, #c6f24e)',
             pointerEvents: 'none',
             transition: 'top .2s ease, left .2s ease, width .2s ease, height .2s ease',
           }}
@@ -221,10 +221,10 @@ export function WorkspaceTour() {
           width: pos?.width ?? 480,
           visibility: pos ? 'visible' : 'hidden',
         }}
-        className="rounded-[20px] border border-[var(--cc-line-2)] bg-[var(--cc-panel)] p-8 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.8)]"
+        className="ws-tour-card"
       >
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--cc-green)] [font-family:var(--cc-mono),monospace]">
+        <div className="ws-tour-head">
+          <span className="ws-tour-step">
             {t('step', { current: step + 1, total: STEPS.length })}
           </span>
           {/* Permanent close — the only action that stops the tour for good. */}
@@ -233,50 +233,45 @@ export function WorkspaceTour() {
             onClick={() => close(true)}
             aria-label={t('close')}
             title={t('close')}
-            className="-mr-1 -mt-1 grid size-7 place-items-center rounded-lg text-[var(--cc-txt-4)] transition-colors hover:bg-white/[0.04] hover:text-[var(--cc-txt-2)]"
+            className="ws-icon-btn"
           >
             ✕
           </button>
         </div>
 
-        <h3
-          className="text-[19px] font-bold tracking-tight text-[var(--cc-txt)]"
-          style={{ fontFamily: 'var(--cc-disp), sans-serif' }}
-        >
+        <h3>
           {t(`steps.${key}.title`)}
         </h3>
-        <p className="mt-2.5 text-[14px] leading-relaxed text-[var(--cc-txt-2)]">
+        <p>
           {t(`steps.${key}.body`)}
         </p>
 
         {/* Progress dots */}
-        <div className="mt-5 flex items-center gap-1.5">
+        <div className="ws-tour-dots">
           {STEPS.map((s, i) => (
             <span
               key={s.key}
-              className={`h-1.5 rounded-full transition-all ${
-                i === step ? 'w-4 bg-[var(--cc-green)]' : 'w-1.5 bg-[var(--cc-line-2)]'
-              }`}
+              className={`ws-tour-dot${i === step ? ' on' : ''}`}
             />
           ))}
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="ws-tour-foot">
           {/* See later — postpone; reappears on next login. */}
           <button
             type="button"
             onClick={() => close(false)}
-            className="rounded-lg px-1 py-1.5 text-[12px] font-semibold text-[var(--cc-txt-4)] transition-colors hover:text-[var(--cc-txt-2)]"
+            className="ws-btn ws-btn-quiet ws-btn-sm"
           >
             {t('later')}
           </button>
 
-          <div className="flex items-center gap-1">
+          <div className="ws-btn-row">
             {step > 0 && (
               <button
                 type="button"
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="rounded-lg px-2.5 py-1.5 text-[12.5px] font-semibold text-[var(--cc-txt-3)] transition-colors hover:text-[var(--cc-txt)]"
+                className="ws-btn ws-btn-quiet ws-btn-sm"
               >
                 {t('back')}
               </button>
@@ -284,8 +279,7 @@ export function WorkspaceTour() {
             <button
               type="button"
               onClick={() => (isLast ? close(true) : setStep((s) => s + 1))}
-              style={{ color: '#0a0c0e' }}
-              className="rounded-lg bg-[var(--cc-green)] px-4 py-2 text-[12.5px] font-bold transition-[filter] hover:brightness-110"
+              className="ws-btn ws-btn-primary ws-btn-sm"
             >
               {isLast ? t('done') : t('next')}
             </button>

@@ -191,57 +191,28 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
   return (
     <>
       {isAdmin && (
-        <div
-          style={{
-            padding: '10px 14px',
-            border: '1px solid var(--cc-purple)',
-            background: 'var(--cc-purple-g)',
-            borderRadius: 9,
-            fontSize: 12,
-            color: 'var(--cc-txt-2)',
-            marginBottom: 16,
-          }}
-        >
-          ▸ <b>Modo admin</b> — los cambios de plan se aplican al instante, sin pasar por el
-          pago.
+        <div className="ws-notice info">
+          <div className="ws-notice-body">
+            <p>
+              <b>Modo admin</b> — tus cambios de plan se aplican al instante, sin pasar por el
+              pago.
+            </p>
+          </div>
         </div>
       )}
 
+      {/* Sticky, dismissible: the toast lasts ~2.5s and users miss it. The
+          usual production cause is MP_ACCESS_TOKEN unset on the server. */}
       {stickyError && (
-        <div
-          style={{
-            padding: '12px 14px',
-            border: '1px solid var(--cc-red, #ff5d5d)',
-            background: 'rgba(255, 93, 93, 0.08)',
-            borderRadius: 9,
-            fontSize: 12.5,
-            color: 'var(--cc-red, #ff5d5d)',
-            marginBottom: 16,
-            lineHeight: 1.5,
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 10,
-          }}
-        >
-          <span style={{ fontSize: 14, lineHeight: 1 }}>▸</span>
-          <div style={{ flex: 1 }}>
-            <b style={{ display: 'block', marginBottom: 3 }}>
-              No pudimos abrir el pago
-            </b>
-            <span>{stickyError}</span>
+        <div className="ws-notice warn">
+          <div className="ws-notice-body">
+            <h3>No pudimos abrir el pago</h3>
+            <p>{stickyError}</p>
           </div>
           <button
             type="button"
+            className="ws-icon-btn"
             onClick={() => setStickyError(null)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--cc-red, #ff5d5d)',
-              fontSize: 14,
-              cursor: 'pointer',
-              padding: 0,
-              opacity: 0.7,
-            }}
             aria-label="Cerrar"
           >
             ✕
@@ -249,90 +220,31 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
         </div>
       )}
 
-      <div
-        className="cc-mod-grid"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}
-      >
+      <div className="ws-grid ws-grid-3">
         {cards.map((c) => {
           const isCurrent = c.id === tier;
           const isPendingHere = pendingTier === c.id;
           return (
             <div
               key={c.id}
-              className="cc-mod-card"
-              style={{
-                borderColor: isCurrent
-                  ? 'var(--cc-green)'
-                  : c.featured
-                    ? 'rgba(158,234,58,.3)'
-                    : undefined,
-                background: c.featured && !isCurrent ? 'rgba(158,234,58,.04)' : undefined,
-                position: 'relative',
-              }}
+              className={`ws-plan${isCurrent ? ' is-current' : ''}${
+                c.featured && !isCurrent ? ' is-featured' : ''
+              }`}
             >
-              <div className="cc-mod-card-head">
-                <span
-                  className="cc-mod-tag"
-                  style={{ fontSize: 13, color: 'var(--cc-txt)', fontWeight: 600 }}
-                >
-                  {c.name}
-                </span>
-                {isCurrent && <span className="cc-mod-badge gr">Tu plan</span>}
-                {!isCurrent && c.featured && <span className="cc-mod-badge gr">El más elegido</span>}
+              <div className="ws-plan-head">
+                <h3>{c.name}</h3>
+                {isCurrent && <span className="ws-badge live">Tu plan</span>}
+                {!isCurrent && c.featured && <span className="ws-badge">El más elegido</span>}
               </div>
-              <div
-                style={{
-                  fontFamily: 'var(--cc-disp), sans-serif',
-                  fontSize: 30,
-                  fontWeight: 700,
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1,
-                }}
-              >
+              <div className="ws-plan-price">
                 {c.price}
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--cc-txt-3)',
-                    fontWeight: 500,
-                    marginLeft: 4,
-                  }}
-                >
-                  {c.per}
-                </span>
+                <span>{c.per}</span>
               </div>
-              <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', minHeight: 36 }}>
-                {c.tagline}
-              </p>
-              <ul
-                style={{
-                  listStyle: 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                  padding: 0,
-                }}
-              >
+              <p className="ws-plan-tagline">{c.tagline}</p>
+              <ul className="ws-plan-feats">
                 {c.features.map((f) => (
-                  <li
-                    key={f}
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      fontSize: 12.5,
-                      color: 'var(--cc-txt-2)',
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: 'var(--cc-green)',
-                        fontFamily: 'var(--cc-mono), monospace',
-                        flexShrink: 0,
-                      }}
-                    >
-                      ✓
-                    </span>
+                  <li key={f}>
+                    <span aria-hidden="true">✓</span>
                     <span>{f}</span>
                   </li>
                 ))}
@@ -341,23 +253,9 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
                 type="button"
                 onClick={() => changeTier(c.id)}
                 disabled={isCurrent || isPending}
-                style={{
-                  marginTop: 'auto',
-                  padding: '11px 14px',
-                  borderRadius: 9,
-                  border: isCurrent ? '1px solid var(--cc-line-2)' : 'none',
-                  background: isCurrent
-                    ? 'transparent'
-                    : c.featured
-                      ? 'var(--cc-green)'
-                      : 'var(--cc-bg-3)',
-                  color: isCurrent ? 'var(--cc-txt-3)' : c.featured ? '#070809' : 'var(--cc-txt)',
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor: isCurrent || isPending ? 'default' : 'pointer',
-                  fontFamily: 'inherit',
-                  opacity: isPending && !isPendingHere ? 0.5 : 1,
-                }}
+                className={`ws-btn ws-btn-block ${
+                  isCurrent ? 'ws-btn-ghost' : c.featured ? 'ws-btn-primary' : 'ws-btn-ghost'
+                }`}
               >
                 {isPendingHere
                   ? 'Procesando…'
@@ -373,32 +271,17 @@ export function SubscriptionActions({ initialTier, userId, isAdmin }: Props) {
       </div>
 
       {tier !== 'FREE' && (
-        <div className="cc-mod-section">
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">Cancelar suscripción</span>
-              <span className="s">
-                Conservas tu acceso a {TIER_LABELS[tier]} hasta que termine el período que ya pagaste.
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={cancelSubscription}
-              style={{
-                background: 'transparent',
-                border: '1px solid var(--cc-red)',
-                color: 'var(--cc-red)',
-                padding: '8px 14px',
-                borderRadius: 8,
-                fontFamily: 'inherit',
-                fontSize: 12.5,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Cancelar plan
-            </button>
+        <div className="ws-notice" style={{ marginTop: 20, marginBottom: 0 }}>
+          <div className="ws-notice-body">
+            <h3>Cancelar suscripción</h3>
+            <p>
+              Conservas tu acceso a {TIER_LABELS[tier]} hasta que termine el período que ya
+              pagaste. Después bajas a Free sin cargo.
+            </p>
           </div>
+          <button type="button" className="ws-btn ws-btn-danger ws-btn-sm" onClick={cancelSubscription}>
+            Cancelar plan
+          </button>
         </div>
       )}
     </>

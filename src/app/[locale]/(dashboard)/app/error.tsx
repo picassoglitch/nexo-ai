@@ -35,119 +35,28 @@ export default function AppError({
 }) {
   const isDev = process.env.NODE_ENV !== 'production';
   return (
-    <div
-      style={{
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '60px 24px',
-        gap: 18,
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 56,
-          height: 56,
-          borderRadius: 14,
-          background: 'rgba(255, 93, 93, 0.08)',
-          border: '1px solid var(--cc-red, #ff5d5d)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 28,
-        }}
-      >
+    <div className="ws-empty ws-error">
+      <div className="ws-empty-ic" aria-hidden="true">
         ⚠
       </div>
-      <div>
-        <h2 style={{ fontSize: 22, fontWeight: 600, margin: 0, marginBottom: 6 }}>
-          Algo se rompió en esta pantalla
-        </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: 'var(--cc-txt-3)',
-            maxWidth: '52ch',
-            lineHeight: 1.55,
-            margin: 0,
-          }}
-        >
-          Un error de servidor cortó la carga. La sesión sigue activa — puedes
-          recargar o irte a otra parte del workspace mientras lo investigamos.
-        </p>
-      </div>
+      <h3>Algo se rompió en esta pantalla</h3>
+      <p>
+        No es tu culpa y no perdiste nada. Recarga la página; si sigue pasando, escríbenos por
+        Mensajes con el ID de abajo y lo revisamos.
+      </p>
 
       {error.digest && (
-        <div
-          style={{
-            padding: '8px 14px',
-            background: 'var(--cc-bg-2)',
-            border: '1px solid var(--cc-line-2)',
-            borderRadius: 7,
-            fontFamily: 'var(--cc-mono), monospace',
-            fontSize: 11,
-            color: 'var(--cc-txt-4)',
-            letterSpacing: '0.04em',
-          }}
-        >
-          ID del error: <code style={{ color: 'var(--cc-txt-2)' }}>{error.digest}</code>
-        </div>
+        <p className="ws-kv">
+          ID del error: <b>{error.digest}</b>
+        </p>
       )}
+      {isDev && error.message && <p className="ws-inline-error">{error.message}</p>}
 
-      {isDev && error.message && (
-        <pre
-          style={{
-            padding: '12px 14px',
-            background: 'rgba(255, 93, 93, 0.06)',
-            border: '1px solid rgba(255, 93, 93, 0.3)',
-            borderRadius: 7,
-            fontFamily: 'var(--cc-mono), monospace',
-            fontSize: 11,
-            color: 'var(--cc-red, #ff5d5d)',
-            maxWidth: '64ch',
-            textAlign: 'left',
-            whiteSpace: 'pre-wrap',
-            margin: 0,
-          }}
-        >
-          {error.message}
-        </pre>
-      )}
-
-      <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-        <button
-          type="button"
-          onClick={() => reset()}
-          style={{
-            padding: '10px 18px',
-            borderRadius: 8,
-            border: 'none',
-            background: 'var(--cc-green)',
-            color: '#070809',
-            fontFamily: 'inherit',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          ↻ Reintentar
+      <div className="ws-btn-row" style={{ justifyContent: 'center', marginTop: 20 }}>
+        <button type="button" className="ws-btn ws-btn-primary" onClick={reset}>
+          Recargar
         </button>
-        <Link
-          href={'/app' as Route}
-          style={{
-            padding: '10px 18px',
-            borderRadius: 8,
-            border: '1px solid var(--cc-line-2)',
-            background: 'transparent',
-            color: 'var(--cc-txt-2)',
-            fontFamily: 'inherit',
-            fontSize: 13,
-            textDecoration: 'none',
-          }}
-        >
+        <Link href={'/app' as Route} className="ws-btn ws-btn-ghost">
           Volver al inicio
         </Link>
       </div>

@@ -1,6 +1,10 @@
 // Server-rendered thread of message bubbles. No client interactivity here —
-// the composer is a separate client component below. Keeping read-side
-// rendering on the server lets RSC stream the history without a flash.
+// the composer is a separate client component. Keeping read-side rendering on
+// the server lets RSC stream the history without a flash.
+//
+// Styles live in src/styles/messages.css, which both shells import: this
+// component renders inside the subscriber workspace AND the admin command
+// center, so it can't depend on either one's tokens directly.
 
 import type { MessageRow } from '@/lib/messages/messages-data';
 
@@ -33,75 +37,23 @@ function formatTime(iso: string): string {
 export function MessageThread({ messages, viewer, emptyMessage }: Props) {
   if (messages.length === 0) {
     return (
-      <div
-        style={{
-          padding: '40px 20px',
-          textAlign: 'center',
-          color: 'var(--cc-txt-4)',
-          fontSize: 13,
-          border: '1px dashed var(--cc-line)',
-          borderRadius: 'var(--cc-r-l)',
-          background: 'var(--cc-bg-1)',
-        }}
-      >
-        {emptyMessage ??
-          'Aún no hay mensajes. Escribe abajo y empieza la conversación.'}
+      <div className="msg-empty">
+        {emptyMessage ?? 'Aún no hay mensajes. Escribe abajo y empieza la conversación.'}
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        padding: '4px 2px 20px',
-      }}
-    >
+    <div className="msg-thread">
       {messages.map((m) => {
+        // Viewer's own messages sit right and carry the accent; the
+        // counterpart's sit left on the neutral panel.
         const fromViewer = m.sender_role === viewer;
-        // viewer bubble = right-aligned, green-ish; counterpart bubble =
-        // left-aligned, panel-colored. Mirrors any modern chat UI.
         return (
-          <div
-            key={m.id}
-            style={{
-              display: 'flex',
-              justifyContent: fromViewer ? 'flex-end' : 'flex-start',
-            }}
-          >
-            <div
-              style={{
-                maxWidth: '78%',
-                padding: '10px 14px',
-                borderRadius: fromViewer
-                  ? '14px 14px 4px 14px'
-                  : '14px 14px 14px 4px',
-                background: fromViewer
-                  ? 'var(--cc-green-g)'
-                  : 'var(--cc-panel-2)',
-                border: '1px solid',
-                borderColor: fromViewer
-                  ? 'rgba(158, 234, 58, 0.35)'
-                  : 'var(--cc-line)',
-                color: 'var(--cc-txt)',
-                fontSize: 13.5,
-                lineHeight: 1.5,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
+          <div key={m.id} className={`msg-line${fromViewer ? ' mine' : ''}`}>
+            <div className="msg-bubble">
               {m.body}
-              <div
-                style={{
-                  marginTop: 6,
-                  fontFamily: 'var(--cc-mono), monospace',
-                  fontSize: 10.5,
-                  color: 'var(--cc-txt-4)',
-                  textAlign: fromViewer ? 'right' : 'left',
-                }}
-              >
+              <div className="msg-meta">
                 {m.sender_role === 'ADMIN' ? 'equipo Nexo · ' : ''}
                 {formatTime(m.created_at)}
               </div>

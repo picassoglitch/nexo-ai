@@ -1,0 +1,674 @@
+@import "../../../../styles/messages.css";
+
+/*
+  Nexo AI — subscriber workspace (/app).
+
+  Scoped under `.ws` so it can't collide with the admin command center's
+  `cc-` system (dashboard.css) or the public site (globals.css).
+
+  Design rules, in priority order:
+
+  1. ONE accent. Acid (--ws-acid) marks the primary action and the LIVE state,
+     nothing else. The old workspace tinted badges, tags, counters, links and
+     buttons all green, so nothing on the page had priority. Status colors
+     (cyan/amber/red) exist but are reserved for states that genuinely differ
+     from "fine".
+  2. Neutral by default. Surfaces and text carry the hierarchy; color is
+     information, not decoration.
+  3. One spacing scale and one radius scale. No ad-hoc pixel values in JSX —
+     if a page needs a new shape, it gets a class here.
+*/
+
+.ws {
+  /* surfaces — same near-black family as the public site */
+  --ws-bg: #06070b;
+  --ws-bg-2: #0a0c13;
+  --ws-panel: #0e1018;
+  --ws-panel-2: #141827;
+  --ws-line: rgba(255, 255, 255, 0.09);
+  --ws-line-2: rgba(255, 255, 255, 0.16);
+
+  /* text */
+  --ws-ink: #f4f3ee;
+  --ws-ink-2: #b9b9c4;
+  --ws-ink-3: #7c7d8b;
+  --ws-ink-4: #55566224;
+
+  /* the one accent */
+  --ws-acid: #c6f24e;
+  --ws-acid-ink: #06070b;
+  --ws-acid-soft: rgba(198, 242, 78, 0.12);
+  --ws-acid-line: rgba(198, 242, 78, 0.32);
+
+  /* status — used only when the state is not "fine" */
+  --ws-cyan: #3df5e0;
+  --ws-amber: #f5b13d;
+  --ws-red: #ff6b6b;
+  --ws-violet: #9d7bff;
+
+  /* scale */
+  --ws-r: 10px;
+  --ws-r-l: 14px;
+  --ws-r-xl: 20px;
+  --ws-sb: 248px;
+  --ws-topbar: 64px;
+  --ws-ease: cubic-bezier(.16, 1, .3, 1);
+
+  --ws-font: var(--ws-font-display, "Familjen Grotesk"), system-ui, sans-serif;
+  --ws-mono: var(--ws-font-mono, "Space Mono"), ui-monospace, monospace;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ws-bg);
+  color: var(--ws-ink);
+  font-family: var(--ws-font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ws *, .ws *::before, .ws *::after { margin: 0; padding: 0; box-sizing: border-box; }
+.ws ::selection { background: var(--ws-acid); color: var(--ws-acid-ink); }
+.ws a { color: inherit; text-decoration: none; }
+.ws ::-webkit-scrollbar { width: 10px; height: 10px; }
+.ws ::-webkit-scrollbar-thumb { background: var(--ws-line-2); border-radius: 6px; border: 3px solid var(--ws-bg); }
+.ws ::-webkit-scrollbar-track { background: transparent; }
+
+/* The workspace paints its own background over the marketing body. */
+body:has(.ws) { background: #06070b; overflow-x: hidden; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.ws-shell { display: grid; grid-template-columns: var(--ws-sb) minmax(0, 1fr); }
+.ws-main { min-width: 0; display: flex; flex-direction: column; }
+.ws-page { padding: 28px 32px 96px; max-width: 1120px; width: 100%; }
+@media (max-width: 1080px) { .ws-page { padding: 24px 20px 96px; } }
+@media (max-width: 900px) {
+  .ws-shell { grid-template-columns: minmax(0, 1fr); }
+  /* Room for the mobile tab bar. */
+  .ws-page { padding: 20px 16px 108px; }
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.ws-sb {
+  position: sticky; top: 0; height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column;
+  background: var(--ws-bg-2); border-right: 1px solid var(--ws-line);
+  z-index: 60;
+}
+.ws-sb-top { display: flex; align-items: center; gap: 10px; padding: 18px 18px 16px; }
+.ws-sb-brand { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+.ws-sb-brand .ws-accent { color: var(--ws-acid); }
+.ws-tier {
+  margin-left: auto; font-family: var(--ws-mono); font-size: 9.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ws-ink-2);
+  border: 1px solid var(--ws-line-2); border-radius: 100px; padding: 3px 8px; white-space: nowrap;
+}
+.ws-sb-scroll { flex: 1; overflow-y: auto; padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 20px; }
+.ws-sb-grp { display: flex; flex-direction: column; gap: 2px; }
+.ws-gl {
+  font-family: var(--ws-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--ws-ink-3); padding: 0 10px 8px;
+}
+.ws-nav-item {
+  position: relative; display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: var(--ws-r); font-size: 13.5px; color: var(--ws-ink-2);
+  transition: background .18s var(--ws-ease), color .18s var(--ws-ease);
+}
+.ws-nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--ws-ink); }
+.ws-nav-item.on { background: var(--ws-panel-2); color: var(--ws-ink); font-weight: 500; }
+/* The active marker is the only acid in the sidebar — it's the one thing
+   you scan for. */
+.ws-nav-item.on::before {
+  content: ''; position: absolute; left: -12px; top: 50%; translate: 0 -50%;
+  width: 3px; height: 18px; border-radius: 0 3px 3px 0; background: var(--ws-acid);
+}
+.ws-nav-ic { width: 18px; display: grid; place-items: center; flex-shrink: 0; color: var(--ws-ink-3); }
+.ws-nav-item.on .ws-nav-ic, .ws-nav-item:hover .ws-nav-ic { color: var(--ws-ink); }
+.ws-nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-ct {
+  font-family: var(--ws-mono); font-size: 10px; min-width: 19px; height: 19px; padding: 0 5px;
+  display: grid; place-items: center; border-radius: 100px;
+  background: rgba(255, 255, 255, 0.07); color: var(--ws-ink-2);
+}
+.ws-ct.alert { background: var(--ws-acid); color: var(--ws-acid-ink); font-weight: 700; }
+.ws-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ws-acid); animation: ws-blink 1.8s infinite; }
+@keyframes ws-blink { 50% { opacity: .35; } }
+
+.ws-sb-foot { border-top: 1px solid var(--ws-line); padding: 12px; display: flex; align-items: center; gap: 10px; }
+.ws-ava {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+  background: var(--ws-panel-2); border: 1px solid var(--ws-line-2);
+  font-size: 13px; font-weight: 600; color: var(--ws-ink);
+}
+.ws-u { flex: 1; min-width: 0; }
+.ws-u-n { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-u-r { font-family: var(--ws-mono); font-size: 10px; color: var(--ws-ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.ws-icon-btn {
+  width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 8px; border: 1px solid transparent; background: transparent;
+  color: var(--ws-ink-3); cursor: pointer; transition: color .18s, background .18s, border-color .18s;
+}
+.ws-icon-btn:hover { color: var(--ws-ink); background: rgba(255, 255, 255, 0.05); border-color: var(--ws-line); }
+.ws-icon-btn.danger:hover { color: var(--ws-red); border-color: rgba(255, 107, 107, 0.4); background: rgba(255, 107, 107, 0.08); }
+
+/* Off-canvas on small screens; the tab bar becomes the primary nav. */
+@media (max-width: 900px) {
+  .ws-sb {
+    position: fixed; inset: 0 auto 0 0; width: 280px;
+    translate: -100% 0; transition: translate .28s var(--ws-ease);
+  }
+  .ws-sb.open { translate: 0 0; }
+  .ws-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 55; }
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.ws-topbar {
+  position: sticky; top: 0; z-index: 50;
+  min-height: var(--ws-topbar);
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 32px; border-bottom: 1px solid var(--ws-line);
+  background: rgba(6, 7, 11, 0.88);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+}
+@media (max-width: 1080px) { .ws-topbar { padding: 12px 20px; } }
+@media (max-width: 900px) { .ws-topbar { padding: 12px 16px; } }
+.ws-topbar-titles { min-width: 0; flex: 1; }
+.ws-topbar h1 { font-size: 19px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.2; }
+.ws-topbar p {
+  font-size: 12.5px; color: var(--ws-ink-3); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ws-topbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+/* Token balance follows you across every page — it's the number that decides
+   whether you can actually run anything. It used to live only on the home. */
+.ws-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px; border-radius: 100px; border: 1px solid var(--ws-line);
+  background: var(--ws-panel); font-family: var(--ws-mono); font-size: 11.5px; color: var(--ws-ink-2);
+  transition: border-color .18s var(--ws-ease), color .18s var(--ws-ease);
+}
+a.ws-chip:hover { border-color: var(--ws-line-2); color: var(--ws-ink); }
+.ws-chip b { color: var(--ws-ink); font-weight: 600; }
+.ws-chip.low { border-color: rgba(245, 177, 61, 0.4); color: var(--ws-amber); }
+.ws-chip.low b { color: var(--ws-amber); }
+.ws-menu-btn { display: none; }
+@media (max-width: 900px) {
+  .ws-menu-btn { display: grid; }
+  .ws-chip .ws-chip-label { display: none; }
+}
+@media (max-width: 620px) {
+  /* On a phone the top bar has a title, the balance and a CTA fighting for
+     one row. The CTA goes — every page's primary destination is already a
+     thumb away in the tab bar. */
+  .ws-topbar-actions .ws-btn { display: none; }
+  .ws-topbar h1 { font-size: 17px; }
+  .ws-topbar p { display: none; }
+}
+
+/* ============================================================
+   MOBILE TAB BAR — primary navigation on phones
+   ============================================================ */
+.ws-tabbar { display: none; }
+@media (max-width: 900px) {
+  .ws-tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 58;
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+    background: rgba(10, 12, 19, 0.94);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--ws-line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .ws-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 4px 11px; font-size: 10.5px; color: var(--ws-ink-3);
+    background: none; border: none; cursor: pointer; font-family: inherit;
+  }
+  .ws-tab .ws-tab-ic { font-size: 16px; line-height: 1; }
+  .ws-tab.on { color: var(--ws-acid); }
+}
+
+/* ============================================================
+   SECTIONS + TYPE
+   ============================================================ */
+.ws-section { margin-bottom: 32px; }
+.ws-section:last-child { margin-bottom: 0; }
+.ws-sl {
+  font-family: var(--ws-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ws-ink-3); margin-bottom: 14px;
+}
+.ws-h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+.ws-sub { font-size: 13.5px; color: var(--ws-ink-3); line-height: 1.55; }
+.ws-mono { font-family: var(--ws-mono); }
+.ws-hr { height: 1px; background: var(--ws-line); border: 0; margin: 24px 0; }
+
+/* Greeting block on the home page. */
+.ws-greet h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 600; letter-spacing: -0.03em; }
+.ws-greet p { margin-top: 8px; font-size: 14.5px; color: var(--ws-ink-2); line-height: 1.6; max-width: 62ch; }
+.ws-greet b { color: var(--ws-ink); font-weight: 600; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.ws-card {
+  background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: var(--ws-r-l);
+  padding: 20px;
+}
+.ws-card-pad-lg { padding: 26px; }
+a.ws-card, button.ws-card { display: block; width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+a.ws-card, button.ws-card { transition: border-color .22s var(--ws-ease), translate .22s var(--ws-ease), background-color .22s var(--ws-ease); }
+a.ws-card:hover, button.ws-card:hover { border-color: var(--ws-line-2); translate: 0 -2px; background-color: var(--ws-panel-2); }
+.ws-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.ws-card h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
+.ws-card p { font-size: 13.5px; line-height: 1.6; color: var(--ws-ink-2); }
+.ws-card-foot { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--ws-line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ws-go { font-size: 13px; font-weight: 600; color: var(--ws-acid); display: inline-flex; align-items: center; gap: 6px; }
+.ws-go .ws-arrow { transition: translate .25s var(--ws-ease); }
+a.ws-card:hover .ws-arrow { translate: 4px 0; }
+
+.ws-grid { display: grid; gap: 14px; }
+.ws-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ws-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ws-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1080px) { .ws-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  .ws-grid-2, .ws-grid-3 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) { .ws-grid-4 { grid-template-columns: minmax(0, 1fr); } }
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.ws-stat { background: var(--ws-panel); border: 1px solid var(--ws-line); border-radius: var(--ws-r-l); padding: 18px 20px; }
+.ws-stat-l { font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ws-ink-3); }
+.ws-stat-v { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; margin: 8px 0 4px; line-height: 1; }
+.ws-stat-v small { font-size: 13px; font-weight: 400; color: var(--ws-ink-3); margin-left: 5px; letter-spacing: 0; }
+.ws-stat-v.acid { color: var(--ws-acid); }
+.ws-stat-sub { font-size: 12.5px; color: var(--ws-ink-3); line-height: 1.45; }
+
+/* ============================================================
+   BUTTONS — one shape, three weights
+   ============================================================ */
+.ws-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 18px; border-radius: var(--ws-r); border: 1px solid transparent;
+  font-family: var(--ws-font); font-size: 13.5px; font-weight: 600; line-height: 1;
+  cursor: pointer; white-space: nowrap;
+  transition: background-color .2s var(--ws-ease), border-color .2s var(--ws-ease),
+              color .2s var(--ws-ease), translate .2s var(--ws-ease), opacity .2s;
+}
+.ws-btn-primary { background: var(--ws-acid); color: var(--ws-acid-ink); }
+.ws-btn-primary:hover:not(:disabled) { background: #d4ff5f; translate: 0 -1px; }
+.ws-btn-ghost { border-color: var(--ws-line-2); color: var(--ws-ink); }
+.ws-btn-ghost:hover:not(:disabled) { border-color: var(--ws-ink); background: rgba(255, 255, 255, 0.05); }
+.ws-btn-quiet { color: var(--ws-ink-2); }
+.ws-btn-quiet:hover:not(:disabled) { color: var(--ws-ink); background: rgba(255, 255, 255, 0.05); }
+.ws-btn-danger { border-color: rgba(255, 107, 107, 0.4); color: var(--ws-red); }
+.ws-btn-danger:hover:not(:disabled) { background: rgba(255, 107, 107, 0.1); border-color: var(--ws-red); }
+.ws-btn-sm { padding: 8px 13px; font-size: 12.5px; }
+.ws-btn-block { width: 100%; }
+.ws-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.ws-btn:active:not(:disabled) { translate: 0 0; scale: .985; transition-duration: .08s; }
+.ws-btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ============================================================
+   BADGES — state, never decoration
+   ============================================================ */
+.ws-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 100px; border: 1px solid var(--ws-line-2); color: var(--ws-ink-2);
+  white-space: nowrap;
+}
+.ws-badge.live { border-color: var(--ws-acid-line); background: var(--ws-acid-soft); color: var(--ws-acid); }
+.ws-badge.soon { border-color: rgba(157, 123, 255, 0.35); color: var(--ws-violet); }
+.ws-badge.warn { border-color: rgba(245, 177, 61, 0.35); color: var(--ws-amber); }
+.ws-badge.danger { border-color: rgba(255, 107, 107, 0.35); color: var(--ws-red); }
+.ws-badge .ws-pulse { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: ws-blink 1.8s infinite; }
+
+/* ============================================================
+   LISTS / ROWS / TABLES
+   ============================================================ */
+.ws-list { border: 1px solid var(--ws-line); border-radius: var(--ws-r-l); overflow: hidden; background: var(--ws-panel); }
+.ws-row { display: flex; align-items: center; gap: 14px; padding: 15px 18px; border-bottom: 1px solid var(--ws-line); }
+.ws-row:last-child { border-bottom: none; }
+.ws-row-body { flex: 1; min-width: 0; }
+.ws-row-name { font-size: 13.5px; font-weight: 500; }
+.ws-row-sub { font-size: 12.5px; color: var(--ws-ink-3); margin-top: 3px; }
+.ws-row-val { font-family: var(--ws-mono); font-size: 13px; color: var(--ws-ink); white-space: nowrap; }
+a.ws-row { transition: background-color .18s var(--ws-ease); }
+a.ws-row:hover { background: var(--ws-panel-2); }
+
+.ws-bar { height: 6px; border-radius: 100px; background: rgba(255, 255, 255, 0.08); overflow: hidden; flex: 1; min-width: 90px; }
+.ws-bar-fill { display: block; height: 100%; border-radius: 100px; background: var(--ws-acid); }
+.ws-bar-fill.warn { background: var(--ws-amber); }
+.ws-bar-fill.danger { background: var(--ws-red); }
+.ws-meter { display: flex; align-items: center; gap: 12px; margin-top: 8px; font-family: var(--ws-mono); font-size: 11.5px; color: var(--ws-ink-3); }
+/* Cap the inline meter so a quota row doesn't stretch a hairline bar across
+   the full page width — it reads as a rule, not a measurement. */
+.ws-meter .ws-bar { max-width: 260px; }
+
+/* ============================================================
+   EMPTY STATE — one shape everywhere
+   ============================================================ */
+.ws-empty {
+  border: 1px dashed var(--ws-line-2); border-radius: var(--ws-r-l);
+  padding: 52px 28px; text-align: center;
+}
+.ws-empty-ic { font-size: 26px; color: var(--ws-ink-3); margin-bottom: 14px; }
+.ws-empty h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.ws-empty p { font-size: 13.5px; color: var(--ws-ink-3); line-height: 1.6; max-width: 46ch; margin: 0 auto; }
+.ws-empty .ws-btn { margin-top: 20px; }
+
+/* ============================================================
+   NOTICES
+   ============================================================ */
+.ws-notice {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px; border-radius: var(--ws-r-l);
+  border: 1px solid var(--ws-line-2); background: var(--ws-panel);
+  margin-bottom: 20px;
+}
+.ws-notice-body { flex: 1; min-width: 0; }
+.ws-notice h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.ws-notice p { font-size: 13px; color: var(--ws-ink-2); line-height: 1.55; }
+.ws-notice.accent { border-color: var(--ws-acid-line); background: var(--ws-acid-soft); }
+.ws-notice.warn { border-color: rgba(245, 177, 61, 0.35); background: rgba(245, 177, 61, 0.07); }
+.ws-notice.info { border-color: rgba(157, 123, 255, 0.35); background: rgba(157, 123, 255, 0.07); }
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+.ws-field { display: flex; flex-direction: column; gap: 7px; }
+.ws-field label { font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ws-ink-3); }
+.ws-field input, .ws-field select, .ws-field textarea {
+  width: 100%; min-width: 0; padding: 11px 13px;
+  background: var(--ws-bg-2); border: 1px solid var(--ws-line); border-radius: var(--ws-r);
+  color: var(--ws-ink); font-family: var(--ws-font); font-size: 13.5px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ws-field textarea { resize: vertical; min-height: 104px; line-height: 1.55; }
+.ws-field input::placeholder, .ws-field textarea::placeholder { color: var(--ws-ink-3); }
+.ws-field input:focus, .ws-field select:focus, .ws-field textarea:focus {
+  outline: none; border-color: var(--ws-acid); box-shadow: 0 0 0 3px var(--ws-acid-soft);
+}
+.ws-field input:disabled { opacity: .55; cursor: not-allowed; }
+.ws-field-hint { font-size: 12px; color: var(--ws-ink-3); line-height: 1.5; }
+.ws-form { display: flex; flex-direction: column; gap: 18px; }
+
+/* ============================================================
+   MOTION — same curve and restraint as the public site
+   ============================================================ */
+@keyframes ws-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.ws-enter { animation: ws-rise .5s var(--ws-ease) both; animation-delay: calc(var(--i, 0) * 55ms); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ws *, .ws *::before, .ws *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .ws-enter { animation: none; opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.ws-toast {
+  position: fixed; left: 50%; bottom: 28px; translate: -50% 0; z-index: 200;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px; border-radius: 100px;
+  background: var(--ws-panel-2); border: 1px solid var(--ws-line-2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  font-size: 13px; color: var(--ws-ink);
+  animation: ws-rise .35s var(--ws-ease) both;
+}
+.ws-toast-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ws-acid); flex-shrink: 0; }
+@media (max-width: 900px) { .ws-toast { bottom: 84px; } }
+
+/* ============================================================
+   ENGINE TILE — the workspace's one recurring object
+   ============================================================ */
+.ws-engine { display: flex; flex-direction: column; gap: 12px; }
+.ws-engine-top { display: flex; align-items: center; gap: 12px; }
+/* `position: relative` is load-bearing: the NexoClip brand mark renders as a
+   next/image with `fill`, which needs a positioned, sized, overflow-hidden
+   parent or it escapes the tile and blows out the card. */
+.ws-engine-glyph {
+  position: relative;
+  width: 42px; height: 42px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 12px; border: 1px solid var(--ws-line); background: var(--ws-bg-2);
+  color: var(--ws-ink-2); overflow: hidden;
+}
+.ws-engine.is-live .ws-engine-glyph { border-color: var(--ws-acid-line); background: var(--ws-acid-soft); color: var(--ws-acid); }
+.ws-engine-id { min-width: 0; flex: 1; }
+.ws-engine-id h3 { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-engine-type {
+  font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ws-ink-3); margin-top: 3px;
+}
+.ws-engine p { font-size: 13px; line-height: 1.55; color: var(--ws-ink-2); flex: 1; }
+.ws-card.is-live { border-color: var(--ws-acid-line); }
+.ws-card.is-soon { opacity: .72; }
+
+/* ============================================================
+   FAQ ACCORDION
+   ============================================================ */
+.ws-faq-item { border-bottom: 1px solid var(--ws-line); }
+.ws-faq-item:last-child { border-bottom: none; }
+.ws-faq-q {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  padding: 15px 18px; border: none; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--ws-ink);
+  text-align: left; transition: background-color .16s var(--ws-ease);
+}
+.ws-faq-q:hover { background: var(--ws-panel-2); }
+.ws-faq-caret {
+  flex-shrink: 0; width: 14px; font-family: var(--ws-mono); font-size: 11px;
+  color: var(--ws-ink-3); transition: rotate .2s var(--ws-ease), color .2s;
+}
+.ws-faq-q[aria-expanded='true'] .ws-faq-caret { rotate: 90deg; color: var(--ws-acid); }
+.ws-faq-a { padding: 0 20px 18px 46px; font-size: 13px; line-height: 1.65; color: var(--ws-ink-2); }
+.ws-faq-a b { color: var(--ws-ink); font-weight: 600; }
+
+/* Messages page: thread + composer stack. */
+.ws-thread { display: flex; flex-direction: column; gap: 18px; }
+
+/* ============================================================
+   PLAN CARDS
+   ============================================================ */
+.ws-plan {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 24px 22px; border: 1px solid var(--ws-line); border-radius: var(--ws-r-l);
+  background: var(--ws-panel);
+}
+.ws-plan.is-featured { border-color: var(--ws-acid-line); }
+.ws-plan.is-current { border-color: var(--ws-acid); }
+.ws-plan-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ws-plan-head h3 { font-size: 14px; font-weight: 600; }
+.ws-plan-price { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.ws-plan-price span { font-size: 13px; font-weight: 400; color: var(--ws-ink-3); margin-left: 5px; letter-spacing: 0; }
+.ws-plan-tagline { font-size: 13px; color: var(--ws-ink-3); line-height: 1.5; min-height: 38px; }
+.ws-plan-feats { list-style: none; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+.ws-plan-feats li { display: flex; gap: 9px; font-size: 12.5px; line-height: 1.5; color: var(--ws-ink-2); }
+.ws-plan-feats li > span:first-child { color: var(--ws-acid); font-family: var(--ws-mono); flex-shrink: 0; }
+
+/* ============================================================
+   USAGE PAGE
+   ============================================================ */
+.ws-usage-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  margin-bottom: 12px; font-size: 13.5px; color: var(--ws-ink-2);
+}
+.ws-warn-text { color: var(--ws-amber); }
+.ws-pack { display: flex; flex-direction: column; gap: 12px; }
+.ws-pack p { flex: 1; }
+.ws-pack-meta { font-family: var(--ws-mono); font-size: 11.5px; color: var(--ws-ink-3); }
+.ws-pack-meta b { color: var(--ws-ink); }
+.ws-details summary {
+  cursor: pointer; font-size: 13px; color: var(--ws-ink-3); margin-bottom: 12px;
+  transition: color .18s;
+}
+.ws-details summary:hover { color: var(--ws-ink); }
+.ws-diag {
+  margin-top: 20px; padding: 11px 14px; border-radius: var(--ws-r);
+  border: 1px solid rgba(245, 177, 61, 0.25); background: rgba(245, 177, 61, 0.06);
+  font-family: var(--ws-mono); font-size: 11px; line-height: 1.55; color: var(--ws-amber);
+}
+
+/* ============================================================
+   ENGINE CARDS + FILTERS
+   ============================================================ */
+/* Fills its grid cell so every card in a row shares one baseline and the
+   footer actions line up, regardless of how much copy each engine carries. */
+.ws-engine-card { display: flex; flex-direction: column; gap: 14px; height: 100%; }
+/* Scoped to `.ws-cell`, NOT to every animated grid child: `.ws-enter` is also
+   on stat cards, and making those flex laid their label, value and caption out
+   in a row on top of each other. */
+.ws-cell { display: flex; }
+.ws-cell > * { flex: 1; }
+.ws-engine-card .ws-engine-tagline { flex: 1; }
+.ws-engine-card .ws-engine-bullets + .ws-card-foot { margin-top: auto; }
+.ws-engine-card .ws-engine-top { gap: 12px; }
+.ws-engine-tagline { font-size: 13.5px; line-height: 1.6; color: var(--ws-ink-2); }
+.ws-engine-bullets { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.ws-engine-bullets li { display: flex; gap: 9px; font-size: 12.5px; line-height: 1.5; color: var(--ws-ink-2); }
+.ws-engine-bullets li > span:first-child { color: var(--ws-acid); font-family: var(--ws-mono); flex-shrink: 0; }
+.ws-engine-card .ws-card-foot { margin-top: auto; flex-wrap: wrap; }
+.ws-engine-owner {
+  font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ws-ink-3); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.ws-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.ws-chips::-webkit-scrollbar { display: none; }
+.ws-filter {
+  display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+  padding: 8px 14px; border-radius: 100px; border: 1px solid var(--ws-line);
+  background: var(--ws-panel); color: var(--ws-ink-3);
+  font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: border-color .18s var(--ws-ease), color .18s var(--ws-ease), background-color .18s var(--ws-ease);
+}
+.ws-filter:hover { border-color: var(--ws-line-2); color: var(--ws-ink); }
+.ws-filter.on { border-color: var(--ws-acid-line); background: var(--ws-acid-soft); color: var(--ws-acid); }
+.ws-filter-ct { font-family: var(--ws-mono); font-size: 10.5px; opacity: .75; }
+
+/* Plan capability strip at the foot of the engines hub. */
+.ws-caps { display: flex; flex-wrap: wrap; gap: 18px 44px; }
+.ws-cap-v { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.ws-cap-k { margin-top: 3px; font-size: 12px; color: var(--ws-ink-3); }
+
+/* ============================================================
+   ENGINE DETAIL
+   ============================================================ */
+.ws-back { margin-bottom: 18px; }
+.ws-back a {
+  font-family: var(--ws-mono); font-size: 12px; color: var(--ws-ink-3);
+  transition: color .18s;
+}
+.ws-back a:hover { color: var(--ws-ink); }
+
+.ws-brand-hero {
+  display: flex; justify-content: center; padding: 18px; margin-bottom: 22px;
+  border: 1px solid var(--ws-line); border-radius: var(--ws-r-xl); background: #03040b;
+}
+.ws-brand-hero img { display: block; width: 150px; height: auto; }
+
+.ws-engine-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.ws-engine-head-id { flex: 1; min-width: 200px; }
+.ws-engine-head-id h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; }
+.ws-engine-glyph-lg { width: 60px; height: 60px; border-radius: 16px; font-size: 30px; }
+.ws-engine-desc { font-size: 14.5px; line-height: 1.65; color: var(--ws-ink-2); max-width: 64ch; margin-bottom: 26px; }
+
+.ws-panel {
+  padding: 24px 26px; margin-bottom: 28px;
+  border: 1px solid var(--ws-line-2); border-radius: var(--ws-r-l); background: var(--ws-panel);
+}
+.ws-panel.is-live { border-color: var(--ws-acid-line); background: var(--ws-acid-soft); }
+.ws-panel.is-gated { border-color: rgba(245, 177, 61, 0.35); background: rgba(245, 177, 61, 0.06); }
+.ws-panel.is-soon { border-style: dashed; }
+.ws-panel-label {
+  font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ws-ink-3); margin-bottom: 8px;
+}
+.ws-panel.is-live .ws-panel-label { color: var(--ws-acid); }
+.ws-panel.is-gated .ws-panel-label { color: var(--ws-amber); }
+.ws-panel h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 6px; }
+.ws-panel > p { font-size: 13.5px; line-height: 1.6; color: var(--ws-ink-2); max-width: 62ch; margin-bottom: 18px; }
+.ws-panel-foot {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--ws-line);
+  font-family: var(--ws-mono); font-size: 11.5px; color: var(--ws-ink-3);
+}
+
+.ws-kv { font-family: var(--ws-mono); font-size: 11.5px; color: var(--ws-ink-3); line-height: 1.6; margin-top: 10px; }
+.ws-kv b { color: var(--ws-ink-2); }
+.ws-kv code {
+  background: var(--ws-bg-2); border: 1px solid var(--ws-line); border-radius: 5px;
+  padding: 1px 5px; font-size: 11px;
+}
+.ws-provision { margin-top: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+
+.ws-pack-buy { display: flex; flex-direction: column; gap: 10px; }
+.ws-inline-error {
+  padding: 9px 12px; border-radius: var(--ws-r);
+  border: 1px solid rgba(255, 107, 107, 0.4); background: rgba(255, 107, 107, 0.08);
+  font-size: 11.5px; line-height: 1.5; color: var(--ws-red);
+}
+
+/* ============================================================
+   SWITCH
+   ============================================================ */
+.ws-switch {
+  position: relative; flex-shrink: 0;
+  width: 42px; height: 24px; border-radius: 100px; cursor: pointer;
+  border: 1px solid var(--ws-line-2); background: var(--ws-bg-2);
+  transition: background-color .2s var(--ws-ease), border-color .2s var(--ws-ease);
+}
+.ws-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; border-radius: 50%; background: var(--ws-ink-3);
+  transition: translate .2s var(--ws-ease), background-color .2s var(--ws-ease);
+}
+.ws-switch.on { background: var(--ws-acid); border-color: var(--ws-acid); }
+.ws-switch.on::after { translate: 18px 0; background: var(--ws-acid-ink); }
+.ws-switch:focus-visible { outline: 2px solid var(--ws-acid); outline-offset: 2px; }
+
+/* ============================================================
+   SKELETONS
+   ============================================================ */
+@keyframes ws-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.ws-skeleton {
+  border: 1px solid var(--ws-line); border-radius: var(--ws-r-l); background: var(--ws-panel);
+  animation: ws-pulse 1.6s ease-in-out infinite;
+}
+.ws-skeleton-chip { height: 34px; width: 104px; border-radius: 100px; flex-shrink: 0; }
+.ws-skeleton-card { height: 236px; }
+
+/* ============================================================
+   ONBOARDING TOUR
+   ============================================================ */
+.ws-tour-card {
+  border: 1px solid var(--ws-line-2); border-radius: var(--ws-r-xl);
+  background: var(--ws-panel-2); padding: 26px;
+  box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.8);
+}
+.ws-tour-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.ws-tour-step {
+  font-family: var(--ws-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ws-acid);
+}
+.ws-tour-card h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+.ws-tour-card > p { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--ws-ink-2); }
+.ws-tour-dots { display: flex; align-items: center; gap: 6px; margin-top: 20px; }
+.ws-tour-dot {
+  height: 5px; width: 5px; border-radius: 100px; background: var(--ws-line-2);
+  transition: width .25s var(--ws-ease), background-color .25s var(--ws-ease);
+}
+.ws-tour-dot.on { width: 18px; background: var(--ws-acid); }
+.ws-tour-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+
+.ws-error { max-width: 560px; margin: 40px auto; }
+.ws-error .ws-kv, .ws-error .ws-inline-error { display: inline-block; margin-top: 14px; }

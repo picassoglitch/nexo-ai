@@ -2,6 +2,8 @@ import { setRequestLocale } from 'next-intl/server';
 import { getSessionUser } from '@/lib/auth/session';
 import { SettingsForm } from '@/components/workspace/settings-form';
 
+export const metadata = { title: 'Tu cuenta' };
+
 export default async function WorkspaceSettingsPage({
   params,
 }: {
@@ -19,12 +21,10 @@ export default async function WorkspaceSettingsPage({
   const email = session?.user.email ?? 'operator@nexo.ai';
 
   return (
-    <div className="cc-scroll">
-      <SettingsForm
-        defaultName={fullName}
-        defaultEmail={email}
-        defaultLocale={locale === 'es' ? 'es' : 'en'}
-      />
-    </div>
+    <SettingsForm
+      defaultName={fullName}
+      defaultEmail={email}
+      defaultLocale={locale === 'es' ? 'es' : 'en'}
+    />
   );
 }

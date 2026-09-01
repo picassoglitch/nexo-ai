@@ -35,24 +35,8 @@ export function EngineReprovisionButton({ engineId, engineName }: Props) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending}
-      style={{
-        background: 'var(--cc-amber)',
-        color: '#070809',
-        padding: '9px 18px',
-        borderRadius: 8,
-        border: 'none',
-        fontFamily: 'inherit',
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: pending ? 'wait' : 'pointer',
-        opacity: pending ? 0.7 : 1,
-      }}
-    >
-      {pending ? 'Creando tu cuenta…' : `↻ Crear tu cuenta en ${engineName}`}
+    <button type="button" className="ws-btn ws-btn-ghost ws-btn-sm" onClick={onClick} disabled={pending}>
+      {pending ? 'Creando tu cuenta…' : `Reintentar en ${engineName}`}
     </button>
   );
 }

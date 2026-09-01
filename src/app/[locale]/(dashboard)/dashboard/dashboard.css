@@ -1,3 +1,5 @@
+@import "../../../../styles/messages.css";
+
 /*
   Nexo AI — Command Center styles.
   Verbatim port of .nexo-reference/reference-prototype-userdashboard.html <style> block,
@@ -271,6 +273,15 @@ body:has(.cc-shell) {
 }
 .cc-cog:hover {
   color: var(--cc-txt-2);
+}
+/* Sign-out variant. Was an inline style on <SidebarSignOut/>; moved here when
+   that component gained a className prop so the subscriber workspace could
+   pass its own icon-button class. */
+.cc-cog--danger {
+  color: var(--cc-red);
+}
+.cc-cog--danger:hover {
+  color: #ff8a8a;
 }
 
 /* ============ MAIN ============ */

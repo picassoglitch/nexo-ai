@@ -70,40 +70,16 @@ export function TokenPackBuyButton({ packId, packLabel }: Props) {
   }
 
   return (
-    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="ws-pack-buy">
       <button
         type="button"
+        className="ws-btn ws-btn-primary ws-btn-block"
         onClick={onClick}
         disabled={pending}
-        style={{
-          padding: '11px 18px',
-          borderRadius: 9,
-          border: 'none',
-          background: pending ? 'var(--cc-bg-3)' : 'var(--cc-green)',
-          color: pending ? 'var(--cc-txt-3)' : '#070809',
-          fontFamily: 'inherit',
-          fontSize: 13.5,
-          fontWeight: 600,
-          cursor: pending ? 'wait' : 'pointer',
-        }}
       >
-        {pending ? 'Abriendo el pago…' : `Comprar ${packLabel} →`}
+        {pending ? 'Abriendo el pago…' : `Comprar ${packLabel}`}
       </button>
-      {stickyError && (
-        <div
-          style={{
-            padding: '8px 12px',
-            background: 'rgba(255, 93, 93, 0.08)',
-            border: '1px solid var(--cc-red, #ff5d5d)',
-            borderRadius: 7,
-            fontSize: 11.5,
-            color: 'var(--cc-red, #ff5d5d)',
-            lineHeight: 1.45,
-          }}
-        >
-          ▸ {stickyError}
-        </div>
-      )}
+      {stickyError && <p className="ws-inline-error">{stickyError}</p>}
     </div>
   );
 }

@@ -28,6 +28,40 @@ const DEFAULT_PREFS: Omit<Prefs, 'locale'> = {
 
 const STORAGE_KEY = 'nexo:settings:prefs';
 
+// One shape for every preference row, so the groups below read as one list
+// rather than three ad-hoc layouts. Declared at module scope: a component
+// defined inside render is re-created on every render and loses its state.
+function ToggleRow({
+  label,
+  title,
+  sub,
+  on,
+  onToggle,
+}: {
+  label: string;
+  title: string;
+  sub: string;
+  on: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="ws-row">
+      <div className="ws-row-body">
+        <div className="ws-row-name">{title}</div>
+        <div className="ws-row-sub">{sub}</div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={label}
+        className={`ws-switch${on ? ' on' : ''}`}
+        onClick={onToggle}
+      />
+    </div>
+  );
+}
+
 export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props) {
   const showToast = useWorkspace((s) => s.showToast);
 
@@ -72,15 +106,15 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
   }
 
   if (!hydrated) {
-    return <div style={{ padding: 20, color: 'var(--cc-txt-4)' }}>Cargando…</div>;
+    return <div className="ws-sub">Cargando…</div>;
   }
 
   return (
     <>
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Cuenta</div>
-        <form className="cc-mod-form" onSubmit={saveProfile}>
-          <div className="cc-mod-field">
+      <section className="ws-section">
+        <div className="ws-sl">Tus datos</div>
+        <form className="ws-card ws-form" onSubmit={saveProfile}>
+          <div className="ws-field">
             <label htmlFor="set-name">Nombre</label>
             <input
               id="set-name"
@@ -89,34 +123,23 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="cc-mod-field">
+          <div className="ws-field">
             <label htmlFor="set-email">Correo</label>
             <input id="set-email" type="email" value={defaultEmail} disabled />
+            <p className="ws-field-hint">
+              Tu correo es tu identidad de acceso. Para cambiarlo, escríbenos por Mensajes.
+            </p>
           </div>
-          <button
-            type="submit"
-            style={{
-              alignSelf: 'flex-start',
-              background: 'var(--cc-green)',
-              color: '#070809',
-              border: 'none',
-              padding: '10px 18px',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
+          <button type="submit" className="ws-btn ws-btn-primary" style={{ alignSelf: 'flex-start' }}>
             Guardar cambios
           </button>
         </form>
-      </div>
+      </section>
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Preferencias</div>
-        <div className="cc-mod-form">
-          <div className="cc-mod-field">
+      <section className="ws-section">
+        <div className="ws-sl">Idioma y zona horaria</div>
+        <div className="ws-card ws-form">
+          <div className="ws-field">
             <label htmlFor="set-locale">Idioma</label>
             <select
               id="set-locale"
@@ -127,81 +150,61 @@ export function SettingsForm({ defaultName, defaultEmail, defaultLocale }: Props
               <option value="es">Español</option>
             </select>
           </div>
-          <div className="cc-mod-field">
+          <div className="ws-field">
             <label htmlFor="set-tz">Zona horaria</label>
             <select
               id="set-tz"
               value={prefs.timezone}
               onChange={(e) => toggle('timezone', e.target.value)}
             >
-              <option value="America/Mexico_City">America/Mexico_City</option>
-              <option value="America/New_York">America/New_York</option>
-              <option value="America/Los_Angeles">America/Los_Angeles</option>
-              <option value="Europe/Madrid">Europe/Madrid</option>
+              <option value="America/Mexico_City">Ciudad de México</option>
+              <option value="America/New_York">Nueva York</option>
+              <option value="America/Los_Angeles">Los Ángeles</option>
+              <option value="Europe/Madrid">Madrid</option>
             </select>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Notificaciones</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">Errores críticos</span>
-              <span className="s">Te avisamos por email y push cuando algo se cae.</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Toggle notify critical"
-              className={`cc-mod-switch${prefs.notifyCritical ? ' on' : ''}`}
-              onClick={() => toggle('notifyCritical', !prefs.notifyCritical)}
-            />
-          </div>
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">Resumen diario</span>
-              <span className="s">Ingresos, tareas y errores del día anterior, a las 09:00.</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Toggle notify daily"
-              className={`cc-mod-switch${prefs.notifyDaily ? ' on' : ''}`}
-              onClick={() => toggle('notifyDaily', !prefs.notifyDaily)}
-            />
-          </div>
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">Eventos de marketing</span>
-              <span className="s">Cuando una publicación se vuelve viral o sube la interacción.</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Toggle notify marketing"
-              className={`cc-mod-switch${prefs.notifyMarketing ? ' on' : ''}`}
-              onClick={() => toggle('notifyMarketing', !prefs.notifyMarketing)}
-            />
-          </div>
+      <section className="ws-section">
+        <div className="ws-sl">Avisos</div>
+        <div className="ws-list">
+          <ToggleRow
+            label="Avisar de errores críticos"
+            title="Errores críticos"
+            sub="Te avisamos por correo cuando algo se cae."
+            on={prefs.notifyCritical}
+            onToggle={() => toggle('notifyCritical', !prefs.notifyCritical)}
+          />
+          <ToggleRow
+            label="Resumen diario"
+            title="Resumen diario"
+            sub="Lo que corrió, lo que ganaste y lo que falló, a las 09:00."
+            on={prefs.notifyDaily}
+            onToggle={() => toggle('notifyDaily', !prefs.notifyDaily)}
+          />
+          <ToggleRow
+            label="Eventos de marketing"
+            title="Eventos de marketing"
+            sub="Cuando una publicación se vuelve viral o sube la interacción."
+            on={prefs.notifyMarketing}
+            onToggle={() => toggle('notifyMarketing', !prefs.notifyMarketing)}
+          />
         </div>
-      </div>
+      </section>
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Seguridad</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div className="cc-mod-toggle">
-            <div className="cc-mod-toggle-text">
-              <span className="t">2FA con app autenticadora</span>
-              <span className="s">El código TOTP es obligatorio para los roles Admin y Super Admin.</span>
-            </div>
-            <button
-              type="button"
-              aria-label="Toggle 2FA"
-              className={`cc-mod-switch${prefs.twoFA ? ' on' : ''}`}
-              onClick={() => toggle('twoFA', !prefs.twoFA)}
-            />
-          </div>
+      <section className="ws-section">
+        <div className="ws-sl">Seguridad</div>
+        <div className="ws-list">
+          <ToggleRow
+            label="Autenticación en dos pasos"
+            title="Verificación en dos pasos"
+            sub="Un código de tu app autenticadora además de tu contraseña. Obligatorio para roles admin."
+            on={prefs.twoFA}
+            onToggle={() => toggle('twoFA', !prefs.twoFA)}
+          />
         </div>
-      </div>
+      </section>
     </>
   );
 }

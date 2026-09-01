@@ -1,30 +1,31 @@
-import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { Familjen_Grotesk, Space_Mono } from 'next/font/google';
 import { getSessionUser, requireUser } from '@/lib/auth/session';
 import { BfcacheGuard } from '@/components/auth/bfcache-guard';
 import { WorkspaceShell } from '@/components/workspace/workspace-shell';
 import { WorkspaceProfileSubscriber } from '@/components/workspace/workspace-profile-subscriber';
 import { effectiveTier, isAdminRole, tierLabelShort } from '@/lib/billing/tiers';
 import { countUnreadForUser } from '@/lib/messages/messages-data';
-import '../dashboard/dashboard.css';
+import { getTokenBalance } from '@/lib/usage/tokens';
+import './workspace.css';
 
-const inter = Inter({
+// Same two families as the public site, so signing in doesn't feel like
+// landing on a different product. (Was Inter + Space Grotesk + JetBrains Mono,
+// none of which appear anywhere else in the brand.)
+const display = Familjen_Grotesk({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--cc-body',
+  weight: ['400', '500', '600', '700'],
+  variable: '--ws-font-display',
   display: 'swap',
 });
-const grotesk = Space_Grotesk({
+const mono = Space_Mono({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--cc-disp',
+  weight: ['400', '700'],
+  variable: '--ws-font-mono',
   display: 'swap',
 });
-const mono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--cc-mono',
-  display: 'swap',
-});
+
+/** Below this, the top-bar token chip turns amber. */
+const LOW_TOKEN_RATIO = 0.15;
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   await requireUser('/app');
@@ -47,28 +48,32 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   const tier = effectiveTier(role, storedTier);
   const tierLabel = isAdmin ? `${tierLabelShort(tier)} · ADMIN` : tierLabelShort(tier);
 
-  // Sidebar badge — admin-sent messages this user hasn't opened yet.
-  // The /app/messages page auto-marks the thread read on render via
-  // markThreadReadAsUser, so this drops to 0 as soon as they visit.
-  //
-  // Wrapped in try/catch because this fn is called on EVERY layout
-  // render (including the re-render that fires after every server
-  // action POST). If the messages table is missing (migration 0014
-  // not applied) or the admin client can't initialize, an unhandled
-  // throw here would 500 the whole layout — meaning every action
-  // succeeds but the page can never re-render. That was the symptom
-  // the operator hit on /app/usage: action OK, RSC re-render dies.
-  let unreadMessages = 0;
-  if (session?.user.id) {
-    try {
-      unreadMessages = await countUnreadForUser(session.user.id);
-    } catch {
-      unreadMessages = 0;
-    }
-  }
+  // Sidebar badge + top-bar token chip. Both are best-effort: the layout
+  // renders on EVERY navigation and after every server action, so a throw
+  // here (missing table, admin client failure) would 500 the whole workspace
+  // and leave actions succeeding against a page that can never re-render.
+  const [unreadMessages, balance] = await Promise.all([
+    session?.user.id
+      ? countUnreadForUser(session.user.id).catch(() => 0)
+      : Promise.resolve(0),
+    session?.user.id
+      ? getTokenBalance(session.user.id).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+
+  const tokensLabel = !balance
+    ? '—'
+    : balance.unlimited
+      ? '∞'
+      : balance.remaining.toLocaleString('es-MX');
+  const tokenCap = balance ? balance.monthlyAllocation + balance.bonus : 0;
+  const tokensLow =
+    balance !== null && !balance.unlimited && tokenCap > 0
+      ? balance.remaining / tokenCap < LOW_TOKEN_RATIO
+      : false;
 
   return (
-    <div className={`${inter.variable} ${grotesk.variable} ${mono.variable}`}>
+    <div className={`${display.variable} ${mono.variable}`}>
       <BfcacheGuard />
       {session?.user.id && <WorkspaceProfileSubscriber userId={session.user.id} />}
       <WorkspaceShell
@@ -77,6 +82,8 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
         tierLabel={tierLabel}
         isAdmin={isAdmin}
         unreadMessages={unreadMessages}
+        tokensLabel={tokensLabel}
+        tokensLow={tokensLow}
       >
         {children}
       </WorkspaceShell>

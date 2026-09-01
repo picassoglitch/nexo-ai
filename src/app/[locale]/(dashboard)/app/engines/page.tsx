@@ -161,75 +161,77 @@ export default async function MyEnginesPage({
   const nf = (n: number) => n.toLocaleString(locale === 'es' ? 'es-MX' : 'en-US');
 
   return (
-    <div className="cc-scroll">
-      <div className="mx-auto max-w-6xl px-6 py-2 md:px-8">
-        {vms.length === 0 ? (
-          <div className="rounded-[14px] border border-dashed border-[var(--cc-line-2)] p-14 text-center">
-            <div className="text-[14px] font-semibold text-[var(--cc-txt-2)]">{t('empty.title')}</div>
-            <div className="mt-2 text-[12px] text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
-              {t('empty.hint')}
-            </div>
+    <>
+      {vms.length === 0 ? (
+        <div className="ws-empty">
+          <div className="ws-empty-ic" aria-hidden="true">
+            ◈
           </div>
-        ) : (
-          <EnginesExplorer
-            engines={vms}
-            liveCount={liveCount}
-            continueEngine={continueEngine}
-            tierLabel={caps.label}
-            showUpsell={showUpsell}
-          />
-        )}
+          <h3>{t('empty.title')}</h3>
+          <p>{t('empty.hint')}</p>
+        </div>
+      ) : (
+        <EnginesExplorer
+          engines={vms}
+          continueEngine={continueEngine}
+          showUpsell={showUpsell}
+        />
+      )}
 
-        {/* Plan capabilities — compact reference strip */}
-        {vms.length > 0 && (
-          <section className="mt-12 border-t border-[var(--cc-line)] pt-6">
-            <div className="mb-5 text-[11px] font-semibold uppercase tracking-wider text-[var(--cc-txt-4)] [font-family:var(--cc-mono),monospace]">
-              {isAdmin
-                ? t('caps.heading', { plan: caps.label })
-                : t('caps.headingPriced', { plan: caps.label, price: caps.price, per: caps.per })}
-            </div>
-            <div className="flex flex-wrap gap-x-10 gap-y-4">
-              {[
-                {
-                  // Real count live right now (includes the NexoClip trial/grace),
-                  // not the static plan cap — matches the hero's "N en vivo ahora".
-                  k: t('caps.liveEngines'),
-                  v: caps.liveEnginesCount === Infinity ? '∞' : String(liveCount),
-                },
-                {
-                  k: t('caps.tokens'),
-                  v: balance
-                    ? balance.unlimited
-                      ? '∞'
-                      : nf(balance.monthlyAllocation + balance.bonus)
-                    : nf(caps.tokensPerMonth),
-                },
-                {
-                  k: t('caps.storage'),
-                  v: caps.storageMB >= 1000 ? `${caps.storageMB / 1000} GB` : `${caps.storageMB} MB`,
-                },
-                {
-                  k: t('caps.history'),
-                  v: caps.historyDays >= 365 ? t('caps.historyYear') : t('caps.historyDays', { days: caps.historyDays }),
-                },
-                {
-                  k: t('caps.support'),
-                  v: caps.hasPrioritySupport
-                    ? t('caps.supportPriority')
-                    : tier === 'PRO'
-                      ? t('caps.supportEmail')
-                      : t('caps.supportCommunity'),
-                },
-              ].map((row) => (
-                <div key={row.k} className="space-y-1">
-                  <div className="text-2xl font-semibold text-[var(--cc-txt)]">{row.v}</div>
-                  <div className="text-xs text-[var(--cc-txt-4)]">{row.k}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-    </div>
+      {/* What your plan gives you — a reference strip, not a sales pitch, so it
+          sits at the bottom in the quiet type. */}
+      {vms.length > 0 && (
+        <section className="ws-section" style={{ marginTop: 40 }}>
+          <hr className="ws-hr" />
+          <div className="ws-sl">
+            {isAdmin
+              ? t('caps.heading', { plan: caps.label })
+              : t('caps.headingPriced', { plan: caps.label, price: caps.price, per: caps.per })}
+          </div>
+          <div className="ws-caps">
+            {[
+              {
+                // Real count live right now (includes the NexoClip trial/grace),
+                // not the static plan cap.
+                k: t('caps.liveEngines'),
+                v: caps.liveEnginesCount === Infinity ? '∞' : String(liveCount),
+              },
+              {
+                k: t('caps.tokens'),
+                v: balance
+                  ? balance.unlimited
+                    ? '∞'
+                    : nf(balance.monthlyAllocation + balance.bonus)
+                  : nf(caps.tokensPerMonth),
+              },
+              {
+                k: t('caps.storage'),
+                v: caps.storageMB >= 1000 ? `${caps.storageMB / 1000} GB` : `${caps.storageMB} MB`,
+              },
+              {
+                k: t('caps.history'),
+                v:
+                  caps.historyDays >= 365
+                    ? t('caps.historyYear')
+                    : t('caps.historyDays', { days: caps.historyDays }),
+              },
+              {
+                k: t('caps.support'),
+                v: caps.hasPrioritySupport
+                  ? t('caps.supportPriority')
+                  : tier === 'PRO'
+                    ? t('caps.supportEmail')
+                    : t('caps.supportCommunity'),
+              },
+            ].map((row) => (
+              <div key={row.k} className="ws-cap">
+                <div className="ws-cap-v">{row.v}</div>
+                <div className="ws-cap-k">{row.k}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </>
   );
 }

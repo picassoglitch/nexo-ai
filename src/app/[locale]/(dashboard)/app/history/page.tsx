@@ -1,4 +1,8 @@
 import { setRequestLocale } from 'next-intl/server';
+import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
+
+export const metadata = { title: 'Historial' };
 
 export default async function HistoryPage({
   params,
@@ -7,32 +11,20 @@ export default async function HistoryPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
   return (
-    <div className="cc-scroll">
-      <div
-        style={{
-          padding: '60px 24px',
-          border: '1px dashed var(--cc-line-2)',
-          borderRadius: 'var(--cc-r-l)',
-          textAlign: 'center',
-          color: 'var(--cc-txt-3)',
-          fontSize: 14,
-          lineHeight: 1.65,
-        }}
-      >
-        Aún no tienes nada en tu historial.
-        <br />
-        <span
-          style={{
-            color: 'var(--cc-txt-4)',
-            fontSize: 12,
-            fontFamily: 'var(--cc-mono), monospace',
-          }}
-        >
-          Cuando corras tu primer sistema, en prueba o en vivo, aquí vas a ver cada trabajo, sus
-          logs y cómo salió.
-        </span>
+    <div className="ws-empty ws-enter">
+      <div className="ws-empty-ic" aria-hidden="true">
+        ≡
       </div>
+      <h3>Todavía no has corrido nada</h3>
+      <p>
+        Cuando corras tu primer engine —en prueba o en vivo— aquí vas a ver cada trabajo, cuánto
+        tardó, qué tokens gastó y cómo salió.
+      </p>
+      <Link href={'/app/engines' as Route} className="ws-btn ws-btn-primary">
+        Elegir un engine
+      </Link>
     </div>
   );
 }

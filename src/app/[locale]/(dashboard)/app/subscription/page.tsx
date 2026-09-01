@@ -1,10 +1,12 @@
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from 'next/navigation';
+import type { Route } from 'next';
+import { Link } from '@/i18n/routing';
 import { getSessionUser } from '@/lib/auth/session';
 import { SubscriptionActions } from '@/components/workspace/subscription-actions';
 import { TIER_CAPS, buildQuotaRows, effectiveTier, isAdminRole } from '@/lib/billing/tiers';
 
-export const metadata = { title: 'Suscripción' };
+export const metadata = { title: 'Tu plan' };
 
 export default async function SubscriptionPage({
   params,
@@ -17,7 +19,7 @@ export default async function SubscriptionPage({
   const session = await getSessionUser();
   if (!session) redirect('/sign-in?next=/app/subscription');
   // For admins, quotas + capabilities follow the EFFECTIVE tier (VIP).
-  // The stored tier is still shown in the "Plan card" so the billing row is
+  // The stored tier is still shown in the plan card so the billing row is
   // honest — admins are simply not gated by it.
   const storedTier = session.tier;
   const role = session.role;
@@ -28,106 +30,82 @@ export default async function SubscriptionPage({
   const quotaRows = buildQuotaRows(tier);
 
   return (
-    <div className="cc-scroll">
+    <>
       {isAdmin && (
-        <div
-          style={{
-            padding: '12px 16px',
-            border: '1px solid var(--cc-purple)',
-            background: 'var(--cc-purple-g)',
-            borderRadius: 'var(--cc-r-l)',
-            marginBottom: 18,
-            fontSize: 12.5,
-            color: 'var(--cc-txt-2)',
-            lineHeight: 1.55,
-          }}
-        >
-          ● <b style={{ color: 'var(--cc-purple)' }}>Modo {role.replace('_', ' ')}</b> — tu rol manda
-          sobre el plan guardado. Tienes acceso completo a todos los sistemas, sin importar el plan
-          que veas abajo. La columna <code>profiles.tier</code> sigue ahí para que pruebes lo que ven
-          los suscriptores; cambiarla no te quita acceso.
+        <div className="ws-notice info ws-enter">
+          <div className="ws-notice-body">
+            <h3>Modo {role.replace('_', ' ')}</h3>
+            <p>
+              Tu rol manda sobre el plan guardado: tienes acceso completo a todos los engines sin
+              importar lo que diga la tarjeta de abajo. El plan almacenado sigue ahí para que
+              pruebes lo que ven los suscriptores — cambiarlo no te quita acceso.
+            </p>
+          </div>
         </div>
       )}
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-statgrid">
-          <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">
-              {isAdmin ? 'Plan almacenado' : 'Plan actual'}
-            </div>
-            <div className="cc-mod-stat-v gr">{storedCaps.label}</div>
-            <div className="cc-mod-stat-sub">
+      <section className="ws-section">
+        <div className="ws-grid ws-grid-3">
+          <div className="ws-stat ws-enter" style={{ '--i': 1 } as React.CSSProperties}>
+            <div className="ws-stat-l">{isAdmin ? 'Plan almacenado' : 'Tu plan'}</div>
+            <div className="ws-stat-v acid">{storedCaps.label}</div>
+            <div className="ws-stat-sub">
               {storedTier === 'FREE'
-                ? 'Sin cargo · sin tarjeta'
+                ? 'sin cargo · sin tarjeta'
                 : `${storedCaps.price} / ${storedCaps.per}`}
             </div>
           </div>
-          {isAdmin ? (
-            <div className="cc-mod-stat">
-              <div className="cc-mod-stat-l">Acceso efectivo</div>
-              <div className="cc-mod-stat-v pu">VIP</div>
-              <div className="cc-mod-stat-sub">gracias a tu rol {role.replace('_', ' ')}</div>
+          <div className="ws-stat ws-enter" style={{ '--i': 2 } as React.CSSProperties}>
+            <div className="ws-stat-l">{isAdmin ? 'Acceso efectivo' : 'Se renueva'}</div>
+            <div className="ws-stat-v">
+              {isAdmin ? 'VIP' : storedTier === 'FREE' ? '—' : '01 oct'}
             </div>
-          ) : (
-            <div className="cc-mod-stat">
-              <div className="cc-mod-stat-l">Renovación</div>
-              <div className="cc-mod-stat-v">{storedTier === 'FREE' ? '—' : '01 jun'}</div>
-              <div className="cc-mod-stat-sub">
-                {storedTier === 'FREE' ? 'Free nunca vence' : 'se cobra solo'}
-              </div>
-            </div>
-          )}
-          <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Método de pago</div>
-            <div className="cc-mod-stat-v">{storedTier === 'FREE' ? '—' : 'Mercado Pago'}</div>
-            <div className="cc-mod-stat-sub">
-              {storedTier === 'FREE'
-                ? isAdmin
-                  ? 'Como admin no pagas'
-                  : 'En Free no necesitas tarjeta'
-                : 'se conecta en el paso 05'}
+            <div className="ws-stat-sub">
+              {isAdmin
+                ? `por tu rol ${role.replace('_', ' ')}`
+                : storedTier === 'FREE'
+                  ? 'Free nunca vence'
+                  : 'se cobra solo'}
             </div>
           </div>
-          <div className="cc-mod-stat">
-            <div className="cc-mod-stat-l">Engines en vivo</div>
-            <div className="cc-mod-stat-v gr">
+          <div className="ws-stat ws-enter" style={{ '--i': 3 } as React.CSSProperties}>
+            <div className="ws-stat-l">Engines que puedes encender</div>
+            <div className="ws-stat-v">
               {caps.liveEnginesCount === Infinity ? '∞' : caps.liveEnginesCount}
             </div>
-            <div className="cc-mod-stat-sub">
+            <div className="ws-stat-sub">
               {tier === 'FREE'
                 ? 'solo en modo prueba'
                 : tier === 'PRO'
-                  ? 'tú eliges cuáles'
-                  : 'todos los engines'}
+                  ? 'tú eliges cuál'
+                  : 'todos a la vez'}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Cambia tu plan</div>
+      <section className="ws-section">
+        <div className="ws-sl">Cambia tu plan</div>
         <SubscriptionActions initialTier={tier} userId={session.user.id} isAdmin={isAdmin} />
-      </div>
+      </section>
 
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Uso este período · {caps.label}</div>
-        <div className="cc-mod-list">
+      <section className="ws-section">
+        <div className="ws-sl">Tus límites este mes · {caps.label}</div>
+        <div className="ws-list">
           {quotaRows.map((row) => {
             const pct = row.cap > 0 ? Math.min(100, (row.used / row.cap) * 100) : 0;
-            const fill = pct > 85 ? 'r' : pct > 60 ? 'am' : 'gr';
+            const fill = pct > 85 ? 'danger' : pct > 60 ? 'warn' : '';
             return (
-              <div key={row.label} className="cc-mod-row">
-                <div className="cc-mod-body">
-                  <div className="cc-mod-name">{row.label}</div>
-                  <div
-                    className="cc-mod-sub"
-                    style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6 }}
-                  >
+              <div key={row.label} className="ws-row">
+                <div className="ws-row-body">
+                  <div className="ws-row-name">{row.label}</div>
+                  <div className="ws-meter">
                     <span>
-                      {row.used.toLocaleString()} / {row.cap.toLocaleString()} {row.unit}
+                      {row.used.toLocaleString('es-MX')} / {row.cap.toLocaleString('es-MX')}{' '}
+                      {row.unit}
                     </span>
-                    <span className="cc-bar-track" style={{ maxWidth: 220 }}>
-                      <span className={`cc-bar-fill ${fill}`} style={{ width: `${pct}%` }} />
+                    <span className="ws-bar">
+                      <span className={`ws-bar-fill ${fill}`} style={{ width: `${pct}%` }} />
                     </span>
                     <span>{Math.round(pct)}%</span>
                   </div>
@@ -136,18 +114,13 @@ export default async function SubscriptionPage({
             );
           })}
         </div>
-        <p
-          style={{
-            fontSize: 11.5,
-            color: 'var(--cc-txt-4)',
-            fontFamily: 'var(--cc-mono), monospace',
-            marginTop: 10,
-            paddingLeft: 4,
-          }}
-        >
-          ▸ Los contadores reales se conectan al motor de telemetry en el paso 05.
+        <p className="ws-sub" style={{ marginTop: 12 }}>
+          ¿Quieres el detalle de tokens día por día?{' '}
+          <Link href={'/app/usage' as Route} className="ws-go">
+            Ver uso y tokens
+          </Link>
         </p>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

@@ -351,366 +351,242 @@ export default async function UsagePage({
   const overSoon = !balance.unlimited && usedPct > 80;
 
   return (
-    <div className="cc-scroll">
+    <>
       {/* Post-checkout return banner */}
       {paymentStatus === 'success' && (
-        <div
-          style={{
-            padding: '14px 18px',
-            border: '1px solid var(--cc-green)',
-            background: 'var(--cc-green-g)',
-            borderRadius: 'var(--cc-r-l)',
-            marginBottom: 18,
-            color: 'var(--cc-txt-2)',
-            fontSize: 13,
-          }}
-        >
-          ● <b style={{ color: 'var(--cc-green)' }}>Pago recibido</b> — tus tokens se suman a tu
-          balance en cuanto Mercado Pago confirma (de segundos a minutos). Esta página se actualiza
-          sola.
+        <div className="ws-notice accent ws-enter">
+          <div className="ws-notice-body">
+            <h3>Pago recibido</h3>
+            <p>
+              Tus tokens se suman a tu balance en cuanto Mercado Pago confirma el pago — de
+              segundos a minutos.
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Top stats */}
-      <div className="cc-mod-statgrid">
-        <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Periodo</div>
-          <div className="cc-mod-stat-v">{periodLabel}</div>
-          <div className="cc-mod-stat-sub">se renueva el 1° del próximo mes</div>
-        </div>
-        <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Balance disponible</div>
-          <div className={`cc-mod-stat-v ${balance.unlimited ? 'pu' : overSoon ? 'am' : 'gr'}`}>
-            {balance.unlimited ? '∞' : formatNumber(balance.remaining)}
+      <section className="ws-section">
+        <div className="ws-grid ws-grid-3">
+          <div className="ws-stat ws-enter" style={{ '--i': 1 } as React.CSSProperties}>
+            <div className="ws-stat-l">Te quedan</div>
+            <div className={`ws-stat-v${balance.unlimited || !overSoon ? ' acid' : ''}`}>
+              {balance.unlimited ? '∞' : formatNumber(balance.remaining)}
+            </div>
+            <div className="ws-stat-sub">
+              {balance.unlimited
+                ? 'admin · sin límite'
+                : `de ${formatNumber(balance.monthlyAllocation + balance.bonus)} este mes`}
+            </div>
           </div>
-          <div className="cc-mod-stat-sub">
-            {balance.unlimited
-              ? `admin · sin límite (usados: ${formatNumber(balance.monthlyUsed)})`
-              : `de ${formatNumber(balance.monthlyAllocation + balance.bonus)} tokens este mes`}
+          <div className="ws-stat ws-enter" style={{ '--i': 2 } as React.CSSProperties}>
+            <div className="ws-stat-l">Tokens comprados</div>
+            <div className="ws-stat-v">{formatNumber(balance.bonus)}</div>
+            <div className="ws-stat-sub">
+              {balance.bonus > 0 ? 'no caducan nunca' : 'aún no compras ninguno'}
+            </div>
           </div>
-        </div>
-        <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Tokens bonus</div>
-          <div className={`cc-mod-stat-v ${balance.bonus > 0 ? 'cy' : ''}`}>
-            {formatNumber(balance.bonus)}
-          </div>
-          <div className="cc-mod-stat-sub">
-            {balance.bonus > 0 ? 'tokens extra comprados · no caducan' : 'aún no compras tokens extra'}
-          </div>
-        </div>
-        <div className="cc-mod-stat">
-          <div className="cc-mod-stat-l">Plan</div>
-          <div className="cc-mod-stat-v gr">{tier.replace('_', '-')}</div>
-          <div className="cc-mod-stat-sub">
-            {balance.unlimited
-              ? 'sin límite por tu rol'
-              : `incluye ${formatNumber(balance.monthlyAllocation)} tokens al mes`}
+          <div className="ws-stat ws-enter" style={{ '--i': 3 } as React.CSSProperties}>
+            <div className="ws-stat-l">Periodo</div>
+            <div className="ws-stat-v" style={{ fontSize: 24 }}>
+              {periodLabel}
+            </div>
+            <div className="ws-stat-sub">
+              plan {tier.replace('_', '-')} · se renueva el 1°
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Progress bar — hide for admins (no meaningful limit) */}
+      {/* Consumption meter — the one number that decides whether you can run
+          anything today, so it gets its own full-width block. */}
       {!balance.unlimited && (
-        <div className="cc-mod-section">
-          <div className="cc-mod-sl">Consumo del mes</div>
-          <div
-            style={{
-              padding: '18px 20px',
-              border: `1px solid var(--cc-line-2)`,
-              background: 'var(--cc-panel)',
-              borderRadius: 'var(--cc-r-l)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, color: 'var(--cc-txt-2)' }}>
-                <b>{formatNumber(balance.monthlyUsed)}</b> usados ·{' '}
-                <b>{formatNumber(balance.remaining)}</b> te quedan
+        <section className="ws-section">
+          <div className="ws-sl">Consumo del mes</div>
+          <div className="ws-card">
+            <div className="ws-usage-head">
+              <span>
+                {formatNumber(balance.monthlyUsed)} de{' '}
+                {formatNumber(balance.monthlyAllocation)} tokens del plan
               </span>
-              <span
-                style={{
-                  fontSize: 11.5,
-                  fontFamily: 'var(--cc-mono), monospace',
-                  color: overSoon ? 'var(--cc-amber)' : 'var(--cc-txt-3)',
-                }}
-              >
-                {usedPct.toFixed(1)}% gastado
+              <span className={`ws-mono${overSoon ? ' ws-warn-text' : ''}`}>
+                {Math.round(usedPct)}%
               </span>
             </div>
-            <span className="cc-bar-track" style={{ display: 'block', width: '100%' }}>
+            <span className="ws-bar" style={{ display: 'block', width: '100%' }}>
               <span
-                className={`cc-bar-fill ${overSoon ? 'am' : 'gr'}`}
+                className={`ws-bar-fill${overSoon ? ' warn' : ''}`}
                 style={{ width: `${usedPct}%` }}
               />
             </span>
             {overSoon && (
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 12,
-                  color: 'var(--cc-amber)',
-                  fontFamily: 'var(--cc-mono), monospace',
-                }}
-              >
-                ▸ Ya casi llegas a tu límite. Compra tokens extra para no quedarte sin servicio cuando se acaben.
-              </div>
+              <p className="ws-sub ws-warn-text" style={{ marginTop: 12 }}>
+                Vas por encima del 80% de tu asignación mensual. Compra tokens extra abajo o sube
+                de plan para no quedarte a media ejecución.
+              </p>
             )}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Buy top-up packs — hidden for admins */}
       {!isAdmin && (
-        <div className="cc-mod-section">
-          <div className="cc-mod-sl">Comprar tokens extra</div>
-          <p
-            style={{
-              fontSize: 12.5,
-              color: 'var(--cc-txt-3)',
-              maxWidth: '64ch',
-              lineHeight: 1.55,
-              marginBottom: 14,
-            }}
-          >
-            Los tokens que compras <b>nunca caducan</b> y se usan <b>después</b> de los tokens que
-            ya trae tu plan cada mes. Sirven en todos los engines (NexoClip y los que vengan después).
+        <section className="ws-section">
+          <div className="ws-sl">Comprar tokens extra</div>
+          <p className="ws-sub" style={{ marginBottom: 14, maxWidth: '64ch' }}>
+            Los tokens que compras nunca caducan y se usan después de los que ya trae tu plan cada
+            mes. Sirven en todos los engines.
           </p>
-          <div className="cc-mod-grid">
-            {TOKEN_PACKS.map((pack) => (
+          <div className="ws-grid ws-grid-3">
+            {TOKEN_PACKS.map((pack, i) => (
               <div
                 key={pack.id}
-                className="cc-mod-card"
-                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+                className="ws-card ws-pack ws-enter"
+                style={{ '--i': i + 1 } as React.CSSProperties}
               >
-                <div className="cc-mod-card-head">
-                  <h4 style={{ fontSize: 16 }}>{pack.label}</h4>
-                  <span className="cc-mod-badge gr">
+                <div className="ws-card-head">
+                  <h3>{pack.label}</h3>
+                  <span className="ws-badge">
                     ${(pack.amountCents / 100).toLocaleString('es-MX')} MXN
                   </span>
                 </div>
-                <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', minHeight: 36 }}>
-                  {pack.tagline}
-                </p>
-                <div className="cc-mod-meta">
-                  <span>
-                    <b>{formatNumber(pack.tokens)}</b> tokens
-                  </span>
-                  <span style={{ fontFamily: 'var(--cc-mono), monospace', fontSize: 10.5 }}>
-                    ≈ ${((pack.amountCents / 100 / (pack.tokens / 1000)).toFixed(2))} MXN/1k tokens
-                  </span>
+                <p>{pack.tagline}</p>
+                <div className="ws-pack-meta">
+                  <b>{formatNumber(pack.tokens)}</b> tokens ·{' '}
+                  {(pack.amountCents / 100 / (pack.tokens / 1000)).toFixed(2)} MXN por 1k
                 </div>
                 <TokenPackBuyButton packId={pack.id} packLabel={pack.label} />
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Partner royalty section — only renders if this user owns an
           engine with a non-zero royalty rate. */}
       {(royaltyAccruals.length > 0 || royaltyPayouts.length > 0) && (
-        <div className="cc-mod-section">
-          <div className="cc-mod-sl">Royalties · tus engines</div>
-          <p
-            style={{
-              fontSize: 12.5,
-              color: 'var(--cc-txt-3)',
-              maxWidth: '64ch',
-              lineHeight: 1.55,
-              marginBottom: 14,
-            }}
-          >
-            Como dueño de uno o más engines, ganas regalías cada vez que
-            otros usuarios gastan tokens en ellos. El admin cierra el
-            periodo al final del mes y procesa el pago por fuera.
+        <section className="ws-section">
+          <div className="ws-sl">Regalías de tus engines</div>
+          <p className="ws-sub" style={{ marginBottom: 14, maxWidth: '64ch' }}>
+            Como dueño de uno o más engines, ganas una regalía cada vez que otros usuarios gastan
+            tokens en ellos. El equipo cierra el periodo al final del mes y procesa el pago.
           </p>
           {royaltyAccruals.length > 0 && (
-            <div className="cc-mod-list" style={{ marginBottom: 14 }}>
+            <div className="ws-list" style={{ marginBottom: 14 }}>
               {royaltyAccruals.map((a) => (
-                <div key={a.engineId} className="cc-mod-row">
-                  <div className="cc-mod-ic">◆</div>
-                  <div className="cc-mod-body">
-                    <div className="cc-mod-name">
-                      {a.engineName}{' '}
-                      <span className="cc-mod-badge">
-                        {a.alreadyFinalized ? 'cerrado' : 'acumulando'}
-                      </span>
-                    </div>
-                    <div className="cc-mod-sub">
-                      {formatNumber(a.tokensThisPeriod)} tokens este mes · rate{' '}
-                      <code>
-                        ${(a.ratePerMillionCents / 100).toLocaleString('es-MX')}/1M
-                      </code>
+                <div key={a.engineId} className="ws-row">
+                  <div className="ws-row-body">
+                    <div className="ws-row-name">{a.engineName}</div>
+                    <div className="ws-row-sub">
+                      {formatNumber(a.tokensThisPeriod)} tokens este mes · $
+                      {(a.ratePerMillionCents / 100).toLocaleString('es-MX')} por millón
                     </div>
                   </div>
-                  <div className="cc-mod-right">
-                    <b className={a.alreadyFinalized ? 'gr' : 'am'}>
-                      ${(a.accruedCents / 100).toLocaleString('es-MX')}
-                    </b>
-                    <span>MXN este periodo</span>
+                  <span className={`ws-badge${a.alreadyFinalized ? ' live' : ' warn'}`}>
+                    {a.alreadyFinalized ? 'cerrado' : 'acumulando'}
+                  </span>
+                  <div className="ws-row-val">
+                    ${(a.accruedCents / 100).toLocaleString('es-MX')} MXN
                   </div>
                 </div>
               ))}
             </div>
           )}
           {royaltyPayouts.length > 0 && (
-            <details>
-              <summary
-                style={{
-                  cursor: 'pointer',
-                  color: 'var(--cc-txt-3)',
-                  fontSize: 12.5,
-                  marginBottom: 10,
-                }}
-              >
-                Historial de pagos ({royaltyPayouts.length})
-              </summary>
-              <div className="cc-mod-list">
+            <details className="ws-details">
+              <summary>Historial de pagos ({royaltyPayouts.length})</summary>
+              <div className="ws-list">
                 {royaltyPayouts.map((p) => (
-                  <div key={p.id} className="cc-mod-row">
-                    <div className="cc-mod-ic">
-                      {p.status === 'paid' ? '✓' : p.status === 'cancelled' ? '✕' : '◷'}
-                    </div>
-                    <div className="cc-mod-body">
-                      <div className="cc-mod-name">
-                        {p.engineName}{' '}
-                        <span className={`cc-mod-badge ${p.status === 'paid' ? 'gr' : ''}`}>
-                          {p.status}
-                        </span>
-                      </div>
-                      <div className="cc-mod-sub">
-                        Periodo{' '}
+                  <div key={p.id} className="ws-row">
+                    <div className="ws-row-body">
+                      <div className="ws-row-name">{p.engineName}</div>
+                      <div className="ws-row-sub">
                         {new Date(p.periodStart).toLocaleDateString('es-MX', {
                           month: 'long',
                           year: 'numeric',
                         })}{' '}
                         · {formatNumber(p.tokensAttributed)} tokens
-                        {p.paymentReference && (
-                          <>
-                            {' '}
-                            · ref <code>{p.paymentReference}</code>
-                          </>
-                        )}
+                        {p.paymentReference ? ` · ref ${p.paymentReference}` : ''}
                       </div>
                     </div>
-                    <div className="cc-mod-right">
-                      <b className={p.status === 'paid' ? 'gr' : ''}>
-                        ${(p.amountCents / 100).toLocaleString('es-MX')}
-                      </b>
-                      <span>MXN</span>
+                    <span className={`ws-badge${p.status === 'paid' ? ' live' : ''}`}>
+                      {p.status}
+                    </span>
+                    <div className="ws-row-val">
+                      ${(p.amountCents / 100).toLocaleString('es-MX')} MXN
                     </div>
                   </div>
                 ))}
               </div>
             </details>
           )}
-        </div>
+        </section>
       )}
 
       {/* Recent usage events — collapsed into runs when engine tags them. */}
-      <div className="cc-mod-section">
-        <div className="cc-mod-sl">Actividad reciente</div>
+      <section className="ws-section">
+        <div className="ws-sl">Actividad reciente</div>
         {visibleRows.length === 0 ? (
-          <div
-            style={{
-              padding: '32px 22px',
-              border: '1px dashed var(--cc-line-2)',
-              borderRadius: 'var(--cc-r-l)',
-              textAlign: 'center',
-              color: 'var(--cc-txt-3)',
-              fontSize: 13,
-              lineHeight: 1.55,
-            }}
-          >
-            Todavía no registras consumo este mes.
-            <br />
-            <span
-              style={{
-                color: 'var(--cc-txt-4)',
-                fontSize: 11.5,
-                fontFamily: 'var(--cc-mono), monospace',
-                marginTop: 6,
-                display: 'inline-block',
-              }}
-            >
-              Tu actividad aparece aquí en cuanto un engine empiece a usar tokens.
-            </span>
+          <div className="ws-empty">
+            <div className="ws-empty-ic" aria-hidden="true">
+              ◑
+            </div>
+            <h3>Sin consumo este mes</h3>
+            <p>
+              Tu actividad aparece aquí en cuanto un engine empiece a usar tokens — cuántos gastó,
+              en qué y cuándo.
+            </p>
           </div>
         ) : (
-          <div className="cc-mod-list">
+          <div className="ws-list">
             {visibleRows.map((row) => {
               if (row.kind === 'run') {
                 const g = row.group;
                 const eng = engineMap.get(g.engineId);
                 return (
-                  <div key={g.key} className="cc-mod-row">
-                    <div className="cc-mod-ic">{eng?.icon ?? '◆'}</div>
-                    <div className="cc-mod-body">
-                      <div className="cc-mod-name">
-                        {eng?.name ?? 'Engine'}{' '}
-                        <span className="cc-mod-badge">{g.operation}</span>{' '}
-                        <span className="cc-mod-badge gr">
-                          {g.count} llamada{g.count === 1 ? '' : 's'}
-                        </span>
-                      </div>
-                      <div className="cc-mod-sub">
-                        {relativeDate(g.occurredAt, locale)} ·{' '}
+                  <div key={g.key} className="ws-row">
+                    <div className="ws-row-body">
+                      <div className="ws-row-name">{eng?.name ?? 'Engine'}</div>
+                      <div className="ws-row-sub">
+                        {relativeDate(g.occurredAt, locale)} · {g.operation} · {g.count} llamada
+                        {g.count === 1 ? '' : 's'} ·{' '}
                         {Array.from(g.kinds)
                           .map((k) => KIND_LABEL[k] ?? k)
                           .join(' · ')}
                       </div>
                     </div>
-                    <div className="cc-mod-right">
-                      <b className="cy">{formatNumber(g.totalAmount)}</b>
-                      <span>tokens · run</span>
-                    </div>
+                    <div className="ws-row-val">{formatNumber(g.totalAmount)} tokens</div>
                   </div>
                 );
               }
               const e = row.event;
               const eng = engineMap.get(e.engine_id);
               return (
-                <div key={e.id} className="cc-mod-row">
-                  <div className="cc-mod-ic">{eng?.icon ?? '◆'}</div>
-                  <div className="cc-mod-body">
-                    <div className="cc-mod-name">
-                      {eng?.name ?? 'Engine'}{' '}
-                      <span className="cc-mod-badge">{KIND_LABEL[e.kind] ?? e.kind}</span>
+                <div key={e.id} className="ws-row">
+                  <div className="ws-row-body">
+                    <div className="ws-row-name">{eng?.name ?? 'Engine'}</div>
+                    <div className="ws-row-sub">
+                      {relativeDate(e.occurred_at, locale)} · {KIND_LABEL[e.kind] ?? e.kind}
                     </div>
-                    <div className="cc-mod-sub">{relativeDate(e.occurred_at, locale)}</div>
                   </div>
-                  <div className="cc-mod-right">
-                    <b>{formatNumber(e.amount)}</b>
-                    <span>{e.kind.split('.')[1] ?? 'units'}</span>
+                  <div className="ws-row-val">
+                    {formatNumber(e.amount)} {e.kind.split('.')[1] ?? 'units'}
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
       {/* Diagnostic strip — only when something actually went wrong. Lives at
           the bottom so it doesn't push the primary surface around. Helps the
           operator see which subsystem fell over without exposing internals. */}
       {data.warnings.length > 0 && (
-        <div
-          style={{
-            marginTop: 18,
-            padding: '8px 12px',
-            background: 'var(--cc-amber-g, rgba(245,177,61,0.06))',
-            border: '1px solid rgba(245,177,61,0.25)',
-            borderRadius: 7,
-            fontSize: 11,
-            color: 'var(--cc-amber, #f5b13d)',
-            fontFamily: 'var(--cc-mono), monospace',
-            lineHeight: 1.5,
-          }}
-        >
-          ▸ Algunos datos se mostraron con valores por defecto (
-          {data.warnings.join(', ')}). Si esto sigue pasando, revisa los logs de
-          Vercel — busca por el prefijo `[/app/usage]`.
-        </div>
+        <p className="ws-diag">
+          Algunos datos se mostraron con valores por defecto ({data.warnings.join(', ')}). Si esto
+          sigue pasando, revisa los logs de Vercel — busca el prefijo `[/app/usage]`.
+        </p>
       )}
-    </div>
+    </>
   );
 }

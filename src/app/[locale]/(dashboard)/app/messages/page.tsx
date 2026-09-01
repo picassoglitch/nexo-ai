@@ -39,22 +39,15 @@ export default async function SubscriberMessagesPage({
   const messages = await listThreadMessages(session.user.id);
 
   return (
-    <div className="cc-scroll">
-      <div
-        style={{
-          marginBottom: 18,
-          padding: '14px 18px',
-          border: '1px solid var(--cc-line)',
-          background: 'var(--cc-panel-2)',
-          borderRadius: 'var(--cc-r-l)',
-        }}
-      >
-        <h3 style={{ fontSize: 14, marginBottom: 4 }}>Habla directo con el equipo Nexo</h3>
-        <p style={{ fontSize: 12.5, color: 'var(--cc-txt-3)', lineHeight: 1.5 }}>
-          Este chat llega directo a nosotros. Escríbenos para ideas, fallas que
-          encontraste, propuestas de colaboración o lo que prefieras no mandar por correo.
-          Nadie más lo ve.
-        </p>
+    <div className="ws-thread ws-enter">
+      <div className="ws-notice info">
+        <div className="ws-notice-body">
+          <h3>Esto llega directo al equipo</h3>
+          <p>
+            Escríbenos ideas, fallas que encontraste o propuestas de colaboración. Te contesta una
+            persona, normalmente el mismo día. Nadie más ve este hilo.
+          </p>
+        </div>
       </div>
 
       <MessageThread
@@ -63,13 +56,11 @@ export default async function SubscriberMessagesPage({
         emptyMessage="Todavía no hay mensajes. Escríbenos el primero aquí abajo — leemos todo."
       />
 
-      <div style={{ marginTop: 18 }}>
-        <MessageComposer
-          send={sendMessageFromUser}
-          placeholder="Cuéntanos qué tienes en mente. Enter envía · Shift+Enter agrega línea."
-          buttonLabel="Enviar al equipo"
-        />
-      </div>
+      <MessageComposer
+        send={sendMessageFromUser}
+        placeholder="Cuéntanos qué tienes en mente. Enter envía · Shift+Enter agrega línea."
+        buttonLabel="Enviar al equipo"
+      />
     </div>
   );
 }

@@ -38,41 +38,17 @@ export function LiveEngineSelectButton({
     });
   }
 
-  if (selected) {
-    return (
-      <button
-        type="button"
-        disabled
-        className="cc-mod-badge gr"
-        style={{
-          cursor: 'default',
-          fontFamily: 'var(--cc-mono), monospace',
-          padding: '5px 10px',
-          fontWeight: 600,
-        }}
-      >
-        ● EN VIVO
-      </button>
-    );
-  }
+  // Already the live one: the card's status badge already says so, so the
+  // button would just be a second, unclickable copy of the same fact.
+  if (selected) return null;
 
   if (disabled) {
     return (
       <button
         type="button"
+        className="ws-btn ws-btn-ghost ws-btn-sm"
         disabled
         title={disabledReason}
-        style={{
-          background: 'transparent',
-          border: '1px dashed var(--cc-line-2)',
-          color: 'var(--cc-txt-4)',
-          padding: '6px 12px',
-          borderRadius: 7,
-          fontFamily: 'inherit',
-          fontSize: 11.5,
-          fontWeight: 500,
-          cursor: 'not-allowed',
-        }}
       >
         {disabledReason ?? 'No disponible'}
       </button>
@@ -82,21 +58,11 @@ export function LiveEngineSelectButton({
   return (
     <button
       type="button"
+      className="ws-btn ws-btn-ghost ws-btn-sm"
       onClick={handleClick}
       disabled={pending}
-      style={{
-        background: 'transparent',
-        border: '1px solid var(--cc-green)',
-        color: 'var(--cc-green)',
-        padding: '6px 12px',
-        borderRadius: 7,
-        fontFamily: 'inherit',
-        fontSize: 11.5,
-        fontWeight: 600,
-        cursor: pending ? 'wait' : 'pointer',
-      }}
     >
-      {pending ? '…' : 'Activar en vivo'}
+      {pending ? 'Activando…' : 'Activar en vivo'}
     </button>
   );
 }

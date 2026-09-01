@@ -51,71 +51,21 @@ export function WelcomeGiftBanner({ claimed }: { claimed: boolean }) {
   }
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        padding: '20px 24px',
-        marginBottom: 22,
-        border: '1px solid var(--cc-green)',
-        background:
-          'linear-gradient(120deg, var(--cc-green-g), rgba(82,229,208,0.06) 60%, transparent)',
-        borderRadius: 'var(--cc-r-l)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 18,
-        flexWrap: 'wrap',
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 260 }}>
-        <div
-          style={{
-            fontFamily: 'var(--cc-mono), monospace',
-            fontSize: 10.5,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: 'var(--cc-green)',
-            marginBottom: 8,
-          }}
-        >
-          🎁 Bienvenido a Nexo AI
-        </div>
-        <div
-          style={{
-            fontFamily: 'var(--cc-disp), sans-serif',
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: '-0.01em',
-            marginBottom: 6,
-          }}
-        >
-          Tu regalo de bienvenida está listo
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--cc-txt-2)', lineHeight: 1.55, maxWidth: '60ch' }}>
-          <b style={{ color: 'var(--cc-green)' }}>50,000 tokens IA</b> para usar en cualquier
-          engine este mes, más{' '}
-          <b style={{ color: 'var(--cc-cyan)' }}>NexoClip Pro gratis por 7 días</b> — corriendo en
-          vivo, sin tarjeta. Acepta para activarlo.
-        </div>
+    <div className="ws-notice accent ws-enter">
+      <div className="ws-notice-body">
+        <h3>Tu regalo de bienvenida está listo</h3>
+        <p>
+          50,000 tokens de IA para usar en cualquier engine este mes, más NexoClip Pro gratis por
+          7 días — corriendo en vivo, sin tarjeta. Acéptalo para activarlo.
+        </p>
       </div>
       <button
         type="button"
+        className="ws-btn ws-btn-primary ws-btn-sm"
         onClick={accept}
         disabled={pending}
-        style={{
-          padding: '12px 22px',
-          borderRadius: 10,
-          border: 'none',
-          background: pending ? 'var(--cc-bg-3)' : 'var(--cc-green)',
-          color: pending ? 'var(--cc-txt-3)' : '#070809',
-          fontFamily: 'inherit',
-          fontSize: 14,
-          fontWeight: 700,
-          cursor: pending ? 'wait' : 'pointer',
-          whiteSpace: 'nowrap',
-        }}
       >
-        {pending ? 'Activando…' : 'Aceptar mi regalo →'}
+        {pending ? 'Activando…' : 'Aceptar mi regalo'}
       </button>
     </div>
   );

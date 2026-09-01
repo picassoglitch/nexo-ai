@@ -124,7 +124,10 @@ export function Sidebar({ userInitial, userName, userRole, mobileOpen, unreadMes
         </Link>
         {/* Always-visible logout next to settings. One click signs out
             via supabase + bounces to landing. */}
-        <SidebarSignOut onBeforeNav={() => setMobileSidebarOpen(false)} />
+        <SidebarSignOut
+          className="cc-cog cc-cog--danger"
+          onBeforeNav={() => setMobileSidebarOpen(false)}
+        />
       </div>
     </aside>
   );

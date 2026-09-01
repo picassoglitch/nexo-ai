@@ -6,6 +6,10 @@
 //
 // Behavior is intentionally minimal: textarea + send button + toast feedback.
 // Enter sends (Shift+Enter newlines). Disable while pending. Reset on success.
+//
+// Styles live in src/styles/messages.css — shared with MessageThread, and
+// imported by both shells, since this renders in the workspace and the admin
+// command center alike.
 
 import { useRef, useState, useTransition } from 'react';
 import { useWorkspace } from '@/lib/workspace/store';
@@ -62,17 +66,7 @@ export function MessageComposer({
   const disabled = isPending || !body.trim() || overLimit;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        padding: '12px 14px',
-        border: '1px solid var(--cc-line)',
-        borderRadius: 'var(--cc-r-l)',
-        background: 'var(--cc-panel)',
-      }}
-    >
+    <div className="msg-composer">
       <textarea
         ref={taRef}
         value={body}
@@ -80,57 +74,13 @@ export function MessageComposer({
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         rows={3}
-        style={{
-          width: '100%',
-          minHeight: 70,
-          maxHeight: 220,
-          padding: '8px 10px',
-          fontFamily: 'inherit',
-          fontSize: 13.5,
-          lineHeight: 1.5,
-          color: 'var(--cc-txt)',
-          background: 'var(--cc-bg-1)',
-          border: '1px solid var(--cc-line)',
-          borderRadius: 'var(--cc-r)',
-          resize: 'vertical',
-          outline: 'none',
-        }}
       />
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          justifyContent: 'space-between',
-        }}
-      >
-        <small
-          style={{
-            fontFamily: 'var(--cc-mono), monospace',
-            fontSize: 10.5,
-            color: overLimit ? 'var(--cc-red)' : 'var(--cc-txt-4)',
-          }}
-        >
+      <div className="msg-composer-foot">
+        <small className={`msg-count${overLimit ? ' over' : ''}`}>
           {body.length} / {maxChars}
           {overLimit && ' · excede el límite'}
         </small>
-        <button
-          type="button"
-          onClick={submit}
-          disabled={disabled}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 'var(--cc-r)',
-            border: 'none',
-            background: disabled ? 'var(--cc-bg-3)' : 'var(--cc-green)',
-            color: disabled ? 'var(--cc-txt-4)' : '#070809',
-            fontWeight: 600,
-            fontSize: 12.5,
-            cursor: disabled ? 'default' : 'pointer',
-            fontFamily: 'inherit',
-            transition: 'background 0.15s',
-          }}
-        >
+        <button type="button" className="msg-send" onClick={submit} disabled={disabled}>
           {isPending ? 'Enviando…' : buttonLabel}
         </button>
       </div>
