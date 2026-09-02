@@ -128,19 +128,31 @@ secrets_needing_values` lists them.
 
 ## Validation status
 
-`terraform fmt` and the module tree resolve cleanly. `terraform init`,
-`validate` and `plan` have **not** been run against this config, because
-`registry.terraform.io` is blocked by the egress policy of the environment it
-was written in — so the provider schemas could not be downloaded.
+`terraform init`, `validate` and `fmt` all pass against the real provider
+schema (`hashicorp/google` 6.50.0). The three attributes previously flagged as
+unverified — `cleanup_policies` on Artifact Registry, `deletion_protection` on
+the Cloud Run v2 resources, and `all_updates_rule` on the billing budget — are
+all correct as written.
 
-That means HCL syntax and module wiring are verified, but individual resource
-attribute names have not been checked against the provider. Run `terraform
-plan` before trusting it. Things most likely to need a nudge, all pinned to
-`hashicorp/google ~> 6.0`:
+`registry.terraform.io` is blocked by the egress policy of the environment this
+was written in, so the provider was installed from `releases.hashicorp.com`
+through a filesystem mirror. That does not affect anything here: the same
+package, the same schema, and `.terraform.lock.hcl` is committed so a normal
+`terraform init` resolves the identical version.
 
-- `cleanup_policies` on `google_artifact_registry_repository`
-- `deletion_protection` on the Cloud Run v2 resources
-- the `all_updates_rule` block on `google_billing_budget`
+The lock carries hashes for `linux_amd64`, `darwin_arm64` and `darwin_amd64`.
+On another platform, add it once:
+
+```sh
+terraform providers lock -platform=linux_arm64
+```
+
+**`terraform plan` has still not been run**, because that needs real GCP
+credentials. Validation checks schema and types; it cannot check anything that
+is only decided at apply time — whether an org policy rejects the `allUsers`
+binding on the Cloud Run services, whether API enablement finishes before the
+resources that depend on it, or IAM propagation delays. Expect to iterate once
+on the first apply.
 
 ## Cost
 
